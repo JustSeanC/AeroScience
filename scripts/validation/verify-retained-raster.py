@@ -11,6 +11,9 @@ import math
 from pathlib import Path
 from osgeo import gdal, osr
 
+if not __debug__:
+    raise RuntimeError('Run this independent oracle with assertions enabled; optimized execution cannot provide a pass.')
+
 def fields(v):
     if isinstance(v, dict): return {k[:1].lower()+k[1:]:fields(x) for k,x in v.items()}
     if isinstance(v, list): return [fields(x) for x in v]

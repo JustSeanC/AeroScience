@@ -1,0 +1,1901 @@
+{
+  "schema": "aeroscience-p08c-retained-raster-summary-1",
+  "runtime_source_commit": "564448327d6e66008f6e8f967dc9d9ce7b973f59",
+  "scope": "Existing real retained Copernicus/Sentinel/Landsat/USGS numeric subsets; <=256 original cells per band; no new sources or original writes; not full-scene QA/index/cutline acceptance",
+  "receipts": [
+    {
+      "file": "artifacts/p08c/retained-copernicus-1/receipt.json",
+      "sha256": "6ccd15eff587c29962af90b39d7aeeb34639bc6faca697d914d6183c24def39e",
+      "runtime": {
+        "source_commit": "564448327d6e66008f6e8f967dc9d9ce7b973f59",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "a65e72c12717072a9278ad99f48e54704d547e0d101a73778e16d9c23e2f3588",
+          "AeroScience.Hdf.SafeRead.dll": "063f0cafecc6765d701058a8f2d66d92db7b3f6cb4f2f3ca2719ede7bf5a6599",
+          "AeroScience.Missions.dll": "489a6afa9b78e10008196f5470cdbea0b3f5745be0e345828b677a5441604b7b",
+          "AeroScience.Organization.dll": "2b03fed7423699980dda2fba1803bc10b78caf12a9ee58414f546c45b88e8639",
+          "AeroScience.Shared.dll": "7402c88393a4276cfde3c17f96b6ce4d85aa5a1693ba764c92363266de36438b",
+          "AeroScience.SimConnect.dll": "80574c797c7a90df332722087077a4feeca3dd21e340ecd4456e54d3c5f1a806",
+          "AeroScience.Telemetry.dll": "9a533d9bf5e9b476ed852d46f436133018bba85ce3ffc9b66529994d872d48dc",
+          "AeroScience.TestHost.dll": "0272fdfe50a20e3f4e1b50ad19084a34f3b5e1cd8685e1c9572618869a6541e2",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "d203da9d2ca04ac4242be8ff36a4ab9bcfac9879fafd40e42ba5f20f89783f3c"
+      },
+      "outcome": "Passed",
+      "tolerances": {
+        "nativeValueAbsolute": 0,
+        "affineSourceUnits": 1e-12,
+        "pixelCenterDegrees": 1e-10
+      },
+      "reference": {
+        "schema": "aeroscience-p08c-retained-raster-comparison-1",
+        "outcome": "Passed",
+        "reference": "GDAL/OSR 3.10.3",
+        "tolerances": {
+          "nativeValueAbsolute": 0,
+          "affineSourceUnits": 1e-12,
+          "pixelCenterDegrees": 1e-10
+        },
+        "originals": [
+          {
+            "file": "elevation.tif",
+            "sha256": "d21e96904ee1132f1ec0a9ffb46f4a6dadba5eb3708453d69d93a2270f8c552c",
+            "bytes": 18472
+          }
+        ],
+        "samplesCompared": 256,
+        "missingSamples": 0,
+        "maximumScaledDifference": 0,
+        "maximumGeographicDifferenceDegrees": 0,
+        "provider": "Microsoft Planetary Computer / Copernicus DEM",
+        "scene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+        "sourceDateUtc": null,
+        "verticalDatum": "EGM2008 geoid (DSM, not bare-earth)",
+        "limitations": [
+          "Deterministic original cell samples only; not full-scene coverage, derived indices, cutline DSM, or installed acceptance.",
+          "QA bands retain original codes; no missing/invalid source made valid."
+        ]
+      },
+      "inputs": [
+        {
+          "id": "elevation.tif",
+          "kind": "dsm",
+          "provider_project": "Microsoft Planetary Computer / Copernicus DEM / Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+          "source_date_utc": null,
+          "horizontal_crs": {
+            "elevation": {
+              "width": 73,
+              "height": 73,
+              "crs": "EPSG:4326",
+              "originX": 8.119861111111112,
+              "originY": 46.12013888888889,
+              "pixelWidth": 0.0002777777777777778,
+              "pixelHeight": -0.0002777777777777778,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "EGM2008 geoid (DSM, not bare-earth)",
+          "units": [
+            "m"
+          ],
+          "native_shape_or_count": {
+            "elevation": {
+              "width": 73,
+              "height": 73,
+              "crs": "EPSG:4326",
+              "originX": 8.119861111111112,
+              "originY": 46.12013888888889,
+              "pixelWidth": 0.0002777777777777778,
+              "pixelHeight": -0.0002777777777777778,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "elevation",
+              "file": "elevation.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "m",
+              "scale": 1,
+              "offset": 0,
+              "noData": null,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "Produced using Copernicus WorldDEM-30: \u00a9 DLR e.V. 2010-2014 and \u00a9 Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. GLO-30 license: https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "d21e96904ee1132f1ec0a9ffb46f4a6dadba5eb3708453d69d93a2270f8c552c",
+          "bytes": 18472,
+          "sha256": "d21e96904ee1132f1ec0a9ffb46f4a6dadba5eb3708453d69d93a2270f8c552c"
+        }
+      ]
+    },
+    {
+      "file": "artifacts/p08c/retained-landsat-1/receipt.json",
+      "sha256": "112e2f371fc39f1be16c97ebe9dd4d5738d296ecfafc3f756914a7f721770673",
+      "runtime": {
+        "source_commit": "564448327d6e66008f6e8f967dc9d9ce7b973f59",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "a65e72c12717072a9278ad99f48e54704d547e0d101a73778e16d9c23e2f3588",
+          "AeroScience.Hdf.SafeRead.dll": "063f0cafecc6765d701058a8f2d66d92db7b3f6cb4f2f3ca2719ede7bf5a6599",
+          "AeroScience.Missions.dll": "489a6afa9b78e10008196f5470cdbea0b3f5745be0e345828b677a5441604b7b",
+          "AeroScience.Organization.dll": "2b03fed7423699980dda2fba1803bc10b78caf12a9ee58414f546c45b88e8639",
+          "AeroScience.Shared.dll": "7402c88393a4276cfde3c17f96b6ce4d85aa5a1693ba764c92363266de36438b",
+          "AeroScience.SimConnect.dll": "80574c797c7a90df332722087077a4feeca3dd21e340ecd4456e54d3c5f1a806",
+          "AeroScience.Telemetry.dll": "9a533d9bf5e9b476ed852d46f436133018bba85ce3ffc9b66529994d872d48dc",
+          "AeroScience.TestHost.dll": "0272fdfe50a20e3f4e1b50ad19084a34f3b5e1cd8685e1c9572618869a6541e2",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "d203da9d2ca04ac4242be8ff36a4ab9bcfac9879fafd40e42ba5f20f89783f3c"
+      },
+      "outcome": "Passed",
+      "tolerances": {
+        "nativeValueAbsolute": 0,
+        "affineSourceUnits": 1e-12,
+        "pixelCenterDegrees": 1e-10
+      },
+      "reference": {
+        "schema": "aeroscience-p08c-retained-raster-comparison-1",
+        "outcome": "Passed",
+        "reference": "GDAL/OSR 3.10.3",
+        "tolerances": {
+          "nativeValueAbsolute": 0,
+          "affineSourceUnits": 1e-12,
+          "pixelCenterDegrees": 1e-10
+        },
+        "originals": [
+          {
+            "file": "ST_B10.tif",
+            "sha256": "05b5e70505ae77243f394049ba2f800a714ce4c55f7e22349f3e3a43462caaa8",
+            "bytes": 7818
+          },
+          {
+            "file": "QA_PIXEL.tif",
+            "sha256": "ba3d6e05277aa9fc9629bced52401b387c8bd7744c6137878177788537a7b996",
+            "bytes": 436
+          },
+          {
+            "file": "QA_RADSAT.tif",
+            "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938",
+            "bytes": 388
+          }
+        ],
+        "samplesCompared": 768,
+        "missingSamples": 0,
+        "maximumScaledDifference": 0,
+        "maximumGeographicDifferenceDegrees": 2.1316282072803006e-14,
+        "provider": "Microsoft Planetary Computer / USGS Landsat",
+        "scene": "LC08_L2SP_014032_20240903_02_T1",
+        "sourceDateUtc": "2024-09-03T15:39:44.650124+00:00",
+        "verticalDatum": "not applicable",
+        "limitations": [
+          "Deterministic original cell samples only; not full-scene coverage, derived indices, cutline DSM, or installed acceptance.",
+          "QA bands retain original codes; no missing/invalid source made valid."
+        ]
+      },
+      "inputs": [
+        {
+          "id": "ST_B10.tif",
+          "kind": "satellite",
+          "provider_project": "Microsoft Planetary Computer / USGS Landsat / LC08_L2SP_014032_20240903_02_T1",
+          "source_date_utc": "2024-09-03T15:39:44.650124+00:00",
+          "horizontal_crs": {
+            "sT_B10": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_PIXEL": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_RADSAT": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "not applicable",
+          "units": [
+            "K",
+            "1",
+            "1"
+          ],
+          "native_shape_or_count": {
+            "sT_B10": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_PIXEL": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_RADSAT": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "ST_B10",
+              "file": "ST_B10.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "K",
+              "scale": 0.00341802,
+              "offset": 149,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "QA_PIXEL",
+              "file": "QA_PIXEL.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": 1,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "QA_RADSAT",
+              "file": "QA_RADSAT.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": null,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "05b5e70505ae77243f394049ba2f800a714ce4c55f7e22349f3e3a43462caaa8",
+          "bytes": 7818,
+          "sha256": "05b5e70505ae77243f394049ba2f800a714ce4c55f7e22349f3e3a43462caaa8"
+        },
+        {
+          "id": "QA_PIXEL.tif",
+          "kind": "satellite",
+          "provider_project": "Microsoft Planetary Computer / USGS Landsat / LC08_L2SP_014032_20240903_02_T1",
+          "source_date_utc": "2024-09-03T15:39:44.650124+00:00",
+          "horizontal_crs": {
+            "sT_B10": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_PIXEL": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_RADSAT": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "not applicable",
+          "units": [
+            "K",
+            "1",
+            "1"
+          ],
+          "native_shape_or_count": {
+            "sT_B10": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_PIXEL": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_RADSAT": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "ST_B10",
+              "file": "ST_B10.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "K",
+              "scale": 0.00341802,
+              "offset": 149,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "QA_PIXEL",
+              "file": "QA_PIXEL.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": 1,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "QA_RADSAT",
+              "file": "QA_RADSAT.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": null,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "ba3d6e05277aa9fc9629bced52401b387c8bd7744c6137878177788537a7b996",
+          "bytes": 436,
+          "sha256": "ba3d6e05277aa9fc9629bced52401b387c8bd7744c6137878177788537a7b996"
+        },
+        {
+          "id": "QA_RADSAT.tif",
+          "kind": "satellite",
+          "provider_project": "Microsoft Planetary Computer / USGS Landsat / LC08_L2SP_014032_20240903_02_T1",
+          "source_date_utc": "2024-09-03T15:39:44.650124+00:00",
+          "horizontal_crs": {
+            "sT_B10": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_PIXEL": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_RADSAT": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "not applicable",
+          "units": [
+            "K",
+            "1",
+            "1"
+          ],
+          "native_shape_or_count": {
+            "sT_B10": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_PIXEL": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "qA_RADSAT": {
+              "width": 58,
+              "height": 75,
+              "crs": "EPSG:32618",
+              "originX": 499995,
+              "originY": 4429995,
+              "pixelWidth": 30,
+              "pixelHeight": -30,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "ST_B10",
+              "file": "ST_B10.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "K",
+              "scale": 0.00341802,
+              "offset": 149,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "QA_PIXEL",
+              "file": "QA_PIXEL.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": 1,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "QA_RADSAT",
+              "file": "QA_RADSAT.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": null,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938",
+          "bytes": 388,
+          "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
+        }
+      ]
+    },
+    {
+      "file": "artifacts/p08c/retained-sentinel-1/receipt.json",
+      "sha256": "aea1c25b9761def902d16709edadb7759df8239a30349b3fa0c9a8510ecd548f",
+      "runtime": {
+        "source_commit": "564448327d6e66008f6e8f967dc9d9ce7b973f59",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "a65e72c12717072a9278ad99f48e54704d547e0d101a73778e16d9c23e2f3588",
+          "AeroScience.Hdf.SafeRead.dll": "063f0cafecc6765d701058a8f2d66d92db7b3f6cb4f2f3ca2719ede7bf5a6599",
+          "AeroScience.Missions.dll": "489a6afa9b78e10008196f5470cdbea0b3f5745be0e345828b677a5441604b7b",
+          "AeroScience.Organization.dll": "2b03fed7423699980dda2fba1803bc10b78caf12a9ee58414f546c45b88e8639",
+          "AeroScience.Shared.dll": "7402c88393a4276cfde3c17f96b6ce4d85aa5a1693ba764c92363266de36438b",
+          "AeroScience.SimConnect.dll": "80574c797c7a90df332722087077a4feeca3dd21e340ecd4456e54d3c5f1a806",
+          "AeroScience.Telemetry.dll": "9a533d9bf5e9b476ed852d46f436133018bba85ce3ffc9b66529994d872d48dc",
+          "AeroScience.TestHost.dll": "0272fdfe50a20e3f4e1b50ad19084a34f3b5e1cd8685e1c9572618869a6541e2",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "d203da9d2ca04ac4242be8ff36a4ab9bcfac9879fafd40e42ba5f20f89783f3c"
+      },
+      "outcome": "Passed",
+      "tolerances": {
+        "nativeValueAbsolute": 0,
+        "affineSourceUnits": 1e-12,
+        "pixelCenterDegrees": 1e-10
+      },
+      "reference": {
+        "schema": "aeroscience-p08c-retained-raster-comparison-1",
+        "outcome": "Passed",
+        "reference": "GDAL/OSR 3.10.3",
+        "tolerances": {
+          "nativeValueAbsolute": 0,
+          "affineSourceUnits": 1e-12,
+          "pixelCenterDegrees": 1e-10
+        },
+        "originals": [
+          {
+            "file": "B02.tif",
+            "sha256": "3a73bd5220bdf9a756516d4164e050a8584735c96388b913d3f00c79e74e6eee",
+            "bytes": 58716
+          },
+          {
+            "file": "B03.tif",
+            "sha256": "0b51220f541aac313b81188027efd1db1d0e0d4bf9d6f37266f732f8b519bb0e",
+            "bytes": 58692
+          },
+          {
+            "file": "B04.tif",
+            "sha256": "18af6015253641f4856d77d87b8283a20eb08d49f83656b5522e22c17d20e15b",
+            "bytes": 59780
+          },
+          {
+            "file": "B08.tif",
+            "sha256": "2709bf2409ed5aedc3b41663975ce79e3141b7dfd8b1ed5780bcab9d6dd72dc4",
+            "bytes": 60866
+          },
+          {
+            "file": "SCL.tif",
+            "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5",
+            "bytes": 1444
+          }
+        ],
+        "samplesCompared": 1280,
+        "missingSamples": 0,
+        "maximumScaledDifference": 0,
+        "maximumGeographicDifferenceDegrees": 2.1316282072803006e-14,
+        "provider": "Copernicus / Element 84 Earth Search",
+        "scene": "S2A_18TWK_20240903_0_L2A",
+        "sourceDateUtc": "2024-09-03T15:52:05.578+00:00",
+        "verticalDatum": "not applicable",
+        "limitations": [
+          "Deterministic original cell samples only; not full-scene coverage, derived indices, cutline DSM, or installed acceptance.",
+          "QA bands retain original codes; no missing/invalid source made valid."
+        ]
+      },
+      "inputs": [
+        {
+          "id": "B02.tif",
+          "kind": "satellite",
+          "provider_project": "Copernicus / Element 84 Earth Search / S2A_18TWK_20240903_0_L2A",
+          "source_date_utc": "2024-09-03T15:52:05.578+00:00",
+          "horizontal_crs": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "not applicable",
+          "units": [
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "1"
+          ],
+          "native_shape_or_count": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "B02",
+              "file": "B02.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B03",
+              "file": "B03.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B04",
+              "file": "B04.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B08",
+              "file": "B08.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "SCL",
+              "file": "SCL.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "3a73bd5220bdf9a756516d4164e050a8584735c96388b913d3f00c79e74e6eee",
+          "bytes": 58716,
+          "sha256": "3a73bd5220bdf9a756516d4164e050a8584735c96388b913d3f00c79e74e6eee"
+        },
+        {
+          "id": "B03.tif",
+          "kind": "satellite",
+          "provider_project": "Copernicus / Element 84 Earth Search / S2A_18TWK_20240903_0_L2A",
+          "source_date_utc": "2024-09-03T15:52:05.578+00:00",
+          "horizontal_crs": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "not applicable",
+          "units": [
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "1"
+          ],
+          "native_shape_or_count": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "B02",
+              "file": "B02.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B03",
+              "file": "B03.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B04",
+              "file": "B04.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B08",
+              "file": "B08.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "SCL",
+              "file": "SCL.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "0b51220f541aac313b81188027efd1db1d0e0d4bf9d6f37266f732f8b519bb0e",
+          "bytes": 58692,
+          "sha256": "0b51220f541aac313b81188027efd1db1d0e0d4bf9d6f37266f732f8b519bb0e"
+        },
+        {
+          "id": "B04.tif",
+          "kind": "satellite",
+          "provider_project": "Copernicus / Element 84 Earth Search / S2A_18TWK_20240903_0_L2A",
+          "source_date_utc": "2024-09-03T15:52:05.578+00:00",
+          "horizontal_crs": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "not applicable",
+          "units": [
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "1"
+          ],
+          "native_shape_or_count": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "B02",
+              "file": "B02.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B03",
+              "file": "B03.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B04",
+              "file": "B04.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B08",
+              "file": "B08.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "SCL",
+              "file": "SCL.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "18af6015253641f4856d77d87b8283a20eb08d49f83656b5522e22c17d20e15b",
+          "bytes": 59780,
+          "sha256": "18af6015253641f4856d77d87b8283a20eb08d49f83656b5522e22c17d20e15b"
+        },
+        {
+          "id": "B08.tif",
+          "kind": "satellite",
+          "provider_project": "Copernicus / Element 84 Earth Search / S2A_18TWK_20240903_0_L2A",
+          "source_date_utc": "2024-09-03T15:52:05.578+00:00",
+          "horizontal_crs": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "not applicable",
+          "units": [
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "1"
+          ],
+          "native_shape_or_count": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "B02",
+              "file": "B02.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B03",
+              "file": "B03.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B04",
+              "file": "B04.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B08",
+              "file": "B08.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "SCL",
+              "file": "SCL.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "2709bf2409ed5aedc3b41663975ce79e3141b7dfd8b1ed5780bcab9d6dd72dc4",
+          "bytes": 60866,
+          "sha256": "2709bf2409ed5aedc3b41663975ce79e3141b7dfd8b1ed5780bcab9d6dd72dc4"
+        },
+        {
+          "id": "SCL.tif",
+          "kind": "satellite",
+          "provider_project": "Copernicus / Element 84 Earth Search / S2A_18TWK_20240903_0_L2A",
+          "source_date_utc": "2024-09-03T15:52:05.578+00:00",
+          "horizontal_crs": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "not applicable",
+          "units": [
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "reflectance",
+            "1"
+          ],
+          "native_shape_or_count": {
+            "b02": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b03": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b04": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "b08": {
+              "width": 171,
+              "height": 223,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 10,
+              "pixelHeight": -10,
+              "rowX": 0,
+              "columnY": 0
+            },
+            "sCL": {
+              "width": 86,
+              "height": 112,
+              "crs": "EPSG:32618",
+              "originX": 500000,
+              "originY": 4429980,
+              "pixelWidth": 20,
+              "pixelHeight": -20,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "B02",
+              "file": "B02.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B03",
+              "file": "B03.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B04",
+              "file": "B04.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "B08",
+              "file": "B08.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "reflectance",
+              "scale": 0.0001,
+              "offset": -0.1,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            },
+            {
+              "id": "SCL",
+              "file": "SCL.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "1",
+              "scale": 1,
+              "offset": 0,
+              "noData": 0,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "S2A_18TWK_20240903_0_L2A",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5",
+          "bytes": 1444,
+          "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
+        }
+      ]
+    },
+    {
+      "file": "artifacts/p08c/retained-usgs-retained-1/receipt.json",
+      "sha256": "3f3be94403371c50e87cae393af26808de18b14f80b13a8685af45374f51c29a",
+      "runtime": {
+        "source_commit": "564448327d6e66008f6e8f967dc9d9ce7b973f59",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "a65e72c12717072a9278ad99f48e54704d547e0d101a73778e16d9c23e2f3588",
+          "AeroScience.Hdf.SafeRead.dll": "063f0cafecc6765d701058a8f2d66d92db7b3f6cb4f2f3ca2719ede7bf5a6599",
+          "AeroScience.Missions.dll": "489a6afa9b78e10008196f5470cdbea0b3f5745be0e345828b677a5441604b7b",
+          "AeroScience.Organization.dll": "2b03fed7423699980dda2fba1803bc10b78caf12a9ee58414f546c45b88e8639",
+          "AeroScience.Shared.dll": "7402c88393a4276cfde3c17f96b6ce4d85aa5a1693ba764c92363266de36438b",
+          "AeroScience.SimConnect.dll": "80574c797c7a90df332722087077a4feeca3dd21e340ecd4456e54d3c5f1a806",
+          "AeroScience.Telemetry.dll": "9a533d9bf5e9b476ed852d46f436133018bba85ce3ffc9b66529994d872d48dc",
+          "AeroScience.TestHost.dll": "0272fdfe50a20e3f4e1b50ad19084a34f3b5e1cd8685e1c9572618869a6541e2",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "d203da9d2ca04ac4242be8ff36a4ab9bcfac9879fafd40e42ba5f20f89783f3c"
+      },
+      "outcome": "Passed",
+      "tolerances": {
+        "nativeValueAbsolute": 0,
+        "affineSourceUnits": 1e-12,
+        "pixelCenterDegrees": 1e-10
+      },
+      "reference": {
+        "schema": "aeroscience-p08c-retained-raster-comparison-1",
+        "outcome": "Passed",
+        "reference": "GDAL/OSR 3.10.3",
+        "tolerances": {
+          "nativeValueAbsolute": 0,
+          "affineSourceUnits": 1e-12,
+          "pixelCenterDegrees": 1e-10
+        },
+        "originals": [
+          {
+            "file": "elevation.tif",
+            "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5",
+            "bytes": 263002
+          }
+        ],
+        "samplesCompared": 256,
+        "missingSamples": 0,
+        "maximumScaledDifference": 0,
+        "maximumGeographicDifferenceDegrees": 0,
+        "provider": "USGS 3DEP National Map",
+        "scene": "3DEP--75,40,-74.98,40.02",
+        "sourceDateUtc": null,
+        "verticalDatum": "Source-native vertical reference is unspecified by this composite export; no datum conversion or aircraft MSL comparison",
+        "limitations": [
+          "Deterministic original cell samples only; not full-scene coverage, derived indices, cutline DSM, or installed acceptance.",
+          "QA bands retain original codes; no missing/invalid source made valid."
+        ]
+      },
+      "inputs": [
+        {
+          "id": "elevation.tif",
+          "kind": "dem",
+          "provider_project": "USGS 3DEP National Map / 3DEP--75,40,-74.98,40.02",
+          "source_date_utc": null,
+          "horizontal_crs": {
+            "elevation": {
+              "width": 256,
+              "height": 256,
+              "crs": "EPSG:4326",
+              "originX": -75.00000000000001,
+              "originY": 40.02000000000001,
+              "pixelWidth": 7.812499999998446e-05,
+              "pixelHeight": -7.812499999998446e-05,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "vertical_datum": "Source-native vertical reference is unspecified by this composite export; no datum conversion or aircraft MSL comparison",
+          "units": [
+            "m"
+          ],
+          "native_shape_or_count": {
+            "elevation": {
+              "width": 256,
+              "height": 256,
+              "crs": "EPSG:4326",
+              "originX": -75.00000000000001,
+              "originY": 40.02000000000001,
+              "pixelWidth": 7.812499999998446e-05,
+              "pixelHeight": -7.812499999998446e-05,
+              "rowX": 0,
+              "columnY": 0
+            }
+          },
+          "attributes": [
+            {
+              "id": "elevation",
+              "file": "elevation.tif",
+              "format": "geotiff",
+              "channel": 0,
+              "unit": "m",
+              "scale": 1,
+              "offset": 0,
+              "noData": -999999,
+              "wavelengthNm": null,
+              "badBand": false,
+              "headerFile": null,
+              "sceneId": "3DEP--75,40,-74.98,40.02",
+              "enviMapReference": "legacy-pixel-center"
+            }
+          ],
+          "license_access": "USGS public domain; https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+          "retained_authorization": "Explicit read-only retained source selection; no new license acceptance",
+          "expected_sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5",
+          "bytes": 263002,
+          "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
+        }
+      ]
+    }
+  ]
+}

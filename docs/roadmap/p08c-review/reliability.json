@@ -1,0 +1,139 @@
+{
+  "schema": "aeroscience-p08c-reliability-summary-1",
+  "runtime_source_commit": "564448327d6e66008f6e8f967dc9d9ce7b973f59",
+  "development_tests": [
+    {
+      "file": "tests/AeroScience.Tests/TestResults/p08c-integration.trx",
+      "sha256": "5d7a0fe3db483b3b7f9c7bd7072c0f77b0dace579ac7002e5c63dc7d7e3c5474",
+      "counters": {
+        "total": "181",
+        "executed": "181",
+        "passed": "181",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      }
+    },
+    {
+      "file": "tests/AeroScience.Tests/TestResults/p08c-organizations.trx",
+      "sha256": "00e0e5827a2229f1dd33623373c70da061eba6bfc89cdaeb8c26ce12699e14e8",
+      "counters": {
+        "total": "67",
+        "executed": "2",
+        "passed": "2",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      }
+    }
+  ],
+  "organization_local_limitation": "65 existing PostgreSQL-dependent cases skipped: no server binaries selected/installed; the focused CI job requires actual PostgreSQL and zero skips for its 18 selected security cases",
+  "smoke_runs": [
+    {
+      "script": "smoke_recovery.py",
+      "exit_code": 0,
+      "wall_seconds": 7.7993314290015405,
+      "scope": "Real subprocesses, disposable synthetic fixtures; not MSFS long-flight acceptance",
+      "log_sha256": "030473c84918050e8f745a5349eef265d533062b47a11c6fc89aedd51264e4af"
+    },
+    {
+      "script": "smoke_evidence_recovery.py",
+      "exit_code": 0,
+      "wall_seconds": 7.543503203,
+      "scope": "Real subprocesses, disposable synthetic fixtures; not MSFS long-flight acceptance",
+      "log_sha256": "ea87446df02497e776dae2c0d84add0adc9219adb6dc07f18b9de37180bbce72"
+    },
+    {
+      "script": "smoke_library_recovery.py",
+      "exit_code": 0,
+      "wall_seconds": 1.599540421000711,
+      "scope": "Real subprocesses, disposable synthetic fixtures; not MSFS long-flight acceptance",
+      "log_sha256": "4f60dd00962a25b283a17c7e388df8909bdc72572fc3f359f7f04a7a6420bd17"
+    },
+    {
+      "script": "smoke_source_deletion.py",
+      "exit_code": 0,
+      "wall_seconds": 2.936960126999111,
+      "scope": "Real subprocesses, disposable synthetic fixtures; not MSFS long-flight acceptance",
+      "log_sha256": "2d995c5b406fdf840b78e80818248c8cdca98143adcedbe4199c6755e3e8a869"
+    },
+    {
+      "script": "smoke_aviation_recovery.py",
+      "exit_code": 1,
+      "wall_seconds": 0.1175681419990724,
+      "scope": "Real subprocesses, disposable synthetic fixtures; not MSFS long-flight acceptance",
+      "log_sha256": "8282c8065004ca120fe0a74bca834c15d918e359161d2ec1cfa665375bc22d36"
+    }
+  ],
+  "aviation_corrected": {
+    "outcome": "Passed",
+    "log_sha256": "3b195aa1735cebe99d7b91d152c178b5eb66325c6cf9cc3a7b0bbf7177b25c65",
+    "cause": "Existing aviation smoke uses dotnet from PATH, not DOTNET; rerun with existing SDK directory in PATH. No assertion changed."
+  },
+  "genuine_deletion": {
+    "sha256": "1977776fb352d16b9895897906398b1a2e9f718fc66b33d5dfadea63496eec14",
+    "receipt": {
+      "state": "Passed",
+      "result": {
+        "Id": "a66573b7-dd7a-4fee-aac2-379b38b12a0e",
+        "RemovedSources": 17,
+        "RemovedManagedBytes": 37001661,
+        "PendingManagedBytes": 0,
+        "PhysicalFreeSpaceChangeBytes": 45015040,
+        "State": "Completed",
+        "Warning": null,
+        "RemovedSourceIds": null,
+        "MetadataCleanupPending": false
+      },
+      "selectedSources": 17,
+      "managedPointTiles": 1580,
+      "remainingManagedNumericTiles": 0,
+      "recoveryCopyVerified": true,
+      "geometryPreserved": true,
+      "originalFlightSciencePreserved": true,
+      "explicitTestExportsPreserved": true,
+      "note": "This deletes only the marked isolated acceptance Library's managed originals/dependent points; fixture originals and visible evidence exports stay protected."
+    },
+    "prior_original_hashes_rechecked_unchanged": true,
+    "scope": "New disposable copied Library only; no prior evidence or owner data deleted"
+  },
+  "tool_tests": {
+    "total": 32,
+    "passed": 31,
+    "skipped": 1,
+    "skip": "Actual Windows controls; required by Windows focused CI",
+    "log_sha256": "28a667b5798383b9fea6e81784c0865745fe206e325bb3033777c7b4ffb13d5f"
+  },
+  "preserved_p08b": {
+    "checklist_tests": 15,
+    "private_verifier_tests": 17,
+    "template_ids": 26,
+    "modified": false
+  },
+  "failed_tool_parse": {
+    "log_sha256": "a5cc5484cb8eafb6eff64c0118e1bd6975a7f6dd07dcb554225694795c85a5b0",
+    "cause": "Smart apostrophe in a PowerShell single-quoted title; replaced with unambiguous plain wording."
+  },
+  "installed_msfs_endurance": "Not Tested",
+  "public_release_approved": false
+}

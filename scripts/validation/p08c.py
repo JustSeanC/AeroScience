@@ -217,15 +217,20 @@ def verify_receipt(path, runtime_source=None):
     plan = read(path.parent/'plan.json')
     require(all(value.get(k) == plan.get(k) for k in plan), 'Receipt differs from its pre-execution plan.')
     require(value['independent_reference'] == read(path.parent/'probe/independent-comparison.json'), 'Reference summary changed.')
-    if value['evidence_kind'] == 'resource-benchmark':
-        for field, artifact in [('application_metrics', 'application-metrics.json'), ('reference_metrics', 'independent-reference-metrics.json')]:
+    if value['evidence_kind'] == 'resource-benchmark' or 'application_metrics' in value:
+        budget = value.get('budgets', value.get('measurement_budgets', {}))
+        require(bool(budget), 'Pre-execution resource budgets are required.')
+        reference_field = 'reference_metrics' if 'reference_metrics' in value else 'independent_reference_metrics'
+        for field, artifact in [('application_metrics', 'application-metrics.json'), (reference_field, 'independent-reference-metrics.json')]:
             metrics = value.get(field, {})
             require(artifact in seen and metrics == read(path.parent/artifact), 'Measured resource artifact is missing or changed.')
             require(metrics.get('exit_code') == 0 and metrics.get('stop_reason') is None and metrics.get('sample_count', 0) > 0,
                     'Failed or unsampled work cannot pass a resource budget.')
-            require(0 < metrics['wall_seconds'] <= value['budgets']['wall_seconds']
-                    and 0 < metrics['sampled_process_tree_peak_rss_bytes'] <= value['budgets']['sampled_tree_rss_bytes']
-                    and 0 <= metrics['final_output_growth_bytes'] <= value['budgets']['output_bytes'], 'Measured resource budget failed.')
+            for key in ['wall_seconds','sampled_process_tree_peak_rss_bytes','final_output_growth_bytes']:
+                require(type(metrics.get(key)) in (int,float) and math.isfinite(metrics[key]), 'Actual finite resource counters are required.')
+            require(0 < metrics['wall_seconds'] <= budget['wall_seconds']
+                    and 0 < metrics['sampled_process_tree_peak_rss_bytes'] <= budget['sampled_tree_rss_bytes']
+                    and 0 <= metrics['final_output_growth_bytes'] <= budget['output_bytes'], 'Measured resource budget failed.')
     return value
 
 
