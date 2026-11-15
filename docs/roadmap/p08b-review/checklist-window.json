@@ -1,0 +1,34 @@
+{
+  "format_version": 1,
+  "baseline": "a68768298083f8019300b1476bc6c8db2e4b8591",
+  "tested_existing_build_source": "876ecf594956b7a40c7df0d4968dac1ce69ac971",
+  "existing_build_receipt_sha256": "52660521d3a3f04aa62eae266989a6c55467cdeafbec0fd66531fded42bf1447",
+  "design": "Reuse previous native WinForms checklist grid with the existing exact-build verifier and append-only observation recorder. No app/package edits, rebuild, HTTP server or network actions.",
+  "local": {
+    "run": 48,
+    "passed": 47,
+    "failed": 0,
+    "skipped": 1,
+    "skip": "Actual WinForms control smoke requires Windows; mandatory in focused Windows CI.",
+    "includes": "Checklist backend/PowerShell parse, all private validation regressions and CI-scope contracts."
+  },
+  "diagnostics": [
+    {
+      "path": "artifacts/p08b-checklist/targeted-first.log",
+      "bytes": 2782,
+      "sha256": "969a8149917b346f42a7bb5f4f341acbd93aaaa0d5b9002397b71d52dce6ce41"
+    },
+    {
+      "path": "artifacts/p08b-checklist/targeted-combined.log",
+      "bytes": 9607,
+      "sha256": "20b4a8b8dba5a814e2af068ad668d690b12309d4e2bec75b6b6d48dcc4f0e50c"
+    }
+  ],
+  "windows_focused_ci": "Pending on exact checklist tool source.",
+  "installed_owner_gui_visual_acceptance": "Not Tested",
+  "installed_msfs_acceptance": "Owner reported working; detailed individual observations remain required.",
+  "qualified_translation_review": "Pending",
+  "public_release_approved": false,
+  "p08c_started": false,
+  "recorded_utc": "2026-11-15T15:25:09.452120+00:00"
+}

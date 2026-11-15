@@ -101,6 +101,12 @@ jobs:
           python -m unittest discover -s tests -p test_private_validation_080.py -k LicensePackagingTests -v *> artifacts/private080-license-copy.log
           if ($LASTEXITCODE -ne 0) { Get-Content artifacts/private080-license-copy.log; throw 'Private 0.8 license-copy regression failed.' }
           Get-Content artifacts/private080-license-copy.log
+      - name: Verify guided private checklist and actual Windows controls
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p test_checklist_080.py -v *> artifacts/private080-checklist.log
+          if ($LASTEXITCODE -ne 0) { Get-Content artifacts/private080-checklist.log; throw 'Private checklist regression failed.' }
+          Get-Content artifacts/private080-checklist.log
       - name: Test profile isolation, toolbar installation, HDF and genuine LiDAR decoder contracts
         shell: pwsh
         run: |
@@ -131,6 +137,7 @@ jobs:
             tests/AeroScience.Tests/TestResults/**/*.trx
             src/AeroScience.Missions/obj/native-lidar/**/build.json
             artifacts/private080-license-copy.log
+            artifacts/private080-checklist.log
           if-no-files-found: ignore
           retention-days: 7
       # Manual diagnostic scope only; never substitutes for either full platform job.
