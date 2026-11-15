@@ -1,0 +1,44 @@
+{
+  "schema": "aeroscience-p08c-ci-failure-1",
+  "source_commit": "e89b6aa6cafbc76dde0070a87f47bb5dedbe6c50",
+  "run_id": 43746212456,
+  "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43746212456",
+  "scope": "Focused windows-profile plus P08c tools/Linux PostgreSQL; not Full CI",
+  "failed_jobs": [
+    {
+      "id": 132910032479,
+      "name": "p08c-tools (ubuntu-24.04)",
+      "log_sha256": "ea59f07d97b6fe0ff5ba29688e45e05a3020406c14075241a92257b704d13b6c",
+      "cause": "P08b native ES2017 validator needs existing locked TypeScript project dependency; new focused job omitted setup-node/npm ci. Isolated exact-script reproduction retained.",
+      "reproduction_log_sha256": "da5c276e6592999141e16cbf8cba450833e90c6206bd65cdc2f75a47a6fd78ff"
+    },
+    {
+      "id": 132910032464,
+      "name": "p08c-tools (windows-latest)",
+      "log_sha256": "3159e7c568d50f0bf5bd43581fbe88199d15bbca9faad65b14ef61242f9c56b4",
+      "cause": "Receipt verifier converted canonical POSIX wire paths to Windows Path before validating; nested paths became backslashes and were falsely refused. Validate PurePosixPath before safe native join; original failed assertion retained."
+    }
+  ],
+  "passed_security": {
+    "job_id": 132910032457,
+    "tests": 18,
+    "failed": 0,
+    "skipped": 0,
+    "log_sha256": "8f8a210350e7480ffab8a8f0cf8907f3c93ac71abe2dcc2dc9c81f626d7c3193"
+  },
+  "actual_windows_controls": "Passed in first run; byte verification failed separately",
+  "corrective_local": {
+    "p08c_tests": 33,
+    "passed": 32,
+    "skipped": 1,
+    "log_sha256": "4cb7a9540ca09287c5e895d32077e857390c49af14179bc53f0aceab3e926115",
+    "development_scope_tests_passed": 16
+  },
+  "assertions_weakened": false,
+  "scientific_or_security_runtime_changed": false,
+  "dispatch_registration_failure": {
+    "original_unregistered_workflow_source": "0f5d6a52923390bc4542469d33d8aecb191da296",
+    "error": "GitHub HTTP 404 for newly added branch-only workflow; no run/jobs created",
+    "resolution": "Reuse existing registered ci.yml manual windows-profile entry, with conditional P08c jobs; protected main untouched"
+  }
+}

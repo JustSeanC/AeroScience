@@ -10,7 +10,7 @@ import hashlib
 import json
 import math
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import platform
 import subprocess
 import sys
@@ -136,6 +136,16 @@ def artifact_records(output):
              'sha256': digest(p)} for p in files if p.name != 'receipt.json']
 
 
+def artifact_relative(value):
+    # Wire paths always use '/'. Validate BEFORE converting to a native Path:
+    # Windows Path would turn a valid nested wire path into backslashes.
+    require(isinstance(value,str) and value and ':' not in value and '\\' not in value,
+            'Unsafe artifact reference.')
+    relative=PurePosixPath(value)
+    require(not relative.is_absolute() and '..' not in relative.parts, 'Unsafe artifact reference.')
+    return relative
+
+
 def numerical(args):
     original = inventory(read(args.inventory))
     selected = next((v for v in original if v['id'] == args.input_id), None)
@@ -207,11 +217,10 @@ def verify_receipt(path, runtime_source=None):
     seen = set()
     require(sum(a['bytes'] for a in artifacts) <= 4*1024**3, 'Evidence bundle exceeds the 4 GiB verification bound.')
     for artifact in artifacts:
-        relative = Path(artifact['file'])
-        require(not relative.is_absolute() and ':' not in str(relative) and '\\' not in str(relative)
-                and '..' not in relative.parts and str(relative) not in seen, 'Unsafe/duplicate artifact reference.')
+        relative = artifact_relative(artifact['file'])
+        require(str(relative) not in seen, 'Duplicate artifact reference.')
         seen.add(str(relative))
-        target = safe_path(path.parent/relative)
+        target = safe_path(path.parent.joinpath(*relative.parts))
         require(target.stat().st_size == artifact['bytes'] and digest(target) == artifact['sha256'], 'Measured evidence is missing or changed.')
     require('plan.json' in seen and 'probe/independent-comparison.json' in seen, 'Retain the original plan and reference artifact.')
     plan = read(path.parent/'plan.json')

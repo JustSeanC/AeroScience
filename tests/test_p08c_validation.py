@@ -3,7 +3,7 @@ import copy
 import importlib.util
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import subprocess
 import sys
 import tempfile
@@ -87,6 +87,14 @@ class EvidenceTests(unittest.TestCase):
         for index, text in enumerate(['{"outcome":"Passed","outcome":"Failed"}', '{"error":NaN}']):
             path = self.root/str(index); path.write_text(text)
             with self.assertRaises(ValueError): p.read(path)
+
+    def test_nested_wire_paths_remain_safe_on_windows_without_accepting_traversal(self):
+        wire='probe/independent-comparison.json'
+        relative=p.artifact_relative(wire)
+        self.assertEqual(wire,str(relative))
+        self.assertEqual(PureWindowsPath('C:/evidence/probe/independent-comparison.json'),PureWindowsPath('C:/evidence').joinpath(*relative.parts))
+        for invalid in ['../outside','/rooted','C:/outside','probe\\outside','//server/share','probe/../../outside','']:
+            with self.subTest(invalid=invalid),self.assertRaises(ValueError):p.artifact_relative(invalid)
 
     def test_receipt_rechecks_actual_plan_reference_and_artifact_bytes(self):
         probe = self.root/'probe'; probe.mkdir()
