@@ -25,7 +25,6 @@ ArchitecturesAllowed=x64os
 ArchitecturesInstallIn64BitMode=x64os
 MinVersion=10.0.19045
 AppMutex=Local\AeroScience.Desktop
-UninstallAppMutex=Local\AeroScience.Desktop
 CloseApplications=no
 RestartApplications=no
 UsePreviousAppDir=no
@@ -155,8 +154,8 @@ end;
 
 function InitializeUninstall: Boolean;
 begin
-  Result := SimulatorClosed;
-  if not Result then MsgBox('Close MSFS and its package builder before removing the Beta 1 application. No process was stopped and beta data will be retained.', mbError, MB_OK);
+  Result := SimulatorClosed and not CheckForMutexes('Local\AeroScience.Desktop');
+  if not Result then MsgBox('Close AeroScience, MSFS and its package builder before removing the Beta 1 application. No process was stopped and beta data will be retained.', mbError, MB_OK);
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
