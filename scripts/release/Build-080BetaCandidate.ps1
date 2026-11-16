@@ -58,7 +58,8 @@ try {
     $runtimeProof=($proof.checks|Where-Object name -eq 'native-runtime-loading-exports-authorization').evidence
     $runtime=Join-Path $SdkRoot 'SimConnect SDK/lib/SimConnect.dll';if((Get-FileHash $runtime -Algorithm SHA256).Hash.ToLowerInvariant() -ne $runtimeProof.report.sha256){throw 'Runtime changed after authorization/load/export verification.'}
     Copy-Item $runtime -Destination (Join-Path $app 'SimConnect.dll')
-    $runtimeProof.report|ConvertTo-Json -Depth 10|Set-Content (Join-Path $app 'runtime-check.json') -Encoding utf8
+    $publicRuntime=[ordered]@{};foreach($key in @('checked_utc','sha256','file_version','architecture','export_check','exports')){if($runtimeProof.report.PSObject.Properties[$key]){$publicRuntime[$key]=$runtimeProof.report.$key}}
+    $publicRuntime|ConvertTo-Json -Depth 10|Set-Content (Join-Path $app 'runtime-check.json') -Encoding utf8
     $runtimeProof.public_authorization|ConvertTo-Json -Depth 10|Set-Content (Join-Path $app 'RUNTIME-AUTHORIZATION.json') -Encoding utf8
     $signingPolicy=if($AllowUnsignedBeta){'allow-unsigned-beta'}else{'require-signed'};$dependencies=@{}
     foreach($relative in @('AeroScience.exe','SimConnect.dll','LidarRuntime/AeroScience.LidarReader.exe')){

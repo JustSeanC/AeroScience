@@ -14,6 +14,10 @@ internal static class Native080ProfileProbe
         {
             path=Path.GetFullPath(path);var assembly=context.LoadFromAssemblyPath(path);var profile=ApplicationProfile.FromAssembly(assembly);
             var version=assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            var desktop=Path.Combine(Path.GetDirectoryName(path)!,"AeroScience.exe");
+            var executable=System.Diagnostics.FileVersionInfo.GetVersionInfo(desktop);
+            if(executable.FileVersion!="0.8.0.1"||executable.ProductVersion!=ApplicationProfile.BetaVersion+"+"+commit
+                ||executable.ProductName!="AeroScience v0.8.0 Beta 1")throw new IOException("Actual Windows EXE version/product metadata differs from Beta 1.");
             var missions=context.LoadFromAssemblyPath(Path.Combine(Path.GetDirectoryName(path)!,"AeroScience.Missions.dll"));
             var identity=missions.GetType("AeroScience.Missions.LidarRuntimeIdentity",true)!;
             string Constant(string key)=>(string)identity.GetField(key,BindingFlags.Static|BindingFlags.NonPublic)!.GetRawConstantValue()!;
@@ -28,6 +32,8 @@ internal static class Native080ProfileProbe
                 configuration_directory="%LOCALAPPDATA%/"+profile.Folder,registry_key=profile.RegistryKey,port=profile.Port,cookie=profile.SessionCookieName,
                 command_event=profile.CommandEvent,reply_event=profile.ReplyEvent,mutex=ApplicationProfile.DesktopMutex,
                 engine_sha256=Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path))),lidar_source=Constant("Source"),lidar_sha256=Constant("Sha256"),
+                desktop_sha256=Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(desktop))),desktop_file_version=executable.FileVersion,
+                desktop_product_version=executable.ProductVersion,desktop_product_name=executable.ProductName,
                 presentation_resources=resources,installed_acceptance="Not Tested"}));
         }finally{context.Unload();}
     }

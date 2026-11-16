@@ -55,7 +55,8 @@ def write(path,value):
 def identity():
     props=ET.parse(ROOT/'build/Beta080.props')
     require(props.findtext('.//Version')==VERSION and props.findtext('.//ReleaseChannel')=='beta'
-        and props.findtext('.//AssemblyVersion')=='0.8.0.0' and props.findtext('.//FileVersion')=='0.8.0.1','Beta build identity differs.')
+        and props.findtext('.//AssemblyVersion')=='0.8.0.0' and props.findtext('.//FileVersion')=='0.8.0.1'
+        and props.findtext('.//Product')==TITLE,'Beta build identity differs.')
     return dict(version=VERSION,package_version='0.8.0',channel='beta',profile='beta080',setup_name=SETUP,title=TITLE)
 
 def safe_output(path,repo=ROOT,sdk=Path(r'C:\MSFS 2024 SDK')):
@@ -165,6 +166,9 @@ def native_integrity(folder,execute=False):
     profile=read(folder/'compiled-profile.json')
     require(all(profile.get(k)==v for k,v in {'profile':'beta080','version':VERSION,'channel':'beta','source_commit':info['source_commit'],'port':5089,'mutex':r'Local\AeroScience.Desktop','command_event':'AeroScience.Beta.0_8_0.Command.v1','reply_event':'AeroScience.Beta.0_8_0.Reply.v1','cookie':'AeroScience.Beta.0_8_0.Session'}.items()),'Compiled Beta profile differs.')
     require(profile.get('engine_sha256')==sha(folder/'AeroScience.Engine.dll'),'Published Engine differs from inspected assembly.')
+    require(profile.get('desktop_sha256')==sha(folder/'AeroScience.exe') and profile.get('desktop_file_version')=='0.8.0.1'
+        and profile.get('desktop_product_version')==VERSION+'+'+info['source_commit'] and profile.get('desktop_product_name')==TITLE,
+        'Actual Windows EXE differs from its inspected Beta version/product metadata.')
     require(profile.get('configuration_directory','').replace('\\','/').endswith('/AeroScience-Beta-v0.8.0'),'Beta data root differs.')
     source=native.lidar_source();stamp=read(folder/'LidarRuntime/build.json');executable=folder/'LidarRuntime/AeroScience.LidarReader.exe'
     require(stamp.get('source')==source['source'] and stamp.get('upstreamCommit')==source['upstreamCommit'] and stamp.get('sha256')==sha(executable)
@@ -190,7 +194,7 @@ def payload(folder,commit,execute=False):
     folder=native.no_links(folder);native_integrity(folder,execute)
     require(read(folder/'build-info.json')['source_commit']==commit,'Beta source mismatch.')
     windows_payload(folder)
-    release.validate_runtime(folder,folder/'runtime-check.json',folder/'RUNTIME-AUTHORIZATION.json')
+    runtime_disclosure(folder)
     sdk=read(folder/'Toolbar/sdk-build.json');files=community(folder/'Toolbar'/PACKAGE,commit)
     require(sdk.get('variant')=='toolbar-beta-080' and sdk.get('version')==VERSION and sdk.get('source_commit')==commit
         and sdk.get('source_dirty') is False and sdk.get('sdk_contract')=='passed' and sdk.get('files')==files
@@ -221,6 +225,12 @@ def locale_projection(data,full):
         require(all(catalog.get(k)==original.get(k) for k in ['version','locale','sourceHash'])
             and catalog.get('pendingEnglishFallbackKeys',[])==[k for k in original.get('pendingEnglishFallbackKeys',[]) if k in keys]
             and catalog['messages']=={k:v for k,v in original['messages'].items() if k in keys},'Native translated messages/fallback differ: '+name)
+
+def runtime_disclosure(folder):
+    report,public=release.validate_runtime(folder,folder/'runtime-check.json',folder/'RUNTIME-AUTHORIZATION.json')
+    require(set(report)<= {'checked_utc','sha256','file_version','architecture','export_check','exports'},
+        'Keep absolute SDK paths and private environment details out of the distributed runtime report.')
+    require(read(folder/'RUNTIME-AUTHORIZATION.json')==public,'Only the existing public runtime authorization projection may ship; retain correspondence privately.')
 
 def windows_payload(folder):
     # Composition of two strict checks, without changing the byte-protected

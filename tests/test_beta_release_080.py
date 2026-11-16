@@ -74,6 +74,18 @@ class Beta080Tests(unittest.TestCase):
         self.assertNotIn('Invoke-WebRequest',text)
         self.assertFalse((ROOT/'native/lidar/laszip').is_symlink())
 
+    def test_runtime_package_refuses_private_correspondence_and_absolute_sdk_paths(self):
+        import test_release_flow as flow
+        fixture=flow.ReleaseFlowTests();fixture.setUp();self.addCleanup(fixture.tearDown)
+        report=beta.read(fixture.report);approval=beta.read(fixture.approval)
+        (fixture.published/'runtime-check.json').write_text(json.dumps(report))
+        (fixture.published/'RUNTIME-AUTHORIZATION.json').write_text(json.dumps(beta.release.public_runtime_approval(approval)))
+        with self.assertRaises(ValueError):beta.runtime_disclosure(fixture.published)
+        report.pop('runtime_file');(fixture.published/'runtime-check.json').write_text(json.dumps(report))
+        beta.runtime_disclosure(fixture.published)
+        (fixture.published/'RUNTIME-AUTHORIZATION.json').write_text(json.dumps(approval))
+        with self.assertRaises(ValueError):beta.runtime_disclosure(fixture.published)
+
     def test_preflight_replaces_only_output_guard_and_keeps_native_sdk_failures(self):
         proof={'checks':[{'name':'output-isolation','outcome':'Passed','evidence':'private shim'},
             {'name':'genuine-SDK-inputs','outcome':'Blocked','next_action':'Actual SDK required'}]}
