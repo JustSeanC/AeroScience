@@ -32,7 +32,7 @@ public sealed partial class AviationReference
             if (storageDirectory is not null)
             {
                 StorageManager.ValidateLocalPath(storageDirectory);
-                if (ApplicationProfile.Current.Validation)
+                if (ApplicationProfile.Current.Isolated)
                     new PreferenceStore(configurationDirectory, configurationDirectory).ValidateDirectory(storageDirectory);
                 if (p.StoreId is not null && Path.GetFullPath(storageDirectory) != Path.GetFullPath(directory))
                     throw new InvalidOperationException("Existing aviation storage is preserved. Automatic relocation is not supported; reconnect the original location.");

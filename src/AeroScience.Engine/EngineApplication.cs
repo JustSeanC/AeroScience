@@ -43,7 +43,7 @@ public static class EngineApplication
         builder.Services.AddSingleton(sp => {
             var value = sp.GetRequiredService<EngineOptions>();
             return new PreferenceStore(value.ConfigurationDirectory ?? value.DataDirectory,
-                ApplicationProfile.Current.Validation ? ApplicationProfile.Current.ConfigurationDirectory : null,
+                ApplicationProfile.Current.Isolated ? ApplicationProfile.Current.ConfigurationDirectory : null,
                 new(value.DataDirectory, value.ScienceLibraryDirectory ?? Path.Combine(value.DataDirectory,"ScienceLibrary"), EnableLan:value.EnableLan, LanAddress:value.LanAddress, SamplingIntervalMs:value.SamplingIntervalMs));
         });
         builder.Services.AddSingleton<IOrganizationCredentials,UnavailableOrganizationCredentials>();
@@ -198,7 +198,9 @@ public static class EngineApplication
         app.MapGet("/api/toolbar/bridge",(ToolbarBridgeStatus status)=>status.Snapshot());
         app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = ApplicationUpdates.CurrentVersion }));
         app.MapGet("/api/build", () => new {
-            profile = ApplicationProfile.Current.Validation ? "validation" : "production",
+            profile = ApplicationProfile.Current.Beta080 ? "beta080" : ApplicationProfile.Current.Validation ? "validation" : "production",
+            version = ApplicationUpdates.CurrentVersion,
+            channel = ApplicationProfile.Current.Channel,
             name = ApplicationProfile.Current.Name,
             sourceCommit = typeof(EngineApplication).Assembly.GetCustomAttributes<System.Reflection.AssemblyInformationalVersionAttribute>()
                 .FirstOrDefault()?.InformationalVersion.Split('+').LastOrDefault(),

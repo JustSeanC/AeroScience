@@ -550,9 +550,9 @@ class IngamePanelAeroScience extends TemplateElement {
     if(!pending)return; // Unsolicited, duplicate and late replies have no authority.
     if(reply.protocol!==1){this.setControls(false);this.replyFault('unsupported protocol');return;}
     if(typeof reply.ok!=='boolean'){this.replyFault('missing command outcome');return;}
-    if(typeof reply.error==='string'&&reply.error.indexOf('Validation toolbar source mismatch')===0){
+    if(typeof reply.error==='string'&&(reply.error.indexOf('Validation toolbar source mismatch')===0||reply.error.indexOf('Beta toolbar source mismatch')===0)){
       this.pending.clear();this.lastReply=0;this.setControls(false);this.renderIntelligence(false);
-      this.byId('as-map-plan').disabled=true;this.byId('as-reply-detail').textContent=nativeText("native.validationSourceMismatchNoStateAccepted","Validation source mismatch. No state accepted.");this.status(reply.error);return;
+      this.byId('as-map-plan').disabled=true;this.byId('as-reply-detail').textContent=reply.error.indexOf('Beta toolbar source mismatch')===0?'Beta toolbar mismatch. No state accepted.':nativeText("native.validationSourceMismatchNoStateAccepted","Validation source mismatch. No state accepted.");this.status(reply.error);return;
     }
     if(!pending.op.startsWith('map-')&&!['research-state','research-control'].includes(pending.op)&&
       (!reply.state||typeof reply.state.connection?.message!=='string'||!reply.state.connection.source||

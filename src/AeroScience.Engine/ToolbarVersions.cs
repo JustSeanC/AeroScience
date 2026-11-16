@@ -51,14 +51,14 @@ public static class ToolbarVersions
         profile ??= ApplicationProfile.Current;
         var bundled = ReadVersion(Path.Combine(bundle, profile.ToolbarPackage), profile);
         var companion = typeof(ToolbarVersions).Assembly.GetName().Version!;
-        if (profile.Validation && SourceCommit(Path.Combine(bundle, profile.ToolbarPackage), profile) != ApplicationProfile.SourceCommit)
-            return new(null,bundled?.ToString(3),community,ToolbarInstallState.Incompatible,"The validation toolbar does not match this compiled source. Rebuild the complete private candidate.",false);
+        if (profile.Isolated && SourceCommit(Path.Combine(bundle, profile.ToolbarPackage), profile) != ApplicationProfile.SourceCommit)
+            return new(null,bundled?.ToString(3),community,ToolbarInstallState.Incompatible,profile.Beta080?"The beta toolbar does not match this compiled source. Repair with this beta's complete installer.":"The validation toolbar does not match this compiled source. Rebuild the complete private candidate.",false);
         if (bundled is null || bundled.ToString(3) != companion.ToString(3)) return new(null, bundled?.ToString(3), community, ToolbarInstallState.Unknown,
             "The bundled SDK toolbar is missing, unknown, or does not match this companion. Repair the application with a complete installer.", false);
         var target = community is null ? null : Path.Combine(community, profile.ToolbarPackage);
         if (target is null || !Directory.Exists(target)) return new(null, bundled.ToString(3), community, ToolbarInstallState.Missing, "AeroScience MSFS Toolbar is not installed.", true);
-        if (profile.Validation && SourceCommit(target, profile) != ApplicationProfile.SourceCommit)
-            return new(ReadVersion(target,profile)?.ToString(3),bundled.ToString(3),community,ToolbarInstallState.UpdateAvailable,"Validation toolbar source mismatch. Close MSFS and install this candidate's matching validation package. Production is preserved.",true);
+        if (profile.Isolated && SourceCommit(target, profile) != ApplicationProfile.SourceCommit)
+            return new(ReadVersion(target,profile)?.ToString(3),bundled.ToString(3),community,ToolbarInstallState.UpdateAvailable,profile.Beta080?"Beta toolbar source mismatch. Close MSFS and install this beta's matching toolbar from Settings.":"Validation toolbar source mismatch. Close MSFS and install this candidate's matching validation package. Production is preserved.",true);
         var installed = ReadVersion(target, profile); var protocol = Protocol(target, profile);
         if (installed is null) return new(null, bundled.ToString(3), community, ToolbarInstallState.Unknown, "The installed toolbar version cannot be determined. Inspect or repair the selected package; no version was assumed.", false, true, protocol);
         if (protocol is not null && protocol != 1) return new(installed.ToString(3), bundled.ToString(3), community, ToolbarInstallState.Incompatible, "The installed toolbar protocol is unsupported. Flight recording and the browser remain available.", false, false, protocol);
@@ -71,6 +71,8 @@ public static class ToolbarVersions
         try
         {
             using var data=JsonDocument.Parse(File.ReadAllText(Path.Combine(folder,"html_ui","InGamePanels",profile.ToolbarFolder,"toolbar-compatibility.json")));
+            if(profile.Beta080)return data.RootElement.GetProperty("profile").GetString()=="beta080"
+                &&data.RootElement.GetProperty("applicationVersion").GetString()==ApplicationProfile.BetaVersion?data.RootElement.GetProperty("sourceCommit").GetString():null;
             if(profile.Native080&&(!data.RootElement.TryGetProperty("validationInstance",out var instance)||instance.GetString()!=profile.Instance))return null;
             return data.RootElement.GetProperty("profile").GetString()=="validation"?data.RootElement.GetProperty("sourceCommit").GetString():null;
         }

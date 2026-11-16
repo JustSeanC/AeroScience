@@ -1,0 +1,22 @@
+AeroScience v0.8.0 Beta 1
+
+This is an experimental beta, not stable v0.8.0 certification.
+Close MSFS and other AeroScience companions before installation.
+Choose an empty beta application folder. Existing apps are not replaced.
+Beta data is separate from production/private validation and is retained on uninstall.
+
+The installer includes the Windows runtime dependencies. A signed Microsoft
+Visual C++ prerequisite may request its normal Windows administrator permission.
+Testers do not need the MSFS SDK, Visual Studio, Python, Node.js or Git.
+
+After installation, open the Beta 1 companion. With MSFS closed, install the
+matching beta toolbar through Settings and its Community-folder picker.
+Then start MSFS and a flight. Recording and scientific collection remain separate.
+
+Use the Start-menu Tester guide (START-HERE.html) for the first flight, optional
+testing cards, known limitations, feedback and rollback. Reports stay local until
+you review and share them manually. Never share credentials or private research.
+
+Four non-English languages are candidates awaiting fluent review. Longer flights,
+larger datasets and wider hardware/accessibility evaluation belong to beta testing.
+Stop and report possible data-loss, corruption, privacy or installation defects.

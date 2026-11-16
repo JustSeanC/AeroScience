@@ -26,6 +26,8 @@ public static class NativeValidationPaths
     {
         var local=Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var roots=new List<string>{Path.Combine(local,"AeroScience"),Path.Combine(local,"Programs","AeroScience")};
+        roots.Add(Path.Combine(local,"AeroScience-Beta-v0.8.0"));
+        roots.Add(Path.Combine(local,"Programs","AeroScience-Beta-v0.8.0"));
         if(Directory.Exists(local))roots.AddRange(Directory.EnumerateDirectories(local,"AeroScience-Validation-*"));
         foreach(var root in roots.ToArray())
         {

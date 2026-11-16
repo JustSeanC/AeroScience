@@ -9,4 +9,6 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
+  <!-- Explicit beta graph; legacy/private graphs retain their locked identity. -->
+  <Import Project="build/Beta080.props" Condition="'$(AeroScienceBeta080)' == 'true'" />
 </Project>

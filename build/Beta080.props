@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <Version>0.8.0-beta.1</Version>
+    <!-- Internal dependency identity; distributed assemblies use the beta version. -->
+    <PackageVersion>0.7.0</PackageVersion>
+    <AssemblyVersion>0.8.0.0</AssemblyVersion>
+    <FileVersion>0.8.0.1</FileVersion>
+    <InformationalVersion>0.8.0-beta.1</InformationalVersion>
+    <ReleaseChannel>beta</ReleaseChannel>
+  </PropertyGroup>
+  <Target Name="RejectMixedAeroScienceProfiles" BeforeTargets="PrepareForBuild" Condition="'$(AeroScienceValidation)' == 'true'">
+    <Error Text="Beta 080 and private-validation build profiles cannot be combined." />
+  </Target>
+</Project>

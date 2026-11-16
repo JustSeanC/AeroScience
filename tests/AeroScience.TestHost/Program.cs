@@ -8,6 +8,7 @@ if(args is ["--organization-notification-fixture","--rate-limited"]){await AeroS
 if(args is ["--organization-notification-fixture"]){await AeroScience.TestHost.OrganizationNotificationFixture.Run();return;}
 if(args is ["--terrain-elevation-probe",var terrainOriginal,var terrainOutput]){await AeroScience.TestHost.TerrainElevationProbe.Run(terrainOriginal,terrainOutput);return;}
 if(args is ["--retained-raster-probe",var rasterSource,var rasterOutput]){AeroScience.TestHost.RetainedRasterProbe.Run(rasterSource,rasterOutput);return;}
+if(args is ["--profile-probe-beta080",var betaAssembly,var betaSource]){Native080ProfileProbe.RunBeta(betaAssembly,betaSource);return;}
 if(args is ["--survey-view-probe",var surveyOriginal,var surveyTerrain,var surveyOutput]){await AeroScience.TestHost.SurveyViewProbe.Run(surveyOriginal,surveyTerrain,surveyOutput);return;}
 if(args is ["--lidar-probe",var lidarMode,var lidarOriginal,var lidarOutput]){await AeroScience.TestHost.LidarProbe.Run(lidarMode,lidarOriginal,lidarOutput);return;}
 if(args is ["--lidar-retained-probe",var lidarPrevious,var lidarRetainedOutput]){await AeroScience.TestHost.LidarProbe.Retained(lidarPrevious,lidarRetainedOutput);return;}

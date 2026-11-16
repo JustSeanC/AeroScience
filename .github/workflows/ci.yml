@@ -86,9 +86,21 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - name: Test Beta080 release guards and compile the actual Inno recipe (structural only)
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p test_beta_release_080.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'Beta release guard tests failed.' }
+          ./scripts/build/Test-080BetaInstallerSyntax.ps1
       - name: Execute native compiler bootstrap regression on Windows
         shell: pwsh
         run: |
@@ -112,7 +124,7 @@ jobs:
         run: |
           dotnet restore AeroScience.sln --locked-mode
           if ($LASTEXITCODE -ne 0) { throw 'Locked dependency restore failed.' }
-          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests|FullyQualifiedName~ToolbarInstallTests|FullyQualifiedName~ScientificHdfReaderTests|FullyQualifiedName~DiscordTransportTests|FullyQualifiedName~DiscordWebhookPolicyTests|FullyQualifiedName~Lidar|FullyQualifiedName~HistoricalPointApi' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
+          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests|FullyQualifiedName~ToolbarInstallTests|FullyQualifiedName~ScientificHdfReaderTests|FullyQualifiedName~DiscordTransportTests|FullyQualifiedName~DiscordWebhookPolicyTests|FullyQualifiedName~Lidar|FullyQualifiedName~HistoricalPointApi|FullyQualifiedName~Beta080ProfileTests|FullyQualifiedName~BetaFeedbackTests' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
           if ($LASTEXITCODE -ne 0) { throw 'Windows isolation/protocol tests failed.' }
       - name: Publish production and isolated validation graphs (not distributable)
         shell: pwsh
@@ -122,6 +134,9 @@ jobs:
           python scripts/build/verify_desktop_branding.py --folder artifacts/Windows-Companion
           if ($LASTEXITCODE -ne 0) { throw 'Production Windows icon resources failed verification.' }
           ./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe -OutputDirectory artifacts/Windows-Validation-Structural
+      - name: Publish and inspect the actual Beta080 graph and genuine Windows LAZ decode (not a distribution)
+        shell: pwsh
+        run: ./scripts/build/Publish-080BetaCompanion.ps1 -ExpectedSourceCommit $env:GITHUB_SHA -ArtifactsPath (Join-Path $PWD 'artifacts/beta080-structural/intermediate') -OutputDirectory (Join-Path $PWD 'artifacts/beta080-structural/app')
       - name: Verify dependency locks remain unchanged
         if: always()
         shell: pwsh
@@ -138,6 +153,9 @@ jobs:
             src/AeroScience.Missions/obj/native-lidar/**/build.json
             artifacts/private080-license-copy.log
             artifacts/private080-checklist.log
+            artifacts/beta080-structural/app/compiled-profile.json
+            artifacts/beta080-structural/app/lidar-check.json
+            artifacts/beta080-structural/app/LidarRuntime/build.json
           if-no-files-found: ignore
           retention-days: 7
       # Manual diagnostic scope only; never substitutes for either full platform job.
@@ -279,6 +297,11 @@ jobs:
         shell: pwsh
         run: |
           ./scripts/build/Publish-080ValidationCompanion.ps1 -ExpectedSourceCommit $env:GITHUB_SHA -Instance ([Guid]::NewGuid().ToString('N')) -ArtifactsPath (Join-Path $PWD 'artifacts/native080-structural/intermediate') -OutputDirectory (Join-Path $PWD 'artifacts/native080-structural/app')
+      - name: Compile explicit Beta 080 graph and actual embedded/native identities (not an SDK installer)
+        if: github.ref == 'refs/heads/develop/v0.8.0'
+        shell: pwsh
+        run: |
+          ./scripts/build/Publish-080BetaCompanion.ps1 -ExpectedSourceCommit $env:GITHUB_SHA -ArtifactsPath (Join-Path $PWD 'artifacts/beta080-structural/intermediate') -OutputDirectory (Join-Path $PWD 'artifacts/beta080-structural/app')
       - name: Verify dependency locks remain unchanged
         if: always()
         shell: pwsh
@@ -294,6 +317,9 @@ jobs:
             tests/AeroScience.Tests/TestResults/**/*.trx
             tests/AeroScience.Tests/TestResults/**/Sequence_*.xml
             artifacts/native080-structural/app/compiled-profile.json
+            artifacts/beta080-structural/app/compiled-profile.json
+            artifacts/beta080-structural/app/lidar-check.json
+            artifacts/beta080-structural/app/LidarRuntime/build.json
             artifacts/native080-structural/app/lidar-check.json
             artifacts/native080-structural/app/LidarRuntime/build.json
             src/AeroScience.Missions/obj/native-lidar/**/build.json
@@ -339,6 +365,9 @@ jobs:
           & $compiler "/DPayloadDir=$fixture" "/DVcRuntime=$fixture\VC_redist.x64.exe" "/DReleaseVersion=$(([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.Version)" "/DPackageVersion=$(([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.Version)" "/DOutputDirectory=$fixture\output" scripts/installer/AeroScience.iss
           if ($LASTEXITCODE -ne 0) { throw 'Installer recipe compilation failed.' }
           # Compile only: no fake SDK receipt, executable launch, acceptance or artifact publication.
+      - name: Compile Beta080 installer recipe with structural fixtures only
+        shell: pwsh
+        run: ./scripts/build/Test-080BetaInstallerSyntax.ps1
       # Public-repository CI validates builds without publishing alpha binaries.
       # Release publication is an explicit maintainer action, not a push side effect.
   organization-deployment:

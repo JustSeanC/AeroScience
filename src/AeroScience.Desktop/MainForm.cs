@@ -49,7 +49,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
 
     public MainForm(string configurationDirectory, bool showSetup = false)
     {
-        Preferences = new(configurationDirectory, ApplicationProfile.Current.Validation ? ApplicationProfile.Current.ConfigurationDirectory : null); Storage = new(Preferences);
+        Preferences = new(configurationDirectory, ApplicationProfile.Current.Isolated ? ApplicationProfile.Current.ConfigurationDirectory : null); Storage = new(Preferences);
         Preferences.ValidateDirectory(configurationDirectory);
         new MapSettings(configurationDirectory).InitializeDefaults(File.Exists(Preferences.SettingsPath) || File.Exists(Path.Combine(configurationDirectory, "missions.db")));
         Text = ApplicationProfile.Current.Name + " " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
@@ -381,6 +381,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     public void ShowError(Exception error) => MessageBox.Show(this, error.Message, "AeroScience", MessageBoxButtons.OK, MessageBoxIcon.Error);
     private void ShowFeedback()
     {
+        if(ApplicationProfile.Current.Beta080){ShowAuxiliary(new BetaFeedbackForm());return;}
         using var notes = new BrandedForm { Text = WindowsPresentation.Text("windows.mainForm.collectFeedback"), Width = 560, Height = 300, StartPosition = FormStartPosition.CenterParent };
         var text = new TextBox { Multiline = true, Dock = DockStyle.Fill, PlaceholderText = WindowsPresentation.Text("windows.feedback.notes") };
         var save = new Button { Text = WindowsPresentation.Text("windows.mainForm.saveFeedbackZip"), Dock = DockStyle.Bottom, Height = 42 };

@@ -15,32 +15,36 @@ public static class ReleaseVersions
 }
 public sealed class ApplicationUpdates
 {
-    public const string CurrentVersion = "0.7.0";
+    public static string CurrentVersion => ApplicationProfile.Current.Beta080 ? ApplicationProfile.BetaVersion : "0.7.0";
+    private readonly ApplicationProfile profile;
+    private readonly string currentVersion;
     private readonly string path;
     private readonly HttpClient http;
     private readonly SemaphoreSlim check = new(1, 1);
     private readonly object gate = new();
     private UpdateSnapshot state;
-    public ApplicationUpdates(string directory, HttpClient? client = null)
+    public ApplicationUpdates(string directory, HttpClient? client = null, ApplicationProfile? profile = null)
     {
+        this.profile=profile??ApplicationProfile.Current;currentVersion=this.profile.Beta080?ApplicationProfile.BetaVersion:CurrentVersion;
         path = Path.Combine(directory, "updates.json"); http = client ?? new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(8), MaxResponseContentBufferSize = 2097152 };
-        state = new(CurrentVersion, new());
-        try { if (File.Exists(path)) state = (JsonSerializer.Deserialize<UpdateSnapshot>(File.ReadAllText(path)) ?? state) with { CurrentVersion = CurrentVersion }; }
+        state = new(currentVersion, this.profile.Beta080 ? new(false,true) : new());
+        try { if (File.Exists(path)) state = (JsonSerializer.Deserialize<UpdateSnapshot>(File.ReadAllText(path)) ?? state) with { CurrentVersion = currentVersion }; }
         catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException) { state = state with { Message = "Update preferences unavailable; configure them in Settings. Offline work remains available.", Preferences = new(false) }; }
         if(state.Preferences is null)state=state with{Preferences=new(false),Available=null,Message="Update preferences are invalid; offline work remains available. Review Settings → Updates."};
         if (state.Available is { } cached && !ValidCachedRelease(cached)) state = state with { Available = null, LastCheckedUtc = null };
     }
-    private static bool ValidCachedRelease(AvailableRelease release)
+    private bool ValidCachedRelease(AvailableRelease release)
     {
         try
         {
-            return ReleaseVersions.Compare(release.Version, CurrentVersion) > 0
+            return (!profile.Beta080 || BetaTag(release.Version)) && ReleaseVersions.Compare(release.Version, currentVersion) > 0
                 && release.InstallerName == "AeroScience-Setup-v" + release.Version.TrimStart('v') + ".exe"
                 && release.ReleaseUrl == "https://github.com/JustSeanC/AeroScience/releases/tag/" + Uri.EscapeDataString(release.Version);
         }
         catch (ArgumentException) { return false; }
     }
     public UpdateSnapshot Get() { lock (gate) return state; }
+    private static bool BetaTag(string tag)=>Regex.IsMatch(tag,@"^v?0\.8\.0-beta\.[1-9][0-9]*$");
     private void Save() => PreferenceStore.WriteAtomic(path, state);
     public UpdateSnapshot Configure(UpdatePreferences preferences)
     { lock (gate) { state = state with { Preferences = preferences, Available = null, LastCheckedUtc = null }; Save(); return state; } }
@@ -48,7 +52,7 @@ public sealed class ApplicationUpdates
     { lock (gate) { state = state with { RemindAfterUtc = DateTimeOffset.UtcNow.AddDays(1) }; Save(); return state; } }
     public async Task<UpdateSnapshot> Check(bool force = false, CancellationToken token = default)
     {
-        if (ApplicationProfile.Current.Validation)
+        if (profile.Validation)
         {
             lock (gate) return state = state with { Available=null, Preferences=new(false), Message="Private validation profile. Rebuild from develop/v0.7.0; public installers do not update this profile." };
         }
@@ -60,7 +64,7 @@ public sealed class ApplicationUpdates
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/JustSeanC/AeroScience/releases?per_page=30");
-                request.Headers.UserAgent.ParseAdd("AeroScience/" + CurrentVersion); request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+                request.Headers.UserAgent.ParseAdd("AeroScience/" + currentVersion); request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
                 using var response = await http.SendAsync(request, token); response.EnsureSuccessStatusCode();
                 using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(token));
                 if (document.RootElement.ValueKind != JsonValueKind.Array) throw new JsonException("Expected GitHub releases.");
@@ -72,7 +76,8 @@ public sealed class ApplicationUpdates
                         if (release.GetProperty("draft").GetBoolean()) continue;
                         var tag = release.GetProperty("tag_name").GetString()!;
                         var pre = release.GetProperty("prerelease").GetBoolean() || tag.Contains('-');
-                        if (!current.Preferences.IncludePrereleases && pre || ReleaseVersions.Compare(tag, CurrentVersion) <= 0) continue;
+                        if(profile.Beta080 && !BetaTag(tag))continue;
+                        if (!current.Preferences.IncludePrereleases && pre || ReleaseVersions.Compare(tag, currentVersion) <= 0) continue;
                         var name = "AeroScience-Setup-v" + tag.TrimStart('v') + ".exe";
                         var releaseUrl = "https://github.com/JustSeanC/AeroScience/releases/tag/" + Uri.EscapeDataString(tag);
                         if (release.GetProperty("html_url").GetString() != releaseUrl) continue;

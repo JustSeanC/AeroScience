@@ -7,6 +7,30 @@ using AeroScience.Engine;
 // Maintainer-only metadata probe. Never shipped as a tester launcher, never opens a profile.
 internal static class Native080ProfileProbe
 {
+    internal static void RunBeta(string path,string commit)
+    {
+        var context=new AssemblyLoadContext("beta080-metadata",isCollectible:true);
+        try
+        {
+            path=Path.GetFullPath(path);var assembly=context.LoadFromAssemblyPath(path);var profile=ApplicationProfile.FromAssembly(assembly);
+            var version=assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            var missions=context.LoadFromAssemblyPath(Path.Combine(Path.GetDirectoryName(path)!,"AeroScience.Missions.dll"));
+            var identity=missions.GetType("AeroScience.Missions.LidarRuntimeIdentity",true)!;
+            string Constant(string key)=>(string)identity.GetField(key,BindingFlags.Static|BindingFlags.NonPublic)!.GetRawConstantValue()!;
+            var shared=context.LoadFromAssemblyPath(Path.Combine(Path.GetDirectoryName(path)!,"AeroScience.Shared.dll"));
+            var resources=new Dictionary<string,string>();foreach(var name in new[]{"manifest","schema","en-US","es-ES","fr-FR","de-DE","pt-BR"})
+            {using var stream=shared.GetManifestResourceStream("AeroScience.Presentation."+name+".json")??throw new IOException("Missing embedded locale.");resources[name]=Convert.ToHexStringLower(SHA256.HashData(stream));}
+            if(!profile.Beta080||profile.Validation||profile.Port!=5089||assembly.GetName().Version!=new Version(0,8,0,0)
+                ||missions.GetName().Version!=new Version(0,8,0,0)||version!=ApplicationProfile.BetaVersion+"+"+commit
+                ||missions.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion!=version
+                ||profile.ToolbarPackage!="aeroscience-beta-v0-8-0-toolbar")throw new IOException("Published Beta 1 identity differs from the exact source/version/profile.");
+            Console.WriteLine(JsonSerializer.Serialize(new{profile="beta080",version=ApplicationProfile.BetaVersion,channel="beta",source_commit=commit,
+                configuration_directory="%LOCALAPPDATA%/"+profile.Folder,registry_key=profile.RegistryKey,port=profile.Port,cookie=profile.SessionCookieName,
+                command_event=profile.CommandEvent,reply_event=profile.ReplyEvent,mutex=ApplicationProfile.DesktopMutex,
+                engine_sha256=Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path))),lidar_source=Constant("Source"),lidar_sha256=Constant("Sha256"),
+                presentation_resources=resources,installed_acceptance="Not Tested"}));
+        }finally{context.Unload();}
+    }
     internal static void Run(string path,string commit,string instance)
     {
         var context=new AssemblyLoadContext("private080-metadata",isCollectible:true);
