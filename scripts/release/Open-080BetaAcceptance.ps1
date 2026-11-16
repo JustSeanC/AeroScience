@@ -141,20 +141,24 @@ $export=[Windows.Forms.Button]::new();$export.Text='Export observed acceptance';
 $view.Save.Parent.Controls.Add($verify);$view.Save.Parent.Controls.Add($export)
 $verify.Add_Click({
     if($view.Busy){return}
+    $view.Busy=$true;$view.Grid.Enabled=$false;$view.Form.UseWaitCursor=$true
     $picker=[Windows.Forms.FolderBrowserDialog]::new();$picker.Description='Choose the installed Beta application folder (contains application\AeroScience.exe)';$picker.UseDescriptionForTitle=$true
     try{if($picker.ShowDialog($view.Form) -eq 'OK'){$answer=Invoke-080ChecklistData 'installed' @{installed_directory=$picker.SelectedPath};$view.Status.Text=$answer.message}}
     catch{[void][Windows.Forms.MessageBox]::Show($_.Exception.Message,'Installed files did not verify','OK','Warning')}
-    finally{$picker.Dispose()}
+    finally{$picker.Dispose();$view.Busy=$false;$view.Grid.Enabled=$true;$view.Form.UseWaitCursor=$false}
 })
 $export.Add_Click({
     if($view.Busy){return}
+    $view.Busy=$true;$view.Grid.Enabled=$false;$view.Form.UseWaitCursor=$true
     try{
         if(Get-080ChecklistRequestForClose $view){throw 'Save your changed observations first.'}
         $answer=Invoke-080ChecklistData 'export';$view.Status.Text='Acceptance saved: '+$answer.acceptance_path
         [void][Windows.Forms.MessageBox]::Show('Saved exact-installer observations to '+$answer.acceptance_path+'. Nothing was published. Use the readiness command in the owner guide next.','Beta observations saved')
     }catch{[void][Windows.Forms.MessageBox]::Show($_.Exception.Message,'Review observations','OK','Warning')}
+    finally{$view.Busy=$false;$view.Grid.Enabled=$true;$view.Form.UseWaitCursor=$false}
 })
 $view.Save.Add_Click({
+    if($view.Busy){return}
     try {
         $request=Get-080ChecklistRequest $view
         if(-not $request.entries.Count){$view.Status.Text='No changes to save.';return}

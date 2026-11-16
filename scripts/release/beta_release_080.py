@@ -199,12 +199,28 @@ def payload(folder,commit,execute=False):
     manifest=read(folder/'wwwroot/i18n/locale-manifest.json');require(manifest==read(ROOT/'src/AeroScience.Engine/wwwroot/i18n/locale-manifest.json'),'Stale locale identity.')
     panel=folder/'Toolbar'/PACKAGE/'html_ui/InGamePanels'/PANEL
     text=(panel/'AeroScience.LocaleData.js').read_text(encoding='utf-8-sig');data=json.JSONDecoder().raw_decode(text[text.index('=')+1:].lstrip())[0]
-    require(data['manifest']==manifest,'Native catalog differs from companion.')
+    generated=folder/'wwwroot/i18n/catalog.generated.js'
+    require(sha(generated)==sha(ROOT/'src/AeroScience.Engine/wwwroot/i18n/catalog.generated.js'),'Generated browser catalog differs from this source.')
+    full_text=generated.read_text(encoding='utf-8-sig');full=json.JSONDecoder().raw_decode(full_text[full_text.index('=')+1:].lstrip())[0]
+    locale_projection(data,full)
     embedded=read(folder/'compiled-profile.json')['presentation_resources']
     for name,relative in [('manifest','locale-manifest.json'),('schema','message-schema.json')]+[(n,'locales/'+n+'.json') for n in native.LOCALES]:
         require(sha(folder/'wwwroot/i18n'/relative)==sha(ROOT/'src/AeroScience.Engine/wwwroot/i18n'/relative)==embedded.get(name),'Bundled/embedded locale mismatch.')
     require(sha(folder/'LICENSE')==sha(ROOT/'LICENSE') and sha(folder/'THIRD-PARTY-NOTICES.md')==sha(ROOT/'THIRD-PARTY-NOTICES.md'),'Canonical license inventory changed.')
     return inventory(folder,(RECEIPT,))
+
+def locale_projection(data,full):
+    """Verify projected bytes, not merely a copied catalog identity label."""
+    require(data['manifest']==full['manifest'] and data['schema']['version']==full['schema']['version'],'Native catalog differs from companion.')
+    keys=set(data['schema']['messages']);canonical=full['schema']['messages']
+    required={k for k in canonical if re.match(r'^(toolbar|native|map\.native|common|science|nav|localization)\.',k)}
+    require(required<=keys<=canonical.keys() and all(data['schema']['messages'][k]==canonical[k] for k in keys),'Native message/schema projection differs.')
+    require(set(data['catalogs'])==set(full['catalogs'])==set(native.LOCALES),'Native locale choices differ.')
+    for name,catalog in data['catalogs'].items():
+        original=full['catalogs'][name]
+        require(all(catalog.get(k)==original.get(k) for k in ['version','locale','sourceHash'])
+            and catalog.get('pendingEnglishFallbackKeys',[])==[k for k in original.get('pendingEnglishFallbackKeys',[]) if k in keys]
+            and catalog['messages']=={k:v for k,v in original['messages'].items() if k in keys},'Native translated messages/fallback differ: '+name)
 
 def windows_payload(folder):
     # Composition of two strict checks, without changing the byte-protected

@@ -136,6 +136,15 @@ class BetaToolbarTests(unittest.TestCase):
         self.assertNotIn('validationSource:',text);self.assertNotIn('validationInstance:',text)
         self.assertIn('AeroScience.Beta.0_8_0.Command.v1',text);self.assertIn('AeroScience.Beta.0_8_0.Reply.v1',text)
         self.assertEqual('ES2017',json.loads((self.stage/'native-javascript.json').read_text())['target'])
+    def test_native_projection_cannot_hide_changed_messages_or_fallback_behind_a_matching_manifest(self):
+        def data(path):
+            text=path.read_text(encoding='utf-8-sig');return json.JSONDecoder().raw_decode(text[text.index('=')+1:].lstrip())[0]
+        projected=data(self.stage/'PackageSources/html_ui/InGamePanels'/beta.PANEL/'AeroScience.LocaleData.js')
+        full=data(ROOT/'src/AeroScience.Engine/wwwroot/i18n/catalog.generated.js');beta.locale_projection(projected,full)
+        changed=copy.deepcopy(projected);key=next(iter(changed['catalogs']['de-DE']['messages']));changed['catalogs']['de-DE']['messages'][key]='SYNTHETIC INCORRECT TRANSLATION'
+        with self.assertRaises(ValueError):beta.locale_projection(changed,full)
+        changed=copy.deepcopy(projected);changed['catalogs']['fr-FR']['version']=-1
+        with self.assertRaises(ValueError):beta.locale_projection(changed,full)
 
 class BetaChecklistTests(unittest.TestCase):
     def setUp(self):
