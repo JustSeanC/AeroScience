@@ -161,7 +161,23 @@ public sealed partial class ScienceStore
     private void CheckpointDeletedContent()
     {
         using var db=Open(true);using var command=db.CreateCommand();command.CommandText="PRAGMA wal_checkpoint(TRUNCATE)";
-        using(var rows=command.ExecuteReader()){if(!rows.Read()||rows.GetInt32(0)!=0)throw new IOException("Deletion checkpoint is busy; managed database cleanup remains pending.");}
+        // Like the mission database purge, wait briefly for an archive reader's
+        // old WAL snapshot. SQLite returns contention as a row, so normal command
+        // busy handling does not retry it. Never retry/reapprove the deletion or
+        // claim completion while a persistent reader still retains old content.
+        var checkpointWait=System.Diagnostics.Stopwatch.StartNew();
+        while(true)
+        {
+            bool busy;
+            using(var rows=command.ExecuteReader())
+            {
+                if(!rows.Read())throw new IOException("Deletion checkpoint returned no verification result; managed database cleanup remains pending.");
+                busy=rows.GetInt32(0)!=0;
+            }
+            if(!busy)break;
+            if(checkpointWait.Elapsed>=TimeSpan.FromSeconds(1))throw new IOException("Deletion checkpoint is busy; managed database cleanup remains pending.");
+            Thread.Sleep(20);
+        }
         command.CommandText="VACUUM";command.ExecuteNonQuery();command.CommandText="PRAGMA integrity_check";
         if(command.ExecuteScalar() as string!="ok")throw new IOException("Deleted-content database verification failed; cleanup is not complete.");
     }
