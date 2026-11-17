@@ -1,0 +1,116 @@
+{
+  "schema": "aeroscience-beta080-readiness-1",
+  "version": "0.8.0-beta.1",
+  "channel": "beta",
+  "source_commit": "c40db9311c9359b124f2373a2205a3708aecad58",
+  "installer_sha256": null,
+  "distribution_ready": false,
+  "required_pre_beta": {
+    "packaging": {
+      "outcome": "Blocked",
+      "problems": [
+        "No sealed SDK payload or installer for the corrected source has been built in this Linux environment. The earlier owner SDK package has its own preserved source/attempt and was not resealed or overwritten."
+      ],
+      "next_action": "Run the pinned Windows candidate builder with the genuine SDK, hash-bound runtime authorization and current signed Microsoft VC x64 prerequisite; preserve output and test the exact installer."
+    },
+    "automation": {
+      "name": "Full CI on exact candidate runtime",
+      "outcome": "Passed",
+      "run_url": "https://github.com/JustSeanC/AeroScience/actions/runs/44015112685"
+    },
+    "identity": {
+      "name": "Exact version/source/profile and clean candidate identity",
+      "outcome": "Not Tested",
+      "notes": ""
+    },
+    "installer": {
+      "name": "Install exact EXE in an isolated Windows environment; installed hashes match",
+      "outcome": "Not Tested",
+      "notes": ""
+    },
+    "coexistence": {
+      "name": "Existing apps, settings, Community packages and original data unchanged",
+      "outcome": "Not Tested",
+      "notes": ""
+    },
+    "toolbar": {
+      "name": "Actual MSFS 2024 SDK toolbar opens, connects, resizes/reopens and rejects wrong identity",
+      "outcome": "Not Tested",
+      "notes": ""
+    },
+    "recording-science": {
+      "name": "Basic actual recording; science arm/start/pause/resume/end stay independent",
+      "outcome": "Not Tested",
+      "notes": ""
+    },
+    "genuine-sources": {
+      "name": "Basic genuine retained terrain and historical LiDAR Results/provenance",
+      "outcome": "Not Tested",
+      "notes": ""
+    },
+    "privacy": {
+      "name": "Explicit source/download/deletion/sharing consent; no unauthorized transmission",
+      "outcome": "Not Tested",
+      "notes": ""
+    },
+    "uninstall": {
+      "name": "Uninstall candidate app only; beta data and other installations remain intact",
+      "outcome": "Not Tested",
+      "notes": ""
+    }
+  },
+  "deferred_beta_testing": {
+    "endurance": {
+      "name": "60-minute+ flights, multi-leg/multi-session and extended resources",
+      "outcome": "Deferred"
+    },
+    "large-data": {
+      "name": "Larger genuine terrain/clouds and source inventories",
+      "outcome": "Deferred"
+    },
+    "hardware": {
+      "name": "Aircraft/GPU/hardware/regions/providers and prolonged interruptions/offline",
+      "outcome": "Deferred"
+    },
+    "language-review": {
+      "name": "Qualified fluent review of es-ES/fr-FR/de-DE/pt-BR candidates",
+      "outcome": "Deferred"
+    },
+    "accessibility": {
+      "name": "Broader installed High Contrast, screen-reader and usability evaluation",
+      "outcome": "Deferred"
+    }
+  },
+  "critical_defects": [],
+  "publication_approved": false,
+  "stable_release_approved": false,
+  "engineering_checks": {
+    "regression_linux": {
+      "outcome": "Passed",
+      "passed": 1678
+    },
+    "regression_windows": {
+      "outcome": "Passed",
+      "passed": 1668,
+      "not_executed": 10
+    },
+    "browser": {
+      "outcome": "Passed",
+      "passed": 520,
+      "existing_deferred": 2,
+      "flaky": 0
+    },
+    "windows_beta_metadata_and_genuine_decoder": {
+      "outcome": "Passed",
+      "scope": "Actual compiled Windows metadata/34,923 retained points; no SDK installer or installed MSFS acceptance"
+    },
+    "installer_recipe_syntax": {
+      "outcome": "Passed",
+      "compiler": "Inno Setup 6.7.1",
+      "scope": "Structural fixture only; never installed or distributed"
+    }
+  },
+  "sdk_package_sha256": null,
+  "signing_acceptance": "Not Tested",
+  "evidence_receipt": "v0.8.0-p08d-sdk-layout-engineering.json"
+}

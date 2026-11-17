@@ -1,0 +1,426 @@
+{
+  "schema": "aeroscience-p08d-sdk-layout-remediation-1",
+  "runtime_source": "c40db9311c9359b124f2373a2205a3708aecad58",
+  "starting_head": "2726963444c62f315d143dcc9968dbdea6ebf85d",
+  "branch": "develop/v0.8.0",
+  "commits": [
+    {
+      "source": "8c85143a851840edb5bbe49e4820fbff01af67f0",
+      "change": "Match SDK filename casing and Windows separators without rewriting the package; preserve strict integrity checks; expose failed-step diagnostics and read-only verification."
+    },
+    {
+      "source": "c40db9311c9359b124f2373a2205a3708aecad58",
+      "change": "Retry only a transient physical scientific-library checkpoint; persistent readers still leave deletion pending. No repeated authorization or deletion."
+    }
+  ],
+  "owner_observation": {
+    "attempt": "Beta080-20261116-214253",
+    "layout_path": "html_ui/icons/toolbar/icon_aeroscience_beta_v080.svg",
+    "actual_file": "html_ui/icons/toolbar/ICON_AEROSCIENCE_BETA_V080.svg",
+    "expected_size": 810,
+    "actual_size": 810,
+    "date": 134393570110000000
+  },
+  "full_ci": {
+    "schema": "aeroscience-beta080-ci-1",
+    "source_commit": "c40db9311c9359b124f2373a2205a3708aecad58",
+    "scope": "full",
+    "conclusion": "success",
+    "run_id": 44015112685,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/44015112685",
+    "passed_jobs": [
+      "validation-scope",
+      "windows-companion",
+      "linux",
+      "organization-deployment"
+    ],
+    "checked_utc": "2026-11-17T05:14:40.531330+00:00"
+  },
+  "failed_corrective_ci": {
+    "run_id": 44007985175,
+    "source": "8c85143a851840edb5bbe49e4820fbff01af67f0",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/44007985175",
+    "conclusion": "failure",
+    "passed_jobs": [
+      "windows-companion",
+      "organization-deployment"
+    ],
+    "linux_dotnet_passed": 1676,
+    "browser": {
+      "passed": 519,
+      "failed": 1,
+      "existing_deferred": 2,
+      "flaky": 0,
+      "failure": "tests/web/source-deletion.spec.js:23 expected Completed but correctly reported Cleanup pending because scientific-library WAL checkpoint was busy."
+    },
+    "browser_artifact": {
+      "id": 14297772705,
+      "sha256": "a29346308253f226ab2c8f79bfc3e7b6bb83a78fefce843f98c40c67c4a9d30c"
+    },
+    "investigation": "Real SQLite scientific_artifacts snapshot reproduced the short-reader failure before correction. The first new fixture attempt selected an empty observations table; that setup error is retained separately, not represented as the product reproduction."
+  },
+  "corrective_full_ci_runs": 2,
+  "focused_tests": {
+    "beta_tools_passed": 25,
+    "original_private080_passed": 17,
+    "original_packaging_passed": 21,
+    "dotnet_cleanup_source_ownership_workspace_invalidation_passed": 52,
+    "unchanged_source_deletion_browser_passed": 10,
+    "browser_repetitions": 5,
+    "assertions_weakened": false,
+    "new_skips": 0
+  },
+  "linux_dotnet": {
+    "file": "tests/AeroScience.Tests/TestResults/_runnervm8axu0_2026-11-17_04_12_08_net10.0.trx",
+    "counters": {
+      "total": "1678",
+      "executed": "1678",
+      "passed": "1678",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "not_passed": []
+  },
+  "windows_dotnet": {
+    "file": "tests/AeroScience.Tests/TestResults/windows.trx",
+    "counters": {
+      "total": "1678",
+      "executed": "1668",
+      "passed": "1668",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "not_passed": [
+      {
+        "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade",
+        "outcome": "NotExecuted",
+        "detail": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+      },
+      {
+        "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+        "outcome": "NotExecuted",
+        "detail": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+      },
+      {
+        "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+        "outcome": "NotExecuted",
+        "detail": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+      },
+      {
+        "name": "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+        "outcome": "NotExecuted",
+        "detail": "Unix symlink fixture; installed Windows junction/privilege acceptance remains pending."
+      },
+      {
+        "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay",
+        "outcome": "NotExecuted",
+        "detail": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+      },
+      {
+        "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+        "outcome": "NotExecuted",
+        "detail": "Isolated old/new update binaries and real PostgreSQL/native recovery tools are not configured. No simulated update acceptance."
+      },
+      {
+        "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal",
+        "outcome": "NotExecuted",
+        "detail": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+      },
+      {
+        "name": "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+        "outcome": "NotExecuted",
+        "detail": "Unix symlink fixture; Windows junction/privilege behavior requires separate installed acceptance."
+      },
+      {
+        "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss",
+        "outcome": "NotExecuted",
+        "detail": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+      },
+      {
+        "name": "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+        "outcome": "NotExecuted",
+        "detail": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+      }
+    ]
+  },
+  "browser": {
+    "stats": {
+      "startTime": "2026-11-17T04:34:08.541Z",
+      "duration": 2222974.997,
+      "expected": 520,
+      "skipped": 2,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "omitted": [
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+        "status": "skipped",
+        "expectedStatus": "skipped",
+        "annotations": [
+          {
+            "type": "skip",
+            "description": "Owner deferred the ordinary chart viewer; retained research renderer coverage remains in AviationChartTests.",
+            "location": {
+              "file": "/home/runner/work/AeroScience/AeroScience/tests/web/aviation-charts.spec.js",
+              "line": 16,
+              "column": 7
+            }
+          }
+        ]
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data",
+        "status": "skipped",
+        "expectedStatus": "skipped",
+        "annotations": [
+          {
+            "type": "skip",
+            "description": "Owner deferred the ordinary chart viewer; the active deferral scenario checks retention, tablet accessibility and other overlays.",
+            "location": {
+              "file": "/home/runner/work/AeroScience/AeroScience/tests/web/aviation-charts.spec.js",
+              "line": 34,
+              "column": 7
+            }
+          }
+        ]
+      }
+    ],
+    "source_deletion": [
+      {
+        "file": "source-deletion.spec.js",
+        "title": "real source deletion is separate from exclusion, uses one accessible confirmation and X preserves originals",
+        "status": "expected",
+        "expectedStatus": "passed",
+        "annotations": []
+      },
+      {
+        "file": "source-deletion.spec.js",
+        "title": "collected science uses one responsive modal and removes science without deleting the flight",
+        "status": "expected",
+        "expectedStatus": "passed",
+        "annotations": []
+      }
+    ],
+    "fixture_scope": "Synthetic browser SDK hosting and real local application controllers; not installed MSFS."
+  },
+  "helpers": {
+    "linux": {
+      "total": 278,
+      "passed": 270,
+      "skipped": 8,
+      "skip_reasons": [
+        "test_actual_windows_form_has_named_checks_dropdowns_notes_and_explicit_pass_confirmation (test_checklist_080.ChecklistTests.test_actual_windows_form_has_named_checks_dropdowns_notes_and_explicit_pass_confirmation) ... skipped 'Native WinForms control smoke runs on Windows CI; installed visual/MSFS acceptance remains separate.'",
+        "test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment (test_lidar_runtime.LidarRuntimeTests.test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment) ... skipped 'Actual Windows cmd.exe execution; native Linux decoding is tested separately.'",
+        "test_actual_windows_controls_reuse_existing_layout_and_separate_evidence (test_p08c_checklist.ChecklistTests.test_actual_windows_controls_reuse_existing_layout_and_separate_evidence) ... skipped 'Actual native controls require Windows; installed acceptance remains separate'",
+        "test_output_budget_failure_does_not_claim_success (test_p08c_resources.ResourceTests.test_output_budget_failure_does_not_claim_success) ... skipped 'Actual sampler requires already installed psutil; no installation authorized'",
+        "test_real_owned_process_measurement_and_explicit_timeout_keep_metrics (test_p08c_resources.ResourceTests.test_real_owned_process_measurement_and_explicit_timeout_keep_metrics) ... skipped 'Actual sampler requires already installed psutil; no installation authorized'",
+        "test_unavailable_disk_counters_remain_unknown_not_zero (test_p08c_resources.ResourceTests.test_unavailable_disk_counters_remain_unknown_not_zero) ... skipped 'Requires already installed sampler'",
+        "test_actual_retained_probe_refuses_changed_source_and_existing_output (test_p08c_validation.EvidenceTests.test_actual_retained_probe_refuses_changed_source_and_existing_output) ... skipped 'Build existing TestHost for actual probe refusal checks'",
+        "test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection) ... skipped 'Publish the Windows companion first for the native PE fixture'"
+      ]
+    },
+    "windows": {
+      "total": 275,
+      "passed": 268,
+      "skipped": 7,
+      "skip_reasons": [
+        "test_windows_requirement_stops_before_creating_any_output (test_beta_installer.BetaInstallerTests.test_windows_requirement_stops_before_creating_any_output) ... skipped 'Linux PowerShell platform preflight'",
+        "test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials) ... skipped 'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'",
+        "test_output_budget_failure_does_not_claim_success (test_p08c_resources.ResourceTests.test_output_budget_failure_does_not_claim_success) ... skipped 'Actual sampler requires already installed psutil; no installation authorized'",
+        "test_real_owned_process_measurement_and_explicit_timeout_keep_metrics (test_p08c_resources.ResourceTests.test_real_owned_process_measurement_and_explicit_timeout_keep_metrics) ... skipped 'Actual sampler requires already installed psutil; no installation authorized'",
+        "test_unavailable_disk_counters_remain_unknown_not_zero (test_p08c_resources.ResourceTests.test_unavailable_disk_counters_remain_unknown_not_zero) ... skipped 'Requires already installed sampler'",
+        "test_evidence_symlinks_are_refused (test_p08c_validation.EvidenceTests.test_evidence_symlinks_are_refused) ... skipped 'Symlink creation requires a separate Windows privilege'",
+        "test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry) ... skipped 'A case-sensitive filesystem is required to create both aliases.'"
+      ]
+    }
+  },
+  "windows_beta_profile": {
+    "profile": "beta080",
+    "version": "0.8.0-beta.1",
+    "channel": "beta",
+    "source_commit": "c40db9311c9359b124f2373a2205a3708aecad58",
+    "configuration_directory": "%LOCALAPPDATA%/AeroScience-Beta-v0.8.0",
+    "registry_key": "Software\\AeroScience\\Beta\\v0.8.0",
+    "port": 5089,
+    "cookie": "AeroScience.Beta.0_8_0.Session",
+    "command_event": "AeroScience.Beta.0_8_0.Command.v1",
+    "reply_event": "AeroScience.Beta.0_8_0.Reply.v1",
+    "mutex": "Local\\AeroScience.Desktop",
+    "engine_sha256": "2417871c6427d6973388af674b8561ac55662f7ebdb39ebd28a889526aeda5e4",
+    "lidar_source": "d8f02c47343dab429af8d6ef33e31fb5a2fe7e7cdee11de17ad6e9e2ab03f258",
+    "lidar_sha256": "7a600c2aafaf75b44969201dfc2ca1d54d4d8701d3e5d3265ba5a3ace03ab306",
+    "desktop_sha256": "9e421f961a48a1e41bda62bc20db7ca986f63a66170c80730a0c141557178568",
+    "desktop_file_version": "0.8.0.1",
+    "desktop_product_version": "0.8.0-beta.1+c40db9311c9359b124f2373a2205a3708aecad58",
+    "desktop_product_name": "AeroScience v0.8.0 Beta 1",
+    "presentation_resources": {
+      "manifest": "74d82b73d13ff78bc3ba7fa413ee953b3ef242167d06f5c57e1ba472cbf851b7",
+      "schema": "81ab9eef7a8e53c4dfdb1f34bba2eba7a4c529ac951820ce82f5c43f69d72d0f",
+      "en-US": "841cd2f360e234b28fd22383f44a34258fd8f2c09578084dafe17200c8905f95",
+      "es-ES": "93a4f5551d32a7b8f39de3f96e60c13546cd707259f7c4156c239a53e0b747dd",
+      "fr-FR": "cedf928463e183ae15f44a032cc7ec8cc3dcb297f260c5c437677b48b1d87717",
+      "de-DE": "08ba91d6f6be1c6e6be523da48ed65272d944fbc0118cbcea0e5cc47a768346a",
+      "pt-BR": "bb2e741a9cee39408a49003467e791061bc0626228aba4670635c104325ddbee"
+    },
+    "installed_acceptance": "Not Tested"
+  },
+  "genuine_windows_decoder": {
+    "platform": "Windows",
+    "source_sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+    "metadata_sha256": "c33bff450876950e5fdc2e3c80ba2383fbfa2ea7f888529cdbce87dcaefff4bc",
+    "reference_sha256": "2169c84ab1187c7b9124546e51492f6e90e3d1356cbc1cefb1949062da05cadd",
+    "points": 34923,
+    "raw_protocol_sha256": "bedf4986d31ef0874e7dd380532094f5dc2056a3b0d269afeadd621725ad9eef",
+    "source": "Retained IA_FullState public historical EPT root tile; sparse delivered subset. Dates/vertical datum unknown. No current-provider or in-flight acquisition acceptance."
+  },
+  "artifacts": [
+    {
+      "name": "linux-browser-diagnostics",
+      "id": 14301735757,
+      "bytes": 39150147,
+      "sha256": "f98e81598af35ec66c73589884fb0b671e992d09db749808f1310ccbc5844a0d"
+    },
+    {
+      "name": "windows-test-diagnostics",
+      "id": 14300080344,
+      "bytes": 485522,
+      "sha256": "8239a4817b5be0229d981b54126cf0e23e648e782622f2e56e68bd7f94bf1c61"
+    },
+    {
+      "name": "linux-test-diagnostics",
+      "id": 14299202624,
+      "bytes": 479205,
+      "sha256": "e4335d00f70d1f5cc0ade3802ae0e585934c338c96f380fab72b86ea5c92b424"
+    },
+    {
+      "name": "organization-deployment-diagnostics",
+      "id": 14298262506,
+      "bytes": 2766,
+      "sha256": "c66a49ef15dd1b4a65aabe71652fe6ce313daf85b951561737439e74970eb241"
+    }
+  ],
+  "protected_legacy_files": {
+    "scripts/release/Build-PrivateValidation.ps1": "8cec094b7d4ae1429f58c4bd09fba70a51d1ff19c68a6f69a3c18fbae83468e8",
+    "scripts/build/Publish-ValidationCompanion.ps1": "3611e8d8c117d089faa43746695c492c5b28c61a4468bddd0b2b46b80cc3eb17",
+    "scripts/build/Build-Toolbar.ps1": "7df21d6185addb8b70e94085af33df618166b0cd75ee9af29416081978c6b40e",
+    "scripts/release/Build-ReleaseCandidate.ps1": "3b2b93b2d059b78a2a3add87bc16a9bda64e4cc85061e991b1326ce0e3a3ddbd",
+    "scripts/release/package_release.py": "c3a7462787a5fb29c88ea42d6772f7179fbf869f17f9637441111eff6fa4392b",
+    "scripts/build/lidar_runtime.py": "d67e1cf79599017ef75619464a710caa01a6bdd795aba2c0e996bea6bfab0ea9"
+  },
+  "notices": {
+    "THIRD-PARTY-NOTICES.md": "ae01ce20f49b8fffa428c94dc3968a987b1be554ada04d205deaf4af7ec8453e",
+    "licenses/AeroScience.LidarReader.NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+  },
+  "retained_logs": {
+    "after-with-diagnostics.log": {
+      "bytes": 4945,
+      "sha256": "5f6c123dbe576391c6305d2d3ca5553c7b5822ac4a39b8afbd743e0650ebce45"
+    },
+    "after.log": {
+      "bytes": 4731,
+      "sha256": "a42360f50f03227e97e02d1801daedddf631f304123b6b8944400a45433b9751"
+    },
+    "before.log": {
+      "bytes": 4826,
+      "sha256": "77ebd8deb50fc6c42f72d4578d5c2e089e142201469e9526ac41becab886b174"
+    },
+    "browser-host-rebuild.log": {
+      "bytes": 1207,
+      "sha256": "8f398a4dadb77b41255a15fc550a26515bad27188052038e1b799d3e09c25486"
+    },
+    "ci-watch.log": {
+      "bytes": 364531,
+      "sha256": "32b12debc2a5983529f02ba2efc898dbea8d285d69e922ab1f00160984c12e68"
+    },
+    "cleanup-ci-watch.log": {
+      "bytes": 487363,
+      "sha256": "03bbf1065000685a36d849d4d9dd406453ee8abb685ca07dd9061df934093a00"
+    },
+    "current-linux-ci.log": {
+      "bytes": 1725434,
+      "sha256": "c01779319e433faf5f6f58a2a21e69857975eb0c1246cb8dc2d158af11b77045"
+    },
+    "current-organization-ci.log": {
+      "bytes": 123841,
+      "sha256": "0d241d1dde464f2c628cbc6e4e1d46ca444f7567cf67d5d4b154b839c3dfb3b5"
+    },
+    "current-windows-ci.log": {
+      "bytes": 1269180,
+      "sha256": "db89d45752cb03e76221fbbf3b1a0fd906524ca16673208e7799ee140757e189"
+    },
+    "deletion-browser-repeated.log": {
+      "bytes": 2465,
+      "sha256": "c0a28b4626e8a75af0ba5ab59dfb62e3c578e60d3d18f356a64d0f86f3d50185"
+    },
+    "library-checkpoint-before.log": {
+      "bytes": 3220,
+      "sha256": "254ef04c2d36790c67eb1d302f6d769db19e24c8227c5fbab3cf5a3eac518bda"
+    },
+    "library-checkpoint-reproduced.log": {
+      "bytes": 2480,
+      "sha256": "c54f6c495b5787d42c5d7ea464ec23550d70b4d7a666768960c3770c41b36edb"
+    },
+    "library-cleanup-targeted.log": {
+      "bytes": 1692,
+      "sha256": "fcf860ca9de605e05a31ff9edb2486a0a6e590668925d4ec4d54a2b3f4d5d9ce"
+    },
+    "linux-ci-failed.log": {
+      "bytes": 1656460,
+      "sha256": "2d72f12824bb8247809a09aedd3b8538c567231400255700ccff927fc15bc544"
+    },
+    "original-packaging.log": {
+      "bytes": 3538,
+      "sha256": "e6ff50d3befd4f6676c1b7409e7433b7189fa24f300c22b3fc9ec88857067690"
+    },
+    "private-compatibility.log": {
+      "bytes": 3546,
+      "sha256": "0d5a5168e56279cf77b9b2d20b1607c5e397f90bcefdf6bc460a2c8b70f80e41"
+    },
+    "windows-ci.log": {
+      "bytes": 1274237,
+      "sha256": "ba63bcf87b723592757eb700ff212c16cb7db718d1866c3283b922ff59e56dc2"
+    }
+  },
+  "retained_diagnostic_directory": "artifacts/p08d-sdk-layout-fix/",
+  "original_engineering_receipt": "v0.8.0-p08d-engineering.json",
+  "sdk_bytes_rewritten": false,
+  "owner_data_modified": false,
+  "installer_sha256": null,
+  "sdk_package_sha256": null,
+  "installed_windows_msfs_acceptance": "Not Tested",
+  "human_translation_review": "Pending; deferred beta activity",
+  "distribution_ready": false,
+  "publication_approved": false,
+  "stable_release_approved": false,
+  "protected_remote_heads": {
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+  },
+  "remote_development_head_at_validation": "c40db9311c9359b124f2373a2205a3708aecad58"
+}
