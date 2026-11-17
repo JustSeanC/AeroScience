@@ -110,27 +110,43 @@ def stage_toolbar(stage,commit):
     for a,b in renames:(stage/a).rename(stage/b)
 
 def community(folder,commit):
-    found=inventory(folder);manifest=read(folder/'manifest.json')
+    found=inventory(folder);indexed={name.casefold():name for name in found}
+    require({'manifest.json','layout.json'}<=indexed.keys(),'Missing genuine SDK manifest/layout output.')
+    def actual(name):
+        require(name.casefold() in indexed,'Missing native package file: '+name)
+        return folder/indexed[name.casefold()]
+    manifest=read(actual('manifest.json'))
     require(manifest.get('title')==TITLE and manifest.get('package_version')=='0.8.0' and manifest.get('dependencies')==[]
         and str(manifest.get('content_type','')).upper()=='MISC','Wrong Beta SDK manifest.')
-    layout=read(folder/'layout.json');seen=set()
+    layout=read(actual('layout.json'));seen=set()
     for item in layout['content']:
-        name=item['path'];p=PurePosixPath(name)
-        require(not p.is_absolute() and '..' not in p.parts and ':' not in name and '\\' not in name and name.casefold() not in seen,'Unsafe/duplicate SDK layout path.')
-        seen.add(name.casefold());require(name in found and (folder/name).stat().st_size==item['size'] and type(item['date']) is int and item['date']>0,'SDK layout bytes differ.')
-    require({n.casefold() for n in found}-{'layout.json','manifest.json'}<=seen,'Undeclared native package files.')
-    root=folder/'html_ui/InGamePanels'/PANEL;descriptor=read(root/'toolbar-compatibility.json')
+        raw=item.get('path');require(isinstance(raw,str) and raw,'Missing SDK layout path.')
+        name=raw.replace('\\','/');p=PurePosixPath(name);key=name.casefold()
+        # The Windows SDK may lowercase layout names while retaining case on
+        # disk. Match the established private verifier's identity rules; never
+        # rewrite the SDK layout, package bytes or receipt to make them agree.
+        require(not p.is_absolute() and '..' not in p.parts and ':' not in name and p.as_posix()==name
+            and key not in seen and key!='layout.json','Unsafe/duplicate SDK layout path: '+raw)
+        require(key in indexed,'SDK layout file is missing: '+raw)
+        size=actual(name).stat().st_size
+        require(type(item.get('size')) is int and item['size']==size,
+            'SDK layout size differs: '+raw+'; expected '+str(item.get('size'))+', actual '+str(size))
+        require(type(item.get('date')) is int and item['date']>0,'SDK layout date is invalid: '+raw+'; date '+str(item.get('date')))
+        seen.add(key)
+    require(indexed.keys()-{'layout.json','manifest.json'}<=seen,'Undeclared native package files.')
+    panel='html_ui/InGamePanels/'+PANEL+'/'
+    descriptor=read(actual(panel+'toolbar-compatibility.json'))
     require(all(descriptor.get(k)==v for k,v in {'profile':'beta080','applicationVersion':VERSION,'minimumCompanionVersion':'0.8.0','channel':'beta','sourceCommit':commit,'protocol':1}.items()),'Beta toolbar compatibility/source mismatch.')
-    registration=folder/'InGamePanels/aeroscience_beta_v080_panel.spb';b=registration.read_bytes()
+    registration=actual('InGamePanels/aeroscience_beta_v080_panel.spb');b=registration.read_bytes()
     require(len(b)>32 and not b.lstrip().startswith((b'<',b'{')),'An actual SDK-compiled registration is required.')
-    script=(root/'AeroScience.js').read_text(encoding='utf-8-sig')
+    script=actual(panel+'AeroScience.js').read_text(encoding='utf-8-sig')
     require(all(v in script for v in ['AeroScience.Beta.0_8_0.Command.v1','AeroScience.Beta.0_8_0.Reply.v1'])
         and re.search(r'\bbetaSource\s*:\s*"'+commit+'"',script) and re.search(r'\bbetaVersion\s*:\s*"'+re.escape(VERSION)+'"',script)
         and not re.search(r'\bvalidation(?:Source|Instance)\s*:',script),'Foreign command channel/identity.')
-    require('panel-id="PANEL_AEROSCIENCE_BETA_V080"' in (root/'AeroScience.html').read_text(encoding='utf-8-sig'),'SDK TemplateElement/bootstrap identity missing.')
-    require(sha(folder/'html_ui/icons/toolbar/ICON_AEROSCIENCE_BETA_V080.svg')==sha(ROOT/'assets/branding/orbital-arc-toolbar-white.svg'),'Toolbar icon changed.')
+    require('panel-id="PANEL_AEROSCIENCE_BETA_V080"' in actual(panel+'AeroScience.html').read_text(encoding='utf-8-sig'),'SDK TemplateElement/bootstrap identity missing.')
+    require(sha(actual('html_ui/icons/toolbar/ICON_AEROSCIENCE_BETA_V080.svg'))==sha(ROOT/'assets/branding/orbital-arc-toolbar-white.svg'),'Toolbar icon changed.')
     for name in ['AeroScience.I18n.js','AeroScience.LocaleData.js','AeroScience.LocaleFormat.js','AeroScience.Map.js','AeroScience.Geography.js','AeroScience.FlightStatus.js','AeroScience.css']:
-        require((root/name).is_file(),'Incomplete native toolbar: '+name)
+        actual(panel+name)
     return found
 
 def imports(path):
@@ -357,7 +373,7 @@ def readiness(folder,commit,acceptance_path=None,ci=None):
         'critical_defects':critical,'publication_approved':False,'stable_release_approved':False}
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('action',choices=['metadata','preflight','stage-toolbar','seal','verify','record-installer','verify-installer','verify-installed','readiness','capture-ci'])
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('action',choices=['metadata','preflight','stage-toolbar','verify-toolbar','seal','verify','record-installer','verify-installer','verify-installed','readiness','capture-ci'])
     parser.add_argument('--source');parser.add_argument('--folder',type=Path);parser.add_argument('--output',type=Path);parser.add_argument('--sdk',type=Path);parser.add_argument('--approval',type=Path);parser.add_argument('--confirmed',action='store_true');parser.add_argument('--report',type=Path)
     for name in ['compiler','vc','tool-report','installed','acceptance','ci']:parser.add_argument('--'+name,type=Path)
     parser.add_argument('--run-id')
@@ -370,6 +386,10 @@ def main():
             if args.report:write(args.report,value)
             print(json.dumps(value,indent=2));return 0 if value['ready'] else 1
         elif args.action=='stage-toolbar':stage_toolbar(args.folder,args.source);value={'stage':str(args.folder)}
+        elif args.action=='verify-toolbar':
+            found=community(args.folder,args.source)
+            value={'outcome':'Passed','scope':'Read-only SDK layout and beta toolbar identity checks; not complete payload, signing or installed acceptance.',
+                'source_commit':args.source,'files_verified':len(found),'installed_acceptance':'Not Tested','publication_approved':False}
         elif args.action=='seal':value={'receipt_sha256':seal(args.folder,args.source)}
         elif args.action=='verify':value=verify(args.folder,args.source)
         elif args.action=='record-installer':value=record_installer(args.folder,args.source,args.compiler,args.vc,args.tool_report)

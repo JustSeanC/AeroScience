@@ -142,6 +142,66 @@ class BetaToolbarTests(unittest.TestCase):
         if result.returncode:raise RuntimeError(result.stderr)
     @classmethod
     def tearDownClass(cls):cls.temp.cleanup()
+    def sdk_fixture(self,lowercase=False,backslashes=False):
+        # Structural SDK-layout fixture only; no actual SDK/installer acceptance.
+        temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
+        package=Path(temp.name)/beta.PACKAGE
+        shutil.copytree(self.stage/'PackageSources',package)
+        (package/'InGamePanels/aeroscience_beta_v080_panel.xml').unlink()
+        (package/'InGamePanels/aeroscience_beta_v080_panel.spb').write_bytes(b'SYNTHETIC SDK REGISTRATION FOR VALIDATOR TEST ONLY\0'*2)
+        (package/'manifest.json').write_text(json.dumps({'title':beta.TITLE,'package_version':'0.8.0','dependencies':[],'content_type':'MISC','minimum_game_version':'1.9.24.0'}))
+        rows=[]
+        for name in beta.inventory(package):
+            if name=='manifest.json':continue
+            path=name.lower() if lowercase else name
+            if backslashes:path=path.replace('/','\\')
+            rows.append({'path':path,'size':(package/name).stat().st_size,'date':134393570110000000})
+        (package/'layout.json').write_text(json.dumps({'content':rows}))
+        return package
+
+    def test_sdk_lowercase_layout_matches_actual_uppercase_icon_without_mutating_package(self):
+        package=self.sdk_fixture(lowercase=True)
+        icon=package/'html_ui/icons/toolbar/ICON_AEROSCIENCE_BETA_V080.svg'
+        self.assertEqual(810,icon.stat().st_size)  # Exact observed owner SDK icon size.
+        before=beta.inventory(package)
+        self.assertEqual(before,beta.community(package,SOURCE))
+        self.assertEqual(before,beta.inventory(package))
+
+    def test_sdk_windows_separators_keep_the_same_file_identity(self):
+        package=self.sdk_fixture(lowercase=True,backslashes=True)
+        self.assertEqual(beta.inventory(package),beta.community(package,SOURCE))
+
+    def test_sdk_layout_still_rejects_changed_sizes_dates_missing_files_and_undeclared_files(self):
+        package=self.sdk_fixture(lowercase=True);layout=package/'layout.json';original=json.loads(layout.read_text())
+        for field,value in [('size',-1),('size',True),('date',0),('date',True),('path','missing/file.svg')]:
+            with self.subTest(field=field,value=value):
+                changed=copy.deepcopy(original);changed['content'][0][field]=value;layout.write_text(json.dumps(changed))
+                with self.assertRaises(ValueError):beta.community(package,SOURCE)
+        layout.write_text(json.dumps(original));(package/'undeclared.txt').write_text('UNDECLARED SYNTHETIC FILE')
+        with self.assertRaises(ValueError):beta.community(package,SOURCE)
+
+    def test_sdk_layout_still_rejects_case_aliases_traversal_drives_and_absolute_paths(self):
+        package=self.sdk_fixture(lowercase=True);layout=package/'layout.json';original=json.loads(layout.read_text())
+        alias=copy.deepcopy(original['content'][0]);alias['path']=alias['path'].upper()
+        changed=copy.deepcopy(original);changed['content'].append(alias);layout.write_text(json.dumps(changed))
+        with self.assertRaises(ValueError):beta.community(package,SOURCE)
+        for name in ['../escape.svg','C:/escape.svg','/escape.svg',r'\\server\share\escape.svg','html_ui//escape.svg']:
+            with self.subTest(path=name):
+                changed=copy.deepcopy(original);changed['content'][0]['path']=name;layout.write_text(json.dumps(changed))
+                with self.assertRaises(ValueError):beta.community(package,SOURCE)
+
+    def test_sdk_metadata_error_identifies_the_file_and_actual_expected_values(self):
+        package=self.sdk_fixture();layout=package/'layout.json';data=json.loads(layout.read_text())
+        row=next(x for x in data['content'] if x['path'].endswith('ICON_AEROSCIENCE_BETA_V080.svg'));row['size']=811;layout.write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValueError,r'ICON_AEROSCIENCE_BETA_V080\.svg.*811.*810'):beta.community(package,SOURCE)
+
+    def test_sdk_read_only_cli_rechecks_kept_bytes_without_creating_or_sealing_a_candidate(self):
+        package=self.sdk_fixture(lowercase=True);before=beta.inventory(package)
+        result=subprocess.run([sys.executable,str(ROOT/'scripts/release/beta_release_080.py'),'verify-toolbar','--folder',str(package),'--source',SOURCE],capture_output=True,text=True,timeout=30)
+        self.assertEqual(0,result.returncode,result.stderr)
+        proof=json.loads(result.stdout);self.assertEqual('Passed',proof['outcome']);self.assertEqual('Not Tested',proof['installed_acceptance']);self.assertFalse(proof['publication_approved'])
+        self.assertEqual(before,beta.inventory(package));self.assertFalse((package/beta.RECEIPT).exists())
+
     def test_compiled_classic_script_has_exact_beta_fields_without_private_instance(self):
         text=(self.stage/'PackageSources/html_ui/InGamePanels'/beta.PANEL/'AeroScience.js').read_text()
         self.assertIn('betaSource: "'+SOURCE+'"',text);self.assertIn('betaVersion: "0.8.0-beta.1"',text)

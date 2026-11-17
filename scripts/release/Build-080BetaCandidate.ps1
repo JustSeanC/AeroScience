@@ -29,7 +29,15 @@ try {
     [IO.Directory]::CreateDirectory($output)|Out-Null
     $logs=Join-Path $output 'Logs';[IO.Directory]::CreateDirectory($logs)|Out-Null
     Copy-Item -LiteralPath $preflight -Destination (Join-Path $output 'preflight.json')
-    function Step([string]$Name,[string]$Tool,[string[]]$Arguments){Write-Host $Name;& $Tool @Arguments *> (Join-Path $logs ($Name+'.log'));if($LASTEXITCODE -ne 0){throw "$Name failed. Preserve this attempt/log; no result was promoted to Passed."}}
+    function Step([string]$Name,[string]$Tool,[string[]]$Arguments){
+        Write-Host $Name;$log=Join-Path $logs ($Name+'.log')
+        & $Tool @Arguments *> $log
+        $exitCode=$LASTEXITCODE
+        if($exitCode -ne 0){
+            Get-Content -LiteralPath $log -Tail 40 | ForEach-Object {Write-Host $_}
+            throw "$Name failed (exit $exitCode). Details: $log. Preserve this attempt/log; no result was promoted to Passed."
+        }
+    }
     Step 'Exact-Full-CI' 'python' @($policy,'capture-ci','--source',$ExpectedSourceCommit,'--run-id',[string]$FullCiRunId,'--report',(Join-Path $output 'full-ci.json'))
     Step 'Locked-JavaScript' 'npm' @('ci','--ignore-scripts')
     Step 'Canonical-Locales' 'node' @('scripts/build/build-locales.mjs','--check')
