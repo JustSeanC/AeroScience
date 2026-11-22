@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.8.0-beta.1 — Owner-accepted v0.8.0 baseline (November 22, 2026)
+
+- [Published Windows x64 installer and SHA-256](https://github.com/JustSeanC/AeroScience/releases/tag/v0.8.0-beta.1) from **exact tested runtime source** `c40db9311c9359b124f2373a2205a3708aecad58`. The owner completed the eight-check installed Windows/MSFS acceptance and the exact-installer readiness report indicated `distribution_ready: true`. The project owner treats this as the current accepted baseline; GitHub lists the release as a regular release.
+- **Version identity is unchanged:** the installed executable and installer remain `0.8.0-beta.1`, with isolated beta profile, toolbar, paths, and update channel. This does not assert a newly compiled `v0.8.0` stable-channel installer, automatic upgrade, or existing profile migration.
+- Guided Home, Missions, and Current Flight; flight recording independently controlled from armed/waiting/collecting/paused scientific sessions.
+- Source-backed terrain and historical LiDAR, scientific Results Overview/Explore/Evidence, original-versus-derived provenance, documented uncertainty and missing-data reporting.
+- Personal and organization research workflows, assignment/evidence review, explicitly consented temporary live sharing, and local opt-in feedback export.
+- Five language choices, appearance and units controls; non-English catalog reviews, broader accessibility, extended flights, large datasets, and additional hardware/providers remain further-testing areas.
+- Full automated CI passed on exact runtime source in [run 44015112685](https://github.com/JustSeanC/AeroScience/actions/runs/44015112685). Retained scope, hardware, scientific-provider and platform limitations are documented in the [technical handoff](docs/roadmap/v0.8.0-p08d-handoff.md) and [known limitations](docs/beta/v0.8.0-beta.1/KNOWN-ISSUES.md).
+- Following publication, `main` was fast-forwarded to the v0.8.0 documentation head; six obsolete development branches were retired after saving the three unique v0.7.1/research histories under `archive/pre-v080-cleanup/` tags. Existing releases, receipts, and historical evidence were not rewritten.
+
+The sections below preserve the language and release-status claims from earlier development checkpoints as **historical records**, not the current project's release status.
+
+
 ## Unreleased — v0.6.0 development checkpoint
 
 - Remove overall Library source-count ceilings; add indexed/paged retained collections, physical-
