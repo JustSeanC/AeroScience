@@ -10,93 +10,40 @@ Inspired by real-world atmospheric research, aerial surveying, and NASA airborne
 
 Whether you're flying a small Cessna, a business jet, or a high-altitude research aircraft, AeroScience gives your flights a scientific purpose.
 
-## 🌟 Coming in AeroScience v0.7.0 — Research Programs & Collaborative Science
+## 🌟 Current release — v0.8.0 Beta 1 (owner-accepted baseline)
 
-**v0.7.0 is in active development.** This section describes the **intended experience when the release is complete**, not a promise that every feature is available in today's installer. Some of these workflows already have development implementations and automated tests; others still need integration, hosting, or real-simulator acceptance. The [latest public release is v0.6.0](https://github.com/JustSeanC/AeroScience/releases/tag/v0.6.0).
+**[Download AeroScience v0.8.0 Beta 1](https://github.com/JustSeanC/AeroScience/releases/tag/v0.8.0-beta.1)** for Microsoft Flight Simulator 2024. Published November 22, 2026, and accepted by the project owner as the current release baseline. GitHub lists it as a regular release.
 
-The goal is simple: **give any MSFS 2024 flight a scientific purpose, whether you're researching on your own or flying as part of a larger team.**
+The **actual installer and application still identify themselves as `0.8.0-beta.1`**, with a deliberately separate beta installation, settings, and data profile. This accepted build has **not** been renamed, rebuilt as a distinct `v0.8.0` installer, or certified for in-place upgrade/migration of earlier installations. The Windows x64 installer and SHA-256 checksum are attached to the release.
 
-### 🛩️ Do science on your own — anywhere in the world
+### 🛩️ Fly, record, and collect science
 
-You won't need an AeroScience account, an organization, a specific airport, or an internet connection to conduct supported local research. Pick an experiment, select **Fly Now** for a guided setup or **Customize** to work in the existing Mission Planner, and use the aircraft you have in MSFS when its capabilities fit the experiment.
+- Guided Home, Missions, and Current Flight workflows help choose research objectives and operate a flight.
+- Flight recording and scientific collection have **independent controls**, including science arm, start, pause, resume, and end.
+- Scientific missions and experimental test cards distinguish simulated, recorded, and unsupported measurements instead of fabricating evidence.
+- Maps, Results Overview, Explore, and Evidence support reviewing flights alongside source-backed environmental observations and their provenance.
 
-The planned research activities include:
+### 🌍 Explore genuine scientific sources
 
-- **Scientific Observation Flight** — document what you encounter, with positions, times, and supporting observations where available.
-- **Vertical Atmospheric Profile** — study how supported atmospheric measurements change as you climb or descend.
-- **Atmospheric Transect** — investigate changes in atmospheric conditions across a route or region.
-- **Terrain & Temperature Survey** — plan a survey using selectable sources such as DEM-derived terrain elevation, historical Landsat surface temperature, or simulator-reported air temperature, clearly distinguished from one another.
-- **Flight-Regime Validation** — test supported speed, altitude, and other recorded flight conditions.
-- **Experimental Sensor Checkout** — evaluate configurable, explicitly *modeled* instrument or system behavior against the inputs AeroScience can actually support.
+- Work with supported terrain, geographic, satellite, and **historical LiDAR** data, including retained originals and derived displays where supported.
+- Original source dates, quality, units, datums, processing, and missing coverage matter. A satellite scene or historical LiDAR cloud is **not** a live measurement collected by your simulated aircraft.
+- Supported scientific products and import methods depend on the provider, available source files, licensing, and format. Unsupported transformations or absent source coverage remain explicitly unavailable.
 
-You'll be able to adapt existing templates or create custom personal test cards, save your studies, and compare compatible results across multiple flights. Portable, **data-only** template sharing and proposals for organization use are part of the v0.7.0 target; sharing a template will not share your flight history or scientific data.
+### 👥 Research alone or with an organization
 
-### 🧪 Create experimental flight-test programs
+Local personal research does not require joining an organization or automatically uploading flight history. Supported organization workflows include assignments, evidence submission/review, and separately consented temporary live sharing. Organization hosting and external services have their own configuration and validation requirements; a production one-click deployment is **not** certified by this release.
 
-Go beyond a basic mission checklist. Build flight-test cards with measurable conditions, sustained holds, ordered test points, repetitions, and documented pilot observations. A single flight can contain multiple compatible active cards; you can switch between incompatible tests without ending the flight.
+### 🔒 Your data and testing boundaries
 
-AeroScience will preserve individual manual and automatically detected attempts, including **passes, failures, interruptions, and insufficient evidence**. It will distinguish conditions actually reported by MSFS from modeled responses and pilot-entered observations. Programs can be mostly aircraft-agnostic or restrict eligible aircraft/configurations when a specific test genuinely requires it.
+The accepted installer keeps its beta profile separate from prior AeroScience installations. The matching MSFS 2024 toolbar is installed and removed explicitly through beta Settings, with MSFS closed. Only one companion runs at a time. Feedback export is local and reviewed by you before any manual sharing; original research, credentials, and logs are not automatically uploaded.
 
-These are **simulated research and development workflows**, not real aircraft certification or airworthiness approvals.
+Longer endurance flights, larger scientific datasets, additional aircraft/hardware/providers, comprehensive accessibility checks, and fluent review of non-English translations remain areas for continued validation. For accurate limitations and safe installation/rollback, see the [tester guide](docs/beta/v0.8.0-beta.1/START-HERE.html), [known limitations](docs/beta/v0.8.0-beta.1/KNOWN-ISSUES.md), and [optional QA cards](docs/beta/v0.8.0-beta.1/TEST-CARDS.md).
 
-### 🗺️ Operate your mission from one place
-
-The planned **Mission Operations** experience brings the current flight, active research questions and test cards, scientific instruments, collection sessions, map, readiness warnings, and next actions together.
-
-Use the AeroScience dashboard and compact MSFS toolbar to manage flight research. Flight recording and scientific collection remain separate: pausing a science session or switching test cards won't silently stop the flight recorder.
-
-A synchronized **flight-and-evidence timeline** will connect original test attempts, measurements, collection sessions, pilot observations, and mission events with the matching points on maps, charts, and replay. Provisional in-flight progress will remain clearly different from final postflight evaluation.
-
-### 👥 Join a research organization — completely optional
-
-Organizations will be able to run their own AeroScience server and browser portal to coordinate shared airborne-science campaigns and fictional aircraft/system test programs. **A genuinely beginner-simple hosted deployment is a v0.7.0 release requirement:** choose a proven provider, sign in, approve its actual charges, complete guided secure setup, and invite pilots—no command line, Docker, database setup or manual certificates. The provider account belongs to and bills the organization; AeroScience itself does not require a central account for solo research. **No live public one-click deployment has passed final acceptance yet.**
-
-Organization features are planned to include:
-
-- **Programs and campaigns:** publish scientific questions, objectives, experiment definitions, and research opportunities.
-- **Teams and assignments:** invite pilots, manage membership, assign test cards, or let eligible members claim available research.
-- **Collaborative flights:** prepare a mission from an assignment, fly locally, and retain the exact card and publication revision associated with the resulting evidence.
-- **Review and feedback:** examine submitted evidence by requirement, ask for specific missing observations, and approve or reject results with an audit history.
-- **Research progress:** see approved contributions from distinct pilots, scientific observation locations, altitude bands, measurement types, dates, and remaining gaps.
-- **Test-program management:** configure optional progression phases, record holds and authorized exceptions, and keep original measured failures separate from organizational waivers.
-
-Ordinary scientific campaigns won't have to use advanced experimental-aircraft test phases.
-
-### 📡 Monitor participating research aircraft live — opt-in
-
-v0.7.0 also targets a **read-only, multi-aircraft live map available to every signed-in, active member of the same organization**, not just managers. A pilot must explicitly choose to share their flight with that organization. Participating members can then see aircraft, mission/campaign identity, flight status, focused research-card progress and basic science-collection health. Stale or disconnected aircraft will be labeled clearly.
-
-Live sharing is **off by default**, can be stopped at any time, and is independent for each organization. Live positions and status are temporary, not a permanently retained flight archive. They are **not** scientific submissions, sensor-validation proof or permission to inspect private recordings. Full remote Mission Control and aircraft commands remain outside v0.7.0.
-
-Organization owners/administrators will also be able to configure **optional Discord channel announcements**, built on a reusable organization event system. Planned events include a consenting pilot starting a flight, a research card reaching an accurately labeled completion/approval state, and approved scientific results becoming available to organization members. Admins choose which events to post; live-flight announcements need separate pilot disclosure/consent. No raw scientific data or private flight recordings are sent to Discord.
-
-### 🔒 You choose what gets shared
-
-**Your flight recordings, mission plans, and scientific library remain local by default.** Joining an organization doesn't upload your flights.
-
-After a research flight, you will be able to select the exact eligible evidence to share, see its destination and size, and explicitly approve a submission. Approved packages can be queued for delivery when an organization server becomes reachable. Drafts aren't upload permission, and a queued package cannot silently replace deleted or changed original evidence.
-
-Only the submitted, authorized evidence is available for organizational review. Other members see approved summaries and permitted aggregates—not your private flight archive. Sharing the same flight with a second organization requires a separate choice and approval.
-
-### 📊 Understand the science behind the result
-
-Study maps, measurements, scientific source dates, quality information, flight replay, and comparisons—not just a score. The intended campaign tools will show **what was actually observed**, at which locations and altitudes, and which objectives still lack sufficient accepted evidence.
-
-A recorded flight track does **not** prove a sensor observed everything underneath it. Satellite imagery, DEMs, and other historical datasets retain their original provenance and dates; simulated sensor outputs are not presented as real instrument readings. Unsupported or missing sources must be shown as unavailable rather than made-up science.
-
-### 🚦 What v0.7.0 will *not* include
-
-- No required global AeroScience cloud account or automatic upload of complete flights.
-- No remote aircraft control, simulator commands, automatic flight-history upload, or full MTS-style real-time Mission Control. **Explicitly consented, temporary live monitoring** is planned for v0.7.0.
-- No claim of real-world aircraft certification, authentic instrument calibration, or validated scientific measurements beyond the evidence available.
-- Hurricane reconnaissance, dropsondes, wildfire/ocean research suites, and airborne radar are **future v0.9.0 plans**, not v0.7.0 features.
-- Full scientific-product support depends on validated source formats and data availability; some raster, QA, modeled-response, and NASA EMIT-original validation work remains a separate release gate.
-
-**Development progress:** Follow the [v0.7.0 development tracker](docs/roadmap/v0.7.0-development-tracker.md) and [v0.7.0 product decisions](docs/roadmap/v0.7.0-product-decisions.md). Completing automated checkpoints does not by itself mean the Windows/MSFS experience, production organization hosting, or this release has passed final acceptance.
+**Next direction:** [v0.9.0 scientific-mission scope](docs/roadmap/v0.9.0-scope.md) is planning, not shipped functionality. Older [v0.7.0 product decisions](docs/roadmap/v0.7.0-product-decisions.md) and research handoffs are preserved as historical context, not current release announcements.
 
 ---
 
-## 🌎 What You Can Do Today (v0.6.0)
+## 🌎 What You Can Do With AeroScience
 
 **🗺️ Plan Research Missions**
 
@@ -118,7 +65,7 @@ After your flight, explore collected observations on interactive maps, review sc
 
 AeroScience integrates actual Earth observation datasets, including satellite imagery and geographic information, to connect your simulated flights with real scientific information.
 
-In v0.6.0, explore FAA airport, runway, navigation and supported airspace references alongside your research route. Retained references work offline; published TFR boundaries and advisory mission screening show source freshness and coverage limitations. Official chart catalogs and downloads remain available, while in-app chart rendering is deferred. NASA EMIT import and spectral exploration are experimental, with genuine-original scientific validation still pending. See the [aviation guide](docs/v0.6.0-aviation-reference.md) and [EMIT guide](docs/research/v0.6.0-emit-integration.md) for supported capabilities and limitations.
+Earlier v0.6.0 work introduced FAA airport, runway, navigation and supported airspace references alongside research routes. Retained references work offline; published TFR boundaries and advisory mission screening show source freshness and coverage limitations. Official chart catalogs and downloads remain available, while in-app chart rendering is deferred. NASA EMIT support has source-format and genuine-original validation limits; consult the current in-app capability and provenance messages rather than assuming an imported product is supported. See the [aviation guide](docs/v0.6.0-aviation-reference.md) and [EMIT guide](docs/research/v0.6.0-emit-integration.md) for supported capabilities and limitations.
 
 ## 🚀 How Does It Work?
 
@@ -168,15 +115,15 @@ Your missions and collected data are stored locally, and previously saved result
 
 ## 🧪 Project Status
 
-**Latest release: AeroScience v0.6.0 — Aviation Mapping & Scientific Data Expansion**
+**Current owner-accepted release:** [AeroScience v0.8.0 Beta 1 — Accepted Baseline](https://github.com/JustSeanC/AeroScience/releases/tag/v0.8.0-beta.1). This is published as a regular GitHub release, while its installed product, channel, and file names retain the `0.8.0-beta.1` identity.
 
-**In development: AeroScience v0.7.0 — Personal Research, Experimental Test Cards & Organizations**
+**Active source branch:** [`main`](https://github.com/JustSeanC/AeroScience/tree/main). The accepted release tag points to the exact owner-tested runtime source `c40db9311c9359b124f2373a2205a3708aecad58`; subsequent documentation-only handoffs and maintenance in `main` are not additional installer builds.
 
-Find the Windows installer and release notes on the [v0.6.0 release page](https://github.com/JustSeanC/AeroScience/releases/tag/v0.6.0). The preview above describes the planned v0.7.0 release; it is not yet a downloadable stable release.
+**Historical continuity:** Old development branches were retired after their unique v0.7.1 maintenance/build and research-campaign tips were preserved under `archive/pre-v080-cleanup/` tags. Existing published releases, scientific evidence, build receipts, and historical roadmap documentation remain available.
 
-AeroScience is actively developed and continues to expand its scientific capabilities, mission planning tools, aircraft integration, and research workflows.
+**Future development:** Use `main` as the source baseline; v0.9.0 work is planned, not yet an available feature release.
 
-The project is designed for flight simulation, education, and recreational scientific exploration. It is not a replacement for certified scientific instruments or real-world operational research systems.
+AeroScience is designed for flight simulation, education, and recreational scientific exploration, not certified scientific instrumentation or real-world operational research systems.
 
 ## 💬 Community & Support
 
