@@ -1,29 +1,14 @@
 # AeroScience documentation
 
-## v0.6.0 development reference
+## Current release and source baseline
 
-Current development is **0.6.0 / prerelease** on `develop/v0.6.0`, integrating frozen 0.5.0
-source `27e5f53` while retaining the existing aviation/map/cache implementation.
-Start with [scope](roadmap/v0.6.0-scope.md), [architecture](roadmap/v0.6.0-architecture.md),
-[phase tracker](roadmap/v0.6.0-development-tracker.md) and [readiness](v0.6.0-readiness.md).
-No v0.6.0 public release or owner acceptance is implied. [Map/reference guide](v0.6.0-aviation-reference.md)
-and [owner workbook](v0.6.0-acceptance-workbook.md) distinguish implemented metadata UI from pending original-data features.
-The optional chart runtime has an additive [license/notice supplement](../licenses/ChartRuntime.md);
-the historical legal notice file and original scientific/QA evidence remain unchanged.
-Historical QA records below retain their dates.
+**Current owner-accepted baseline:** [AeroScience v0.8.0 Beta 1](https://github.com/JustSeanC/AeroScience/releases/tag/v0.8.0-beta.1), published November 22, 2026, as a regular GitHub release. Its installed version remains `0.8.0-beta.1`, with a separate beta profile and toolbar. No distinct `v0.8.0` stable-channel installer or automatic migration is implied.
 
-Use the [0.6.0 private build/isolation guide](v0.6.0-private-validation.md) for its separate profile.
-Historical 0.5.0 testing: [build and isolation](v0.5.0-private-validation.md),
-[owner acceptance workbook](v0.5.0-acceptance-workbook.md), [readiness and blockers](v0.5.0-readiness.md).
-The owner published stable v0.5.0 separately from frozen source; development does not replace that installer.
+**Active development branch:** [`main`](../tree/main). The accepted runtime was built from `c40db9311c9359b124f2373a2205a3708aecad58`, verified by [Full CI 44015112685](https://github.com/JustSeanC/AeroScience/actions/runs/44015112685) and owner-observed Windows/MSFS acceptance. The [Beta 1 owner handoff](roadmap/v0.8.0-p08d-handoff.md), [installation and acceptance guide](roadmap/v0.8.0-p08d-beta-acceptance.md), [tester guide](beta/v0.8.0-beta.1/START-HERE.html), [known issues](beta/v0.8.0-beta.1/KNOWN-ISSUES.md) and [QA cards](beta/v0.8.0-beta.1/TEST-CARDS.md) document that scope.
 
+Older per-version scope, architecture, handoff, and scientific validation reports remain **historical records**, even when their original text describes a release as pending. Retired v0.7.1 and campaign-research branch tips remain reachable through verified archival tags under `archive/pre-v080-cleanup/`. Do not overwrite source receipts, alter scientific evidence, or treat earlier experimental plans as certified capabilities.
 
-Development additions: [instrument calibration and provenance](instrument-calibration.md)
-describes P03; use the [development tracker](roadmap/v0.5.0-development-tracker.md) for
-implementation and outstanding acceptance. Stable 0.4.2 QA material remains below.
-
-Published **v0.4.2** assets/QA evidence and the stable **v0.5.0** release remain protected.
-Current 0.6.0 development and its acceptance are separate from those published releases.
+**Future scope:** [v0.9.0 airborne science and environmental missions](roadmap/v0.9.0-scope.md) is a proposal, not an implemented release.
 
 ## Install, fly and review
 
@@ -42,8 +27,8 @@ Current 0.6.0 development and its acceptance are separate from those published r
 ## Develop, verify and release
 
 - [Current architecture](architecture.md) and [development/verification workflow](verification.md) and [two-tier CI](development-validation.md).
-- [Windows candidate build and installed acceptance](public-release-windows.md): current
-  0.5.0 handoff and preserved 0.4.2 guide; publication requires separate approval.
+- [Windows candidate build and installed acceptance](public-release-windows.md):
+  historical 0.5.0 and 0.4.2 handoffs; use the version-matched v0.8.0 Beta 1 guide above for the accepted installer.
 - [v0.4.2 QA checklist](v0.4.2-windows-testing.md),
   [completion and limitations](v0.4.2-completion.md),
   [accessibility evidence](v0.4.2-accessibility.md) and
@@ -67,7 +52,7 @@ Current 0.6.0 development and its acceptance are separate from those published r
   Earlier handoffs and superseded workbooks remain in Git history; the changelog keeps
   immutable links where historical detail matters.
 
-## Active v0.5.0 development
+## Historical v0.5.0 development
 
 - [Implementation tracker and resume point](roadmap/v0.5.0-development-tracker.md).
 - [Approved scope](roadmap/v0.5.0-scope.md), [architecture](roadmap/v0.5.0-architecture.md),
