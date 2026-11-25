@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AeroScience.HdfReader", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AeroScience.Organization", "src\AeroScience.Organization\AeroScience.Organization.csproj", "{F544328E-E6F6-4818-933C-20E72376DBDB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AeroScience.XPlane", "src\AeroScience.XPlane\AeroScience.XPlane.csproj", "{E789BA8A-F094-412F-88BC-69AD648FB969}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -157,6 +159,18 @@ Global
 		{F544328E-E6F6-4818-933C-20E72376DBDB}.Release|x64.Build.0 = Release|Any CPU
 		{F544328E-E6F6-4818-933C-20E72376DBDB}.Release|x86.ActiveCfg = Release|Any CPU
 		{F544328E-E6F6-4818-933C-20E72376DBDB}.Release|x86.Build.0 = Release|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Debug|x64.Build.0 = Debug|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Debug|x86.Build.0 = Debug|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Release|x64.ActiveCfg = Release|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Release|x64.Build.0 = Release|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Release|x86.ActiveCfg = Release|Any CPU
+		{E789BA8A-F094-412F-88BC-69AD648FB969}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -172,5 +186,6 @@ Global
 		{BA76AFDF-4387-480B-9B22-F450264657EE} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{63ADA464-6D04-4346-A6F8-32C02F79FE38} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{F544328E-E6F6-4818-933C-20E72376DBDB} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{E789BA8A-F094-412F-88BC-69AD648FB969} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

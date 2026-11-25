@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../AeroScience.Shared/AeroScience.Shared.csproj" />
+    <ProjectReference Include="../AeroScience.Telemetry/AeroScience.Telemetry.csproj" />
+    <InternalsVisibleTo Include="AeroScience.Tests" />
+  </ItemGroup>
+</Project>
