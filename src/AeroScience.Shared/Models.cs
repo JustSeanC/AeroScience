@@ -26,9 +26,17 @@ public sealed record TelemetryFrame(
 }
 
 public sealed record ConnectionInfo(ConnectionState State, TelemetrySource Source, string Message,
-    DateTimeOffset ChangedUtc);
+    DateTimeOffset ChangedUtc)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorOrigin? Origin { get; init; }
+}
 public sealed record TelemetryUpdate(ConnectionInfo Connection, TelemetryFrame? Frame,
-    AtmosphericFrame? Atmosphere = null, FlightGuidance? Guidance = null, EnvironmentReading? Environment = null);
+    AtmosphericFrame? Atmosphere = null, FlightGuidance? Guidance = null, EnvironmentReading? Environment = null)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorSampleContext? SampleContext { get; init; }
+}
 public sealed record Coordinates(double Latitude, double Longitude);
 public sealed record Mission(Guid Id, string Name, string? Aircraft, TelemetrySource? Source,
     DateTimeOffset StartedUtc, DateTimeOffset? EndedUtc, MissionStatus Status,
