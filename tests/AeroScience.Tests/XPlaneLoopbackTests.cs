@@ -174,7 +174,11 @@ public sealed class XPlaneLoopbackTests
             });
             await app.StartAsync();
             var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
-            host.Options = XPlaneFixture.FastOptions with { Port = new Uri(address).Port };
+            // Real HTTP server startup/JIT scheduling uses the production request
+            // budget. Protocol bounds are asserted below that budget; dedicated
+            // provider tests exercise short timeouts with controlled transports.
+            host.Options = XPlaneFixture.FastOptions with { Port = new Uri(address).Port,
+                RequestTimeout = new XPlaneOptions().RequestTimeout };
             return host;
         }
         public async ValueTask DisposeAsync()

@@ -137,13 +137,19 @@ public sealed class XPlaneProviderTests
         Assert.Null(update.Frame); Assert.Equal("MalformedJson", update.Connection.Message);
     }
 
-    [Fact]
-    public async Task SlowConsumerReceivesCurrentConfirmationRatherThanABacklogOfInventedSamples()
+    [Theory]
+    [InlineData(1)] [InlineData(25)]
+    public async Task SlowConsumerReceivesCurrentConfirmationRatherThanABacklogOfInventedSamples(int delayMilliseconds)
     {
-        var f = new XPlaneFixture { DelayMilliseconds = 1 }; using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+        var f = new XPlaneFixture { DelayMilliseconds = delayMilliseconds }; using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(8));
         await using var stream = f.Provider().ReadAsync(stop.Token).GetAsyncEnumerator();
         var first = await Until(stream, u => u.Frame is not null);
-        await Task.Delay(200, stop.Token);
+        // Leave the consumer stopped until several actual read groups advance.
+        // Windows timer resolution and parallel test load need not allow three
+        // complete groups inside a fixed 200 ms wall-clock delay. The next group
+        // can start only after the preceding group has finished confirmation.
+        var targetPhase = Volatile.Read(ref f.Phase) + 4;
+        while (Volatile.Read(ref f.Phase) < targetPhase) await Task.Delay(10, stop.Token);
         var second = await Until(stream, u => u.Frame is not null);
         Assert.True(second.SampleContext!.Clock!.FlightSeconds >= first.SampleContext!.Clock!.FlightSeconds + 3);
         Assert.InRange((DateTimeOffset.UtcNow - second.Frame!.TimestampUtc).TotalSeconds, 0, 2);
