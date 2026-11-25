@@ -22,7 +22,12 @@ public sealed partial class OrganizationConnectionIntegrationTests
     [RecoveryFact]public Task ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade()=>RestoreAfterLoss(false,false,true);
     async Task RestoreAfterLoss(bool renewIdentity,bool guidedImport=false,bool scopedRoles=false)
     {
-        await using var f=await SubmissionFixture.Create(protectedIdentity:true);var card=await f.Card(ObservationResearch.Template);var attempt=await f.Record(card.Prepared,2,notes:true);var approved=await f.ReviewApprove(f.Draft(attempt));using var delivery=f.Delivery();Assert.Equal(SubmissionDeliveryState.ServerReceived,(await delivery.Send(approved.Id,default)).State);
+        await using var f=await SubmissionFixture.Create(protectedIdentity:true);
+        // This fixture deliberately captures a Pending intent. Quiesce the real
+        // dispatcher before seeding: a disabled destination legitimately turns
+        // Pending into Disabled, which recovery must preserve rather than relabel.
+        await f.Server.App.Services.GetServices<IHostedService>().OfType<OrganizationNotificationWorker>().Single().StopAsync(default);
+        var card=await f.Card(ObservationResearch.Template);var attempt=await f.Record(card.Prepared,2,notes:true);var approved=await f.ReviewApprove(f.Draft(attempt));using var delivery=f.Delivery();Assert.Equal(SubmissionDeliveryState.ServerReceived,(await delivery.Send(approved.Id,default)).State);
         var enrollment=await f.Server.Post("/api/account-security/enroll",new AccountEnrollment("ResearchOnly!2026Flight"));var mfaKey=enrollment.GetProperty("setupKey").GetString()!;var enabled=await f.Server.Post("/api/account-security/enable",new AccountCode(OrganizationServerTests.AuthenticatorCode(mfaKey,DateTimeOffset.UtcNow.ToUnixTimeSeconds()/30+1)));await f.Server.Post("/api/account-security/confirm-recovery",new AccountRecoveryConfirmation(enabled.GetProperty("recoveryCodes")[0].GetString()!));
         await f.Server.Post(Notifications,new DiscordSettingsCommand(Guid.NewGuid(),0,"Restore safety fixture",false,0,"https://discord.com/api/webhooks/123456789012345678/"+new string('a',60)));
         var invitation=(await f.Server.Post("/api/organization/members/invitations",new OrganizationInvitationRequest(1,Guid.NewGuid()))).Deserialize<OrganizationInvitationView>(WireJson.Options)!;var publicIdentity=await f.Server.Browser.GetFromJsonAsync<OrganizationPublicIdentity>("/api/public/organization",WireJson.Options);
@@ -45,6 +50,7 @@ public sealed partial class OrganizationConnectionIntegrationTests
             using(var scope=f.Server.App.Services.CreateScope()){
                 var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();originalOrganization=(await db.Organizations.SingleAsync()).PublicId;originalReceipt=(await db.Submissions.SingleAsync()).PayloadSha256;
                 var destination=await db.DiscordDestinations.SingleAsync();db.DiscordDeliveries.Add(new(){Id=Guid.NewGuid(),EventId=Guid.NewGuid(),DestinationId=destination.PublicId,DestinationRevision=destination.Revision,State=NotificationState.Pending,CreatedUtc=DateTimeOffset.UtcNow,DueUtc=DateTimeOffset.UtcNow,Test=true});await db.SaveChangesAsync();
+                Assert.Equal(NotificationState.Pending,await db.DiscordDeliveries.AsNoTracking().Select(d=>d.State).SingleAsync());
                 var engine=new OrganizationRecoveryEngine(db,settings,options);backup=await engine.Backup(Guid.NewGuid(),default);await engine.CopyIndependent(backup,default);
             }
             await f.Server.App.StopAsync();NpgsqlConnection.ClearAllPools();await using(var admin=new NpgsqlConnection(System.Environment.GetEnvironmentVariable("AEROSCIENCE_ORG_TEST_DATABASE"))){await admin.OpenAsync();await using var drop=new NpgsqlCommand("DROP DATABASE \""+f.Database+"\" WITH (FORCE)",admin);await drop.ExecuteNonQueryAsync();}

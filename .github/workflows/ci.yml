@@ -296,7 +296,22 @@ jobs:
       - name: Compile separate 0.8 private profile and check retained genuine LAZ (no SDK or installed acceptance)
         shell: pwsh
         run: |
-          ./scripts/build/Publish-080ValidationCompanion.ps1 -ExpectedSourceCommit $env:GITHUB_SHA -Instance ([Guid]::NewGuid().ToString('N')) -ArtifactsPath (Join-Path $PWD 'artifacts/native080-structural/intermediate') -OutputDirectory (Join-Path $PWD 'artifacts/native080-structural/app')
+          # The protected publisher permits develop/v0.8.0 or an explicitly pinned
+          # detached worktree. Compile this exact CI source without broadening that
+          # release guard to other development branches or skipping the graph.
+          $pinnedSource = Join-Path $env:RUNNER_TEMP 'aeroscience-native080-source'
+          git worktree add --detach $pinnedSource $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Exact detached native-profile source could not be staged.' }
+          Push-Location $pinnedSource
+          try {
+            ./scripts/build/Publish-080ValidationCompanion.ps1 -ExpectedSourceCommit $env:GITHUB_SHA -Instance ([Guid]::NewGuid().ToString('N')) -ArtifactsPath (Join-Path $PWD 'artifacts/native080-structural/intermediate') -OutputDirectory (Join-Path $PWD 'artifacts/native080-structural/app')
+            $proofRoot = Join-Path $env:GITHUB_WORKSPACE 'artifacts/native080-structural/app'
+            foreach ($relative in @('compiled-profile.json', 'lidar-check.json', 'LidarRuntime/build.json')) {
+              $destination = Join-Path $proofRoot $relative
+              New-Item -ItemType Directory -Force -Path (Split-Path $destination -Parent) | Out-Null
+              Copy-Item -LiteralPath (Join-Path $PWD ('artifacts/native080-structural/app/' + $relative)) -Destination $destination
+            }
+          } finally { Pop-Location }
       - name: Compile explicit Beta 080 graph and actual embedded/native identities (not an SDK installer)
         if: github.ref == 'refs/heads/develop/v0.8.0'
         shell: pwsh

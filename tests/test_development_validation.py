@@ -134,3 +134,17 @@ class DevelopmentValidationTests(unittest.TestCase):
             index = next(i for i, line in enumerate(lines) if line.startswith('python scripts/build/'+probe))
             self.assertTrue(lines[index+1].startswith('if ($LASTEXITCODE -ne 0)'), probe)
             self.assertIn('throw ', lines[index+1], probe)
+
+    def test_native080_graph_uses_exact_pinned_source_without_disabling_its_guard(self):
+        workflow = (ROOT/'.github/workflows/ci.yml').read_text(encoding='utf-8')
+        windows = workflow.split('  windows-companion:', 1)[1]
+        profile = windows.split('- name: Compile separate 0.8 private profile', 1)[1].split('- name: Compile explicit Beta 080', 1)[0]
+        self.assertIn('git worktree add --detach $pinnedSource $env:GITHUB_SHA', profile)
+        self.assertIn('Push-Location $pinnedSource', profile)
+        self.assertIn('Publish-080ValidationCompanion.ps1 -ExpectedSourceCommit $env:GITHUB_SHA', profile)
+        self.assertNotIn('if: ', profile)  # Do not hide failures by skipping the graph on a new branch.
+        self.assertIn("@('compiled-profile.json', 'lidar-check.json', 'LidarRuntime/build.json')", profile)
+        policy = (ROOT/'scripts/release/private_validation_080.py').read_text(encoding='utf-8')
+        self.assertIn("branch in ('develop/v0.8.0', '')", policy)
+        self.assertIn("rev-parse', 'HEAD'", policy)
+        self.assertIn("merge-base', '--is-ancestor', BASELINE, expected", policy)
