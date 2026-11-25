@@ -10,6 +10,8 @@ Older per-version scope, architecture, handoff, and scientific validation report
 
 **Future scope:** [v0.9.0 airborne science and environmental missions](roadmap/v0.9.0-scope.md) is a proposal, not an implemented release.
 
+**v0.8.1 P01 planning:** [X-Plane 12 read-only compatibility scope](roadmap/v0.8.1-scope.md), [architecture audit/design](roadmap/v0.8.1-architecture.md), [official API and dataref research](research/v0.8.1-xplane-feasibility.md), [P01–P06 implementation plan](roadmap/v0.8.1-implementation-plan.md) and [actual progress](roadmap/v0.8.1-development-tracker.md). This is documentation-only research; no X-Plane provider, native panel, simulator acceptance or v0.8.1 installer is claimed. The existing v0.8.0 Beta 1/MSFS installation remains the accepted release.
+
 ## Install, fly and review
 
 - [Windows installation and onboarding](../INSTALL.md): setup EXE, independent storage,
