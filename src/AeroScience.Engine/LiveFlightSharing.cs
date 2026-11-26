@@ -21,7 +21,7 @@ public sealed class LiveFlightSharing(OrganizationConnections connections,Missio
         .Where(c=>c.Card.OrganizationAssignment is {} a&&a.OrganizationId==row.OrganizationId&&a.Origin==row.Origin).ToArray();
     public async Task<object> Preview(Guid connection,CancellationToken ct)
     {
-        coordinator.RequireLiveOperations();
+        coordinator.RequireLiveSharing();
         var row=await connections.LiveConnection(connection,ct,true);var flight=coordinator.Snapshot().ActiveMission??throw new InvalidOperationException("Start normal flight recording before choosing Share Live Flight.");
         var dashboard=await connections.LiveDashboard(connection,ct);var cards=ScopedCards(row,flight.Id);
         return new{version=1,connectionId=connection,organization=row.Name,origin=row.Origin,flightId=flight.Id,flightStartedUtc=flight.StartedUtc,authorizationExpiresUtc=row.ExpiresUtc,policy=dashboard.Policy,
@@ -32,7 +32,7 @@ public sealed class LiveFlightSharing(OrganizationConnections connections,Missio
     }
     public async Task<LocalLiveStatus> Start(LocalLiveConsent consent,CancellationToken ct)
     {
-        coordinator.RequireLiveOperations();
+        coordinator.RequireLiveSharing();
         if(!consent.ConfirmAllActiveMembers)throw new ArgumentException("Confirm disclosure to ALL active members before Start Sharing.");
         await control.WaitAsync(ct);try{
             if(sessions.TryGetValue(consent.ConnectionId,out var existing)&&existing.Enabled)throw new InvalidOperationException("Stop the existing live share before starting another.");
@@ -68,6 +68,7 @@ public sealed class LiveFlightSharing(OrganizationConnections connections,Missio
         try{
             if(!item.Enabled)return;
             if(!coordinator.LiveOperationsAllowed){ended=true;return;}
+            coordinator.RequireLiveSharing();
             var state=coordinator.OperatingIntelligence(includeHistory:false);var flight=state.Flight.ActiveMission;
             if(flight?.Id!=item.Session.FlightId||flight.Status!=MissionStatus.Recording){ended=true;return;}
             var frame=state.Flight.Telemetry;var now=DateTimeOffset.UtcNow;

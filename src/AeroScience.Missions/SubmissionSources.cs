@@ -20,7 +20,7 @@ public sealed partial class MissionStore
     }
     public (SubmissionDocument Document,string[] Unsupported,bool PolicyVerified) MaterializeSubmission(SubmissionDraftRequest request,ScienceStore science,CancellationToken ct=default)
     {
-        if(request.Version is not(1 or SubmissionSupportingProducts.DocumentVersion)||request.Version==1&&request.SupportingProductIds is {Length:>0}||request.SupportingProductIds is {Length:>SubmissionSupportingProducts.MaximumProducts}
+        if(!SubmissionSimulatorOrigins.KnownVersion(request.Version)||request.Version==1&&request.SupportingProductIds is {Length:>0}||request.SupportingProductIds is {Length:>SubmissionSupportingProducts.MaximumProducts}
             ||request.SupportingProductIds?.Any(id=>id==Guid.Empty)==true||request.SupportingProductIds?.Distinct().Count()!=request.SupportingProductIds?.Length
             ||request.Id==Guid.Empty||request.ResultIds is not {Length:>=1 and <=16}||request.ResultIds.Distinct().Count()!=request.ResultIds.Length||request.ResultIds.Any(i=>i==Guid.Empty)
             ||request.SelectedKeys?.Length>SubmissionEvidenceProtocol.MaximumItems||string.IsNullOrWhiteSpace(request.Name)||request.Name.Length>120||request.Name.Any(char.IsControl))throw new ArgumentException("Choose a named submission and 1–16 saved results from one completed flight.");
@@ -94,8 +94,8 @@ public sealed partial class MissionStore
         }
         var chosen=request.SelectedKeys is null?items:items.Where(i=>request.SelectedKeys.Contains(i.Reference.Key)||i.Reference.Kind==SubmissionEvidenceKind.Definition).ToList();
         if(request.SelectedKeys is not null&&request.SelectedKeys.Any(k=>!items.Any(i=>i.Reference.Key==k)))throw new IOException("A selected original evidence reference is missing. Nothing was substituted.");
-        var version=chosen.Any(i=>i.Data.SupportingProduct is not null)?SubmissionSupportingProducts.DocumentVersion:1;
-        var manifest=new SubmissionManifest(version,request.Id,request.Name.Trim(),source.Origin,source.OrganizationId,source.OrganizationName,source.CampaignId,source.CampaignName,source.PilotId,mission.Id,request.ResultIds.Order().ToArray(),bindings.OrderBy(b=>b.CardId).ToArray(),policies.OrderBy(p=>p.OpportunityId).ToArray(),chosen.Select(i=>i.Reference).OrderBy(i=>i.Key,StringComparer.Ordinal).ToArray(),SubmissionEvidenceProtocol.HistoryDisclosure,SubmissionEvidenceProtocol.PrivacyDisclosure,request.ReviewLink);
+        var version=mission.SimulatorOrigin is not null?SubmissionSimulatorOrigins.DocumentVersion:chosen.Any(i=>i.Data.SupportingProduct is not null)?SubmissionSupportingProducts.DocumentVersion:1;
+        var manifest=new SubmissionManifest(version,request.Id,request.Name.Trim(),source.Origin,source.OrganizationId,source.OrganizationName,source.CampaignId,source.CampaignName,source.PilotId,mission.Id,request.ResultIds.Order().ToArray(),bindings.OrderBy(b=>b.CardId).ToArray(),policies.OrderBy(p=>p.OpportunityId).ToArray(),chosen.Select(i=>i.Reference).OrderBy(i=>i.Key,StringComparer.Ordinal).ToArray(),SubmissionEvidenceProtocol.HistoryDisclosure,version==SubmissionSimulatorOrigins.DocumentVersion?SubmissionSimulatorOrigins.PrivacyDisclosure:SubmissionEvidenceProtocol.PrivacyDisclosure,request.ReviewLink){SimulatorOrigin=mission.SimulatorOrigin};
         var document=new SubmissionDocument(manifest,chosen.OrderBy(i=>i.Reference.Key,StringComparer.Ordinal).ToArray());
         if(SubmissionEvidenceProtocol.Bytes(document)>SubmissionEvidenceProtocol.MaximumPayloadBytes)throw new NotSupportedException("The selected payload exceeds 2 MiB. Choose fewer optional items or a shorter evaluated interval.");
         return(document,unsupported.ToArray(),policies.All(p=>p.Revision>0));
@@ -114,11 +114,12 @@ public sealed partial class MissionStore
     public SubmissionPreview PreviewSubmission(SubmissionDraftRequest request,ScienceStore science,CancellationToken ct=default)
     {
         var built=MaterializeSubmission(request,science,ct);var d=built.Document;var assessment=built.PolicyVerified?SubmissionEvidenceProtocol.Assess(d,ct):new(false,false,new[]{"Submission policy is Unknown. Save the offline draft, then connect once to review this claim's actual policy before approving delivery."});
-        var supporting=d.Manifest.Version==SubmissionSupportingProducts.DocumentVersion;
+        var supporting=SubmissionSimulatorOrigins.HasSupportingProducts(d.Manifest)||d.Manifest.Version==SubmissionSimulatorOrigins.DocumentVersion;
         var capability=request.ConnectionId is {} connection?CachedSubmissionCapabilities(connection,d.Manifest.Origin):null;
-        var supported=!supporting||capability is {SupportingProductsVersion:SubmissionSupportingProducts.Version,Permission:OrganizationDesktopPermission.SubmitEvidence}
-            &&capability.OrganizationId==d.Manifest.OrganizationId&&capability.PilotId==d.Manifest.PilotId;
-        var warnings=supported?built.Unsupported:built.Unsupported.Append("Review the exact server's supporting-product capability with a Submit Evidence connection before approval. This reference-only extension cannot be downgraded to the original format or treated as attached source measurements.").ToArray();
+        var supported=!supporting||SubmissionSimulatorOrigins.Supported(d.Manifest,capability);
+        var warnings=supported?built.Unsupported:built.Unsupported.Append(d.Manifest.Version==SubmissionSimulatorOrigins.DocumentVersion
+            ?"This source-qualified flight requires the exact server to advertise simulator-origin v1 with Submit Evidence permission. Keep the draft and update the receiver before approval; simulator identity cannot be stripped or downgraded."
+            :"Review the exact server's supporting-product capability with a Submit Evidence connection before approval. This reference-only extension cannot be downgraded to the original format or treated as attached source measurements.").ToArray();
         return new(d.Manifest,PreflightReadiness.Hash(d.Manifest),PreflightReadiness.Hash(d),SubmissionEvidenceProtocol.Bytes(d),assessment,warnings,built.PolicyVerified,built.PolicyVerified&&supported&&SubmissionEvidenceProtocol.RequiredPoliciesMet(d,ct));
     }
 }
@@ -131,6 +132,6 @@ public sealed partial class ScienceStore
         using var db=Open();using var c=db.CreateCommand();var names=instruments.Select((id,n)=>{var key="$instrument"+n;c.Parameters.AddWithValue(key,id);return key;}).ToArray();
         c.CommandText=$"SELECT id,payload_json FROM observations WHERE mission_id=$flight AND timestamp_utc >= $start AND timestamp_utc <= $end AND json_extract(payload_json,'$.instrumentId') IN ({string.Join(',',names)}) ORDER BY timestamp_utc,id LIMIT 513";
         c.Parameters.AddWithValue("$flight",flight.ToString());c.Parameters.AddWithValue("$start",start.ToString("O",CultureInfo.InvariantCulture));c.Parameters.AddWithValue("$end",end.ToString("O",CultureInfo.InvariantCulture));
-        using var rows=c.ExecuteReader();var result=new List<ScienceObservation>();while(rows.Read()){ct.ThrowIfCancellationRequested();result.Add(JsonSerializer.Deserialize<ScienceObservation>(rows.GetString(1),WireJson.Options)! with{Id=rows.GetInt64(0)});}return result.ToArray();
+        using var rows=c.ExecuteReader();var result=new List<ScienceObservation>();while(rows.Read()){ct.ThrowIfCancellationRequested();result.Add(ReadCatalog<ScienceObservation>(rows.GetString(1)) with{Id=rows.GetInt64(0)});}return result.ToArray();
     }
 }

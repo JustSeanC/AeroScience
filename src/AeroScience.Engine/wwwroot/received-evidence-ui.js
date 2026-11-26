@@ -2,10 +2,13 @@ import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {t as textForUI} from './i18n.js';
 import {node,table,disclosure,numeric,chart} from './workstation-ui.js';
 import {supportingProductEvidence} from './supporting-product-ui.js';
+import {simulatorOriginDetails} from './simulator-origin.js';
 // Preserve the original ISO timestamp, UTC offset and fractional precision; browser timezone never rewrites it.
 const dateTime=value=>value?String(value):textForUI("localization.unavailableValue");
 // Presentation of explicitly received/selected typed evidence only. Never fetches a pilot's source archive.
 export function receivedEvidence(parent,item,{totalRecords=item.reference.records}={}){
+ const source=item.data.telemetry?.samples?.[0]?.frame||item.data.observations?.[0]||item.data.sessions?.[0];
+ if(source)simulatorOriginDetails(parent,source.simulatorOrigin,source.source);
  if(item.data.supportingProduct){supportingProductEvidence(parent,item.data.supportingProduct);return;}
  const {reference:r,data:d}=item;parent.append(node('p',localizedCopy("ui.receivedEvidenceUi.messageOriginalRecordS",{value1:(String(r.description)),value2:(String(totalRecords))})),node('p',`${dateTime(r.startUtc)} → ${dateTime(r.endUtc)} · ${r.privacy}`));
  if(d.definition){const c=d.definition;parent.append(node('h4',c.name),node('p',localizedCopy("ui.receivedEvidenceUi.messageFrozenLocalRevision",{value1:(String(c.revision)),value2:(String(c.template?.id||c.template||textForUI("ui.receivedEvidenceUi.messageResearchDefinition")))})));const details=disclosure(parent,localizedCopy("ui.receivedEvidenceUi.messageExactFrozenDefinition"));details.append(node('pre',JSON.stringify(c,null,2)));}

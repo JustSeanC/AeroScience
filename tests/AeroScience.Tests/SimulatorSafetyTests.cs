@@ -13,6 +13,9 @@ public sealed class SimulatorSafetyTests : IDisposable
     private static TelemetryUpdate XPlane(DateTimeOffset now,bool approved=false)
     {
         var fixture=new XPlaneAssemblerFixture();fixture.Seed();fixture.Confirm();var update=fixture.Assembler.Snapshot()!;
+        // Deliberately forged freshness: changing the frame time must not renew the
+        // retained field-confirmation evidence. P04's valid-source cases separately
+        // exercise recording with matching clocks/proofs, regardless of these flags.
         return update with {Frame=update.Frame! with{TimestampUtc=now}, SampleContext=update.SampleContext! with{Capabilities=update.SampleContext.Capabilities with{ProductionRecordingReady=approved,ScienceIntegrationReady=approved}}};
     }
     [Theory] [InlineData(false)] [InlineData(true)]

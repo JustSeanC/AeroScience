@@ -30,7 +30,13 @@ public sealed record InstrumentDefinition(string Id, string Name, string Descrip
     MeasurementDefinition[] Measurements, int MinimumIntervalMs = 1000);
 public sealed record AtmosphericFrame(DateTimeOffset TimestampUtc, double? TemperatureCelsius, double? PressureInHg,
     double? WindSpeedKnots, double? WindDirectionTrueDegrees, double? DensitySlugsPerCubicFoot,
-    ObservationQuality Quality = ObservationQuality.Valid, string? Message = null);
+    ObservationQuality Quality = ObservationQuality.Valid, string? Message = null)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorOrigin? SimulatorOrigin { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorSampleContext? SimulatorContext { get; init; }
+}
 public sealed record MeasurementReading(string MeasurementId, double? Value, string Unit,
     ScienceProvenance Provenance = ScienceProvenance.SimulatorReported, ObservationQuality Quality = ObservationQuality.Valid, double? DisplayValue = null, string? DisplayUnit = null);
 public sealed record ScienceObservation(long Id, Guid DatasetId, Guid MissionId, string InstrumentId,
@@ -39,7 +45,13 @@ public sealed record ScienceObservation(long Id, Guid DatasetId, Guid MissionId,
     DateTimeOffset? PositionTimestampUtc = null,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CalibrationDerivation? Calibration = null,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? SessionId = null,
-    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? IntentId = null);
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? IntentId = null)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorOrigin? SimulatorOrigin { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorSampleContext? SimulatorContext { get; init; }
+}
 public sealed record ScienceDataset(Guid Id, Guid LibraryId, Guid MissionId, string MissionName, string InstrumentId,
     DateTimeOffset CreatedUtc, string RelativePath, long ObservationCount, string ProvenanceJson);
 public sealed record InstrumentState(string InstrumentId, bool Enabled, int IntervalMs, ObservationQuality Quality,

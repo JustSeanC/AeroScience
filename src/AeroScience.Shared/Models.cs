@@ -16,6 +16,12 @@ public sealed record TelemetryFrame(
     double BankDegrees, double VerticalSpeedFeetPerMinute, bool IsPaused = false, double? MachNumber = null,
     FlightGuidance? Guidance = null, EnvironmentFrame? Environment = null, AtmosphericFrame? Atmosphere = null)
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorOrigin? SimulatorOrigin { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorSampleContext? SimulatorContext { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool ContinuityBreak { get; init; }
     public bool IsValid => TimestampUtc.Offset == TimeSpan.Zero && !string.IsNullOrWhiteSpace(Aircraft)
         && double.IsFinite(Latitude) && Latitude is >= -90 and <= 90
         && double.IsFinite(Longitude) && Longitude is >= -180 and <= 180
@@ -43,6 +49,8 @@ public sealed record Mission(Guid Id, string Name, string? Aircraft, TelemetrySo
     Coordinates? Departure, Coordinates? Arrival, int SampleCount, double? MinimumAltitudeFeet,
     double? MaximumAltitudeFeet, ScienceMode Mode = ScienceMode.Universal)
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorOrigin? SimulatorOrigin { get; init; }
     public double DurationSeconds => Math.Max(0, ((EndedUtc ?? DateTimeOffset.UtcNow) - StartedUtc).TotalSeconds);
 }
 public sealed record MissionEvent(long Id, DateTimeOffset TimestampUtc, string Kind, string Message);

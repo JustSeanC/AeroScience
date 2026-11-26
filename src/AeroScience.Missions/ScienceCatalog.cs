@@ -52,6 +52,18 @@ public static class ScienceCatalog
     }
     public static IScienceInstrument Instrument(string id) => new AtmosphericInstrument(
         Definitions.SingleOrDefault(d => d.Id == id) ?? throw new ArgumentException("Unknown instrument."));
+    public static InstrumentDefinition DefinitionFor(string id,SimulatorOrigin? origin)
+    {
+        if(origin is not null)SimulatorProvenance.Validate(origin);
+        return DefinitionForSimulator(id,origin?.SimulatorId);
+    }
+    public static InstrumentDefinition DefinitionForSimulator(string id,string? simulatorId)
+    {
+        var definition=Definitions.Single(d=>d.Id==id);
+        if(simulatorId!=SimulatorPreferences.XPlane12||definition.Measurements.Length==0)return definition;
+        return definition with{DataSource="X-Plane 12 / local read-only Web API v1; aircraft-local simulator reports",
+            Measurements=definition.Measurements.Select(m=>m with{SimulatorVariable=SimulatorAccessPolicy.Datarefs[m.Id]}).ToArray()};
+    }
     private sealed class AtmosphericInstrument(InstrumentDefinition definition) : IScienceInstrument
     {
         public InstrumentDefinition Definition => definition;

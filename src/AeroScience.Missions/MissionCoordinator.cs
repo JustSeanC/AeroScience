@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace AeroScience.Missions;
 
 // All mutations pass through this gate, including telemetry and commands from every display.
-public sealed class MissionCoordinator(MissionStore store, int samplingIntervalMs, bool requireFreshTelemetry = false,
+public sealed partial class MissionCoordinator(MissionStore store, int samplingIntervalMs, bool requireFreshTelemetry = false,
     Action? ensureRecordingCapacity = null, ResearchOperations? research = null,Func<DateTimeOffset>? utcNow=null,Func<MissionPlan,ReadinessAssessment>? assessPreflight=null,
     SimulatorAccessPolicy? simulatorAccess=null)
 {
@@ -14,6 +14,14 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     private bool hadQualifiedTelemetry;
     public bool HadQualifiedTelemetry { get {lock(gate)return hadQualifiedTelemetry;} }
     public void RequireLiveOperations() { lock (gate) simulatorPolicy.RequireRecording(); }
+    public void RequireLiveSharing()
+    {
+        lock(gate)
+        {
+            simulatorPolicy.RequireRecording();
+            if(simulatorPolicy.XPlane)throw new InvalidOperationException("X-Plane live sharing requires a source-aware live protocol. The current version 1 receiver cannot carry its simulator identity; no sharing was authorized. Compatibility work remains for P05.");
+        }
+    }
     public bool CanChangeSimulator { get { lock(gate) return active is null && !maintenance; } }
     private readonly object gate = new();
     private ScienceCollectionController? collection;
@@ -62,7 +70,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 active is not null && active.DurationSeconds >= 1 ? count / active.DurationSeconds : null,
                 active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value - active.StartedUtc).TotalSeconds) : null),
                 Research: research?.Snapshot(connection, frame), RecordingStop: recordingStop, SelectedPlanId: SelectedPlan())
-                { Simulator = LiveOperationsAllowed ? null : simulatorPolicy.Availability };
+                { Simulator = simulatorPolicy.XPlane||!LiveOperationsAllowed ? simulatorPolicy.Availability : null };
         }
     }
 
@@ -82,6 +90,12 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         lock(gate)
         {
             simulatorPolicy.Observe(update);
+            // Production always requires fresh input at Start. Preserve the legacy
+            // no-input constructor used by disposable/archive fixtures without
+            // assigning a new source retroactively to an already-open legacy row.
+            if(simulatorPolicy.RecordingAllowed&&(active is null||active.SimulatorOrigin is not null||requireFreshTelemetry||simulatorPolicy.XPlane))
+                update=simulatorPolicy.Qualify(update);
+            if(simulatorPolicy.XPlane&&active is not null&&CheckXPlaneContinuity(ref update))return;
             if (!LiveOperationsAllowed)
             {
                 // Diagnostic-only projection: do not run MSFS enrichment,
@@ -97,8 +111,12 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 return;
             }
             if(active is not null&&connection.State!=update.Connection.State)store.AddEvent(active.Id,Now,"connection",update.Connection.Message);
-            connection=update.Connection;environment.Apply(update);
-            if(update.Frame is {IsValid:true} incoming)update=update with{Frame=environment.Enrich(incoming)};
+            connection=update.Connection;
+            if(!simulatorPolicy.XPlane)
+            {
+                environment.Apply(update);
+                if(update.Frame is {IsValid:true} incoming)update=update with{Frame=environment.Enrich(incoming)};
+            }
             frame=connection.State!=ConnectionState.Connected?null:update.Frame is {IsValid:true}?update.Frame:update.Frame is not null?null:frame;
             if(frame is not null)hadQualifiedTelemetry=true;
             if(active is null){research?.Observe(update,frame);return;}
@@ -202,10 +220,14 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 || DateTimeOffset.UtcNow - frame.TimestampUtc > TimeSpan.FromSeconds(6) || frame.IsPaused))
                 throw new InvalidOperationException("Live aircraft telemetry is unavailable. Mission History remains accessible.");
             var armed=request.ArmScience||plan?.StartScienceArmed==true||plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed;
+            if(!armed)simulatorPolicy.RequireInstruments(configurations);
+            if(!armed)simulatorPolicy.RequirePlanScience(plan);
+            if(simulatorPolicy.XPlane&&(connection.State!=ConnectionState.Connected||frame is not {IsValid:true,IsPaused:false,SimulatorOrigin:{}}))
+                throw new InvalidOperationException("Wait for current confirmed, unpaused X-Plane aircraft data before starting a separate recording.");
             if(!armed)research?.EnsureCanStart(configurations);
             var readiness=plan is null?null:assessPreflight?.Invoke(plan);
             var now = Now;
-            var id = store.Create(name, frame, now, mode, plan, configurations, request.Objective);
+            var id = store.Create(name, frame, now, mode, plan, configurations, request.Objective,frame?.SimulatorOrigin);
             active = store.Detail(id)!.Mission;
             recordingStop = null;
             research?.Begin(active, store.Research(id));
@@ -214,7 +236,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 try
                 {
                     store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed?CollectionAuthority.Automatic:CollectionAuthority.Manual,ControlRevision:0),plan?.Collection,
-                        MissionRubrics.Freeze(id,now,mode,store.RecordedPlanHash(id),plan,configurations,request.Objective,readiness));
+                        MissionRubrics.Freeze(id,now,mode,store.RecordedPlanHash(id),plan,configurations,request.Objective,readiness,active.SimulatorOrigin));
                     store.AddEvent(id,now,"science-armed","Flight recording active; science awaits an explicit session start.");
                     collection=new(store,id,()=>research!.Configurations);collectionFault=false;
                     geographicCollection=plan?.Collection is null?null:new(plan,collection);
@@ -238,6 +260,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             firstRecordedUtc = samplingAnchor = null;
             lastSlot = -1; received = skipped = missing = 0;
             lastAircraft = null;
+            xplaneBaseline=simulatorPolicy.XPlane?frame:null;
             // Take a fresh sample on the next provider update; do not backdate the first sample.
             return active;
         }
@@ -251,6 +274,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (research is null) throw new InvalidOperationException("Scientific acquisition is unavailable in this host.");
             var next=InstrumentProfiles.Freeze(ScienceCatalog.Normalize(configurations));
             if(JsonSerializer.Serialize(next,WireJson.Options)==JsonSerializer.Serialize(research.Configurations,WireJson.Options))return;
+            if(active is not null)simulatorPolicy.RequireInstruments(next);
             research.EnsureCanStart(next);
             collection?.ConfigurationChanged(ControlTime,next);
             try{research.Configure(next);if(collection is not null)research.ApplyCollection(collection.State,collection.Session,[]);}
@@ -322,6 +346,11 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if(store.CollectionControlReceipt(request) is {} previous)return previous;
             if(maintenance||active?.Id!=request.MissionId||collection is null)throw new InvalidOperationException("This flight is not recording.");
             if(request.Action==CollectionAction.StartData)research?.EnsureCanStart(research.Configurations);
+            if(request.Action is CollectionAction.StartData or CollectionAction.ResumeData or CollectionAction.RearmAutomation)
+            {
+                simulatorPolicy.RequireInstruments(research?.Configurations??[]);
+                simulatorPolicy.RequirePlanScience(store.Research(request.MissionId).PlanSnapshot);
+            }
             if(request.Action==CollectionAction.RearmAutomation&&collectionFault&&collection.Session is {} retained)
                 research?.Configure(retained.Configurations.GroupBy(c=>c.Settings.InstrumentId).Select(g=>g.OrderByDescending(c=>c.Revision).First().Settings).ToArray());
             var result=collection.Control(request,ControlTime);

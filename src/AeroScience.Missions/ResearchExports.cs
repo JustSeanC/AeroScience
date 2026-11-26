@@ -32,6 +32,8 @@ public static class ResearchExports
         if (text.Length > 0 && text[0] is '=' or '+' or '-' or '@' or '\t' or '\r') text = "'" + text;
         return "\"" + text.Replace("\"", "\"\"") + "\"";
     }
+    private static string OriginDescription(SimulatorOrigin? origin)=>origin is null?"":" Simulator-origin contract v1: "+System.Text.Json.JsonSerializer.Serialize(origin,WireJson.Options)
+        +". Navigation/summary export only; use the version 3 JSON archive for original sample confirmations and full scientific evidence.";
     public static void RequireCompleted(MissionStore store, Guid id)
     {
         var detail = store.Detail(id) ?? throw new ArgumentException("Mission not found.");
@@ -40,31 +42,34 @@ public static class ResearchExports
     public static async Task CsvAsync(MissionStore store, Guid id, string kind, Stream stream, CancellationToken token)
     {
         RequireCompleted(store, id);
+        var origin=store.SimulatorOrigin(id);
         await using var writer = new StreamWriter(stream, new UTF8Encoding(false), 16384, leaveOpen: true);
         async Task Line(params string[] cells) { token.ThrowIfCancellationRequested(); await writer.WriteLineAsync(string.Join(',', cells).AsMemory(), token); }
+        Task SourceLine(int legacyColumns,params string[] cells)=>Line(origin is null?cells[..legacyColumns]:cells);
         if (kind == "flight")
         {
-            await Line("timestamp_utc", "source", "aircraft", "latitude_deg_n", "longitude_deg_e", "altitude_msl_ft", "altitude_agl_ft",
+            await SourceLine(26,"timestamp_utc", "source", "aircraft", "latitude_deg_n", "longitude_deg_e", "altitude_msl_ft", "altitude_agl_ft",
                 "ias_kt", "tas_kt", "groundspeed_kt", "heading_true_deg", "track_true_deg", "pitch_deg", "bank_deg", "vertical_speed_ft_min", "mach",
-                "ap_status", "lateral_mode", "lateral_target", "lateral_unit", "vertical_mode", "vertical_target", "vertical_unit", "speed_mode", "speed_target", "speed_unit");
+                "ap_status", "lateral_mode", "lateral_target", "lateral_unit", "vertical_mode", "vertical_target", "vertical_unit", "speed_mode", "speed_target", "speed_unit", "simulator_id", "adapter_id", "mapping_revision", "connection_epoch", "timestamp_basis", "simulator_origin_json", "simulator_context_json");
             foreach (var sample in store.StreamSamples(id))
-                await Line(Q(sample.TimestampUtc.ToUniversalTime().ToString("O")), Q(sample.Source.ToString()), Q(sample.Aircraft), N(sample.Latitude), N(sample.Longitude), N(sample.AltitudeMslFeet), N(sample.AltitudeAglFeet),
+                await SourceLine(26,Q(sample.TimestampUtc.ToUniversalTime().ToString("O")), Q(sample.Source.ToString()), Q(sample.Aircraft), N(sample.Latitude), N(sample.Longitude), N(sample.AltitudeMslFeet), N(sample.AltitudeAglFeet),
                     N(sample.IndicatedAirspeedKnots), N(sample.TrueAirspeedKnots), N(sample.GroundspeedKnots), N(sample.HeadingDegrees), N(sample.GroundTrackDegrees), N(sample.PitchDegrees), N(sample.BankDegrees), N(sample.VerticalSpeedFeetPerMinute), N(sample.MachNumber),
                     Q(sample.Guidance?.Autopilot.ToString()), Q(sample.Guidance?.Lateral.Mode), N(sample.Guidance?.Lateral.Target), Q(sample.Guidance?.Lateral.Unit),
-                    Q(sample.Guidance?.Vertical.Mode), N(sample.Guidance?.Vertical.Target), Q(sample.Guidance?.Vertical.Unit), Q(sample.Guidance?.Speed.Mode), N(sample.Guidance?.Speed.Target), Q(sample.Guidance?.Speed.Unit));
+                    Q(sample.Guidance?.Vertical.Mode), N(sample.Guidance?.Vertical.Target), Q(sample.Guidance?.Vertical.Unit), Q(sample.Guidance?.Speed.Mode), N(sample.Guidance?.Speed.Target), Q(sample.Guidance?.Speed.Unit),
+                    Q(sample.SimulatorOrigin?.SimulatorId),Q(sample.SimulatorOrigin?.AdapterId),Q(sample.SimulatorOrigin?.MappingRevision),Q(sample.SimulatorOrigin?.ConnectionEpoch.ToString()),Q(sample.SimulatorOrigin?.TimestampBasis),Q(sample.SimulatorOrigin is null?null:System.Text.Json.JsonSerializer.Serialize(sample.SimulatorOrigin,WireJson.Options)),Q(sample.SimulatorContext is null?null:System.Text.Json.JsonSerializer.Serialize(sample.SimulatorContext,WireJson.Options)));
         }
         else if (kind is "science" or "atmosphere")
         {
             var science = store.ScienceLibrary ?? throw new InvalidOperationException("Science Library is not configured in this host.");
             if (science.AvailabilityError() is { } error) throw new InvalidOperationException(error);
-            await Line("mission_id", "dataset_id", "instrument_id", "timestamp_utc", "measurement", "value", "unit", "provenance", "source", "quality", "latitude_deg_n", "longitude_deg_e", "altitude_msl_ft", "position_timestamp_utc", "science_session_id", "acquisition_intent_id");
+            await SourceLine(16,"mission_id", "dataset_id", "instrument_id", "timestamp_utc", "measurement", "value", "unit", "provenance", "source", "quality", "latitude_deg_n", "longitude_deg_e", "altitude_msl_ft", "position_timestamp_utc", "science_session_id", "acquisition_intent_id", "simulator_origin_json", "simulator_context_json");
             foreach (var item in science.StreamObservations(id))
-                await Line(Q(item.MissionId.ToString()), Q(item.DatasetId.ToString()), Q(item.InstrumentId), Q(item.TimestampUtc.ToString("O")), Q(item.MeasurementId), N(item.Value), Q(item.Unit), Q(item.Provenance.ToString()), Q(item.Source), Q(item.Quality.ToString()), N(item.Latitude), N(item.Longitude), N(item.AltitudeMslFeet), Q(item.PositionTimestampUtc?.ToString("O")),Q(item.SessionId?.ToString()),Q(item.IntentId?.ToString()));
+                await SourceLine(16,Q(item.MissionId.ToString()), Q(item.DatasetId.ToString()), Q(item.InstrumentId), Q(item.TimestampUtc.ToString("O")), Q(item.MeasurementId), N(item.Value), Q(item.Unit), Q(item.Provenance.ToString()), Q(item.Source), Q(item.Quality.ToString()), N(item.Latitude), N(item.Longitude), N(item.AltitudeMslFeet), Q(item.PositionTimestampUtc?.ToString("O")),Q(item.SessionId?.ToString()),Q(item.IntentId?.ToString()),Q(item.SimulatorOrigin is null?null:System.Text.Json.JsonSerializer.Serialize(item.SimulatorOrigin,WireJson.Options)),Q(item.SimulatorContext is null?null:System.Text.Json.JsonSerializer.Serialize(item.SimulatorContext,WireJson.Options)));
         }
         else if (kind == "events")
         {
-            await Line("event_id", "timestamp_utc", "kind", "message");
-            foreach (var item in store.StreamEvents(id)) await Line(item.Id.ToString(CultureInfo.InvariantCulture), Q(item.TimestampUtc.ToString("O")), Q(item.Kind), Q(item.Message));
+            await SourceLine(4,"event_id", "timestamp_utc", "kind", "message", "simulator_origin_json");
+            foreach (var item in store.StreamEvents(id)) await SourceLine(4,item.Id.ToString(CultureInfo.InvariantCulture), Q(item.TimestampUtc.ToString("O")), Q(item.Kind), Q(item.Message),Q(origin is null?null:System.Text.Json.JsonSerializer.Serialize(origin,WireJson.Options)));
         }
         else throw new ArgumentException("Choose flight, science or events CSV.");
         await writer.FlushAsync(token);
@@ -72,16 +77,17 @@ public static class ResearchExports
     public static async Task GpxAsync(MissionStore store, Guid id, Stream output, CancellationToken token)
     {
         RequireCompleted(store, id); const string ns = "http://www.topografix.com/GPX/1/1";
+        var origin=store.SimulatorOrigin(id);
         await using var writer = XmlWriter.Create(output, new XmlWriterSettings { Async = true, Encoding = new UTF8Encoding(false), CloseOutput = false });
         await writer.WriteStartDocumentAsync(); await writer.WriteStartElementAsync(null, "gpx", ns);
         await writer.WriteAttributeStringAsync(null, "version", null, "1.1"); await writer.WriteAttributeStringAsync(null, "creator", null, "AeroScience");
-        await writer.WriteStartElementAsync(null, "metadata", ns); await writer.WriteElementStringAsync(null, "desc", ns, "Actual simulator track; WGS84 coordinates, elevation in metres above simulator MSL, original UTC receipt timestamps."); await writer.WriteEndElementAsync();
+        await writer.WriteStartElementAsync(null, "metadata", ns); await writer.WriteElementStringAsync(null, "desc", ns, "Actual simulator track; WGS84 coordinates, elevation in metres above simulator MSL, original UTC receipt timestamps."+OriginDescription(origin)); await writer.WriteEndElementAsync();
         await writer.WriteStartElementAsync(null, "trk", ns); await writer.WriteElementStringAsync(null, "name", ns, store.Detail(id)!.Mission.Name);
         await writer.WriteStartElementAsync(null, "trkseg", ns); DateTimeOffset? last = null; var count = 0;
         foreach (var sample in store.StreamSamples(id))
         {
             token.ThrowIfCancellationRequested();
-            if (last is not null && sample.TimestampUtc - last > TimeSpan.FromSeconds(65))
+            if (last is not null && (sample.ContinuityBreak || sample.TimestampUtc - last > TimeSpan.FromSeconds(origin?.SimulatorId==SimulatorPreferences.XPlane12?2:65)))
             { await writer.WriteEndElementAsync(); await writer.WriteStartElementAsync(null, "trkseg", ns); }
             await writer.WriteStartElementAsync(null, "trkpt", ns);
             await writer.WriteAttributeStringAsync(null, "lat", null, N(sample.Latitude)); await writer.WriteAttributeStringAsync(null, "lon", null, N(sample.Longitude));
@@ -95,15 +101,25 @@ public static class ResearchExports
     public static async Task KmlAsync(MissionStore store, Guid id, Stream output, CancellationToken token)
     {
         RequireCompleted(store, id); const string ns = "http://www.opengis.net/kml/2.2";
+        var origin=store.SimulatorOrigin(id);
+        var segmented=origin?.SimulatorId==SimulatorPreferences.XPlane12;
         await using var writer = XmlWriter.Create(output, new XmlWriterSettings { Async = true, Encoding = new UTF8Encoding(false), CloseOutput = false });
         await writer.WriteStartDocumentAsync(); await writer.WriteStartElementAsync(null, "kml", ns); await writer.WriteStartElementAsync(null, "Document", ns);
         await writer.WriteElementStringAsync(null, "name", ns, store.Detail(id)!.Mission.Name);
+        if(origin is not null)await writer.WriteElementStringAsync(null,"description",ns,OriginDescription(origin));
         await writer.WriteStartElementAsync(null, "Placemark", ns); await writer.WriteElementStringAsync(null, "name", ns, "Recorded simulator flight path");
+        if(segmented)await writer.WriteStartElementAsync(null,"MultiGeometry",ns);
         await writer.WriteStartElementAsync(null, "LineString", ns); await writer.WriteElementStringAsync(null, "altitudeMode", ns, "absolute");
-        await writer.WriteStartElementAsync(null, "coordinates", ns); var count = 0;
+        await writer.WriteStartElementAsync(null, "coordinates", ns); var count = 0;DateTimeOffset? previous=null;
         foreach (var sample in store.StreamSamples(id))
-        { token.ThrowIfCancellationRequested(); await writer.WriteStringAsync($"{N(sample.Longitude)},{N(sample.Latitude)},{N(sample.AltitudeMslFeet * .3048)}\n"); if (++count % 256 == 0) await writer.FlushAsync(); }
+        {
+            token.ThrowIfCancellationRequested();
+            if(segmented&&previous is {} prior&&(sample.ContinuityBreak||(sample.TimestampUtc-prior).TotalSeconds is <=0 or >2))
+            {await writer.WriteEndElementAsync();await writer.WriteEndElementAsync();await writer.WriteStartElementAsync(null,"LineString",ns);await writer.WriteElementStringAsync(null,"altitudeMode",ns,"absolute");await writer.WriteStartElementAsync(null,"coordinates",ns);}
+            await writer.WriteStringAsync($"{N(sample.Longitude)},{N(sample.Latitude)},{N(sample.AltitudeMslFeet * .3048)}\n");previous=sample.TimestampUtc;if (++count % 256 == 0) await writer.FlushAsync();
+        }
         await writer.WriteEndElementAsync(); await writer.WriteEndElementAsync(); await writer.WriteEndElementAsync();
+        if(segmented)await writer.WriteEndElementAsync();
         async Task Point(string name, double latitude, double longitude, double? altitude, string? note)
         {
             await writer.WriteStartElementAsync(null, "Placemark", ns); await writer.WriteElementStringAsync(null, "name", ns, name);
@@ -155,16 +171,17 @@ public static class ResearchExports
     }
     public static string PerformanceCsv(MissionStore store,Guid id)
     {
-        var report=store.LatestPerformanceReport(id);var csv=new StringBuilder("formatVersion,missionId,reportRevision,sessionId,instrumentId,metric,numerator,denominator,unit,missing,unassessed,method\n");
+        var report=store.LatestPerformanceReport(id);var origin=store.SimulatorOrigin(id);var csv=new StringBuilder("formatVersion,missionId,reportRevision,sessionId,instrumentId,metric,numerator,denominator,unit,missing,unassessed,method"+(origin is null?"":",simulator_origin_json")+"\n");
         if(report is null)return csv.ToString();
         foreach(var y in report.Input.Yield.Concat(report.Input.Sessions.SelectMany(s=>s.Yield)))foreach(var m in y.Metrics)
-            csv.AppendLine(string.Join(',',"1",Q(id.ToString()),report.Revision,Q(y.SessionId?.ToString()),Q(y.InstrumentId),Q(m.Id),N(m.Numerator),N(m.Denominator),Q(m.Unit),m.Missing,m.Unassessed,Q(m.Method)));
+            csv.AppendLine(string.Join(',',"1",Q(id.ToString()),report.Revision,Q(y.SessionId?.ToString()),Q(y.InstrumentId),Q(m.Id),N(m.Numerator),N(m.Denominator),Q(m.Unit),m.Missing,m.Unassessed,Q(m.Method))+(origin is null?"":","+Q(System.Text.Json.JsonSerializer.Serialize(origin,WireJson.Options))));
         return csv.ToString();
     }
     public static string Report(MissionStore store, Guid id, bool includeDetails = true)
     {
         var detail = store.Detail(id) ?? throw new ArgumentException("Mission not found."); var research = store.Research(id); var stats = store.Statistics(id);
         var text = new StringBuilder(); text.AppendLine("AeroScience — Research mission summary"); text.AppendLine(detail.Mission.Name);
+        if(detail.Mission.SimulatorOrigin is {} origin)text.AppendLine(OriginDescription(origin));
         text.AppendLine($"Mission: {id}\nTemplate: {research.Template}\nMode: {detail.Mission.Mode}\nAircraft: {detail.Mission.Aircraft ?? "Unavailable"}\nSource: {detail.Mission.Source?.ToString() ?? "Unavailable"}");
         text.AppendLine($"UTC start: {detail.Mission.StartedUtc:O}\nUTC end: {detail.Mission.EndedUtc:O}\nObjective: {research.Objective ?? "Not supplied"}\nSamples: {stats.Samples}\nReported gap events: {stats.GapEvents}");
         text.AppendLine($"Altitude range (ft MSL): {N(stats.MinimumAltitudeFeet)} – {N(stats.MaximumAltitudeFeet)}\nIAS range (kt): {N(stats.MinimumIasKnots)} – {N(stats.MaximumIasKnots)}\nMach range: {N(stats.MinimumMach)} – {N(stats.MaximumMach)} ({stats.MachSamples} available samples)\nAverage received recording interval (s): {N(stats.ActualAverageIntervalSeconds)}");

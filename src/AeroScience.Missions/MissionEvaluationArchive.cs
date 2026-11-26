@@ -186,6 +186,6 @@ public static class MissionEvaluationArchive
         }
         catch(Exception e)when(e is IOException or Microsoft.Data.Sqlite.SqliteException){limitations.Add("Saved source snapshots unavailable at this evaluation; earlier report revisions remain retained.");}
         return new(1,mission,at,completed,context,criteria.ToArray(),yield.Where(y=>y.SessionId is null).ToArray(),sessionReports,
-            ["telemetry-sha256:"+PreflightReadiness.Hash(archivedFrames),"collection-events-sha256:"+PreflightReadiness.Hash(events),"operating-sha256:"+PreflightReadiness.Hash(operating),"science-results-sha256:"+PreflightReadiness.Hash(actual)],limitations.ToArray(),sources,actual.Length==0?null:actual.Max(a=>a.ProcessedUtc??a.ExposureUtc),detail.Mission.Source,detail.Mission.Status==MissionStatus.Interrupted);
+            ["telemetry-sha256:"+PreflightReadiness.Hash(archivedFrames),"collection-events-sha256:"+PreflightReadiness.Hash(events),"operating-sha256:"+PreflightReadiness.Hash(operating),"science-results-sha256:"+PreflightReadiness.Hash(actual)],limitations.ToArray(),sources,actual.Length==0?null:actual.Max(a=>a.ProcessedUtc??a.ExposureUtc),detail.Mission.Source,detail.Mission.Status==MissionStatus.Interrupted){SimulatorOrigin=detail.Mission.SimulatorOrigin};
     }
 }

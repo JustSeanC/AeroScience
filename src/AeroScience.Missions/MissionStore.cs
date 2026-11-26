@@ -7,7 +7,7 @@ namespace AeroScience.Missions;
 
 public sealed partial class MissionStore
 {
-    public const int CurrentSchemaVersion = 13;
+    public const int CurrentSchemaVersion = 14;
     private readonly string connectionString;
     public string DatabasePath { get; }
 
@@ -49,6 +49,8 @@ public sealed partial class MissionStore
         if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 12) MigrateSubmissions(db);
         cmd.CommandText = "PRAGMA user_version;";
         if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 13) MigrateReviewCache(db);
+        cmd.CommandText = "PRAGMA user_version;";
+        if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 14) MigrateSimulatorOrigins(db);
         cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_card_attempts_card ON personal_card_attempts(card_id,started_utc DESC,id); CREATE INDEX IF NOT EXISTS personal_card_attempts_point_review ON personal_card_attempts(mission_id,card_id,started_utc,id)";
         cmd.ExecuteNonQuery();
         cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_detection_work ON collection_receipts(kind,json_extract(result_json,'$.complete'),mission_id,receipt_id) WHERE kind='personal-detection'; CREATE INDEX IF NOT EXISTS personal_detection_cards ON collection_receipts(mission_id,json_extract(result_json,'$.consent.cardId'),json_extract(result_json,'$.consent.eventId')) WHERE kind='personal-detection'";cmd.ExecuteNonQuery();
@@ -83,7 +85,7 @@ public sealed partial class MissionStore
             // Already current: no JSON or historical sample is rewritten.
             return;
         }
-        if (version is 8 or 9 or 10 or 11 or 12) return;
+        if (version is 8 or 9 or 10 or 11 or 12 or 13) return;
         if (version == 7) { MigrateCollectionEvidence(db); return; }
         if (version == 6) { MigrateScientificReview(db); MigrateCollectionEvidence(db); return; }
         if (version == 5) { MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }
@@ -182,11 +184,12 @@ public sealed partial class MissionStore
         {
             writer.Flush(); await output.WriteAsync(buffer.WrittenMemory, cancellationToken); buffer.Clear();
         }
-        writer.WriteStartObject(); writer.WriteNumber("formatVersion", 2);
+        writer.WriteStartObject(); writer.WriteNumber("formatVersion", detail.Mission.SimulatorOrigin is null?2:3);
         writer.WriteString("application", "AeroScience Science Mission Operations");
         writer.WriteString("timestampBasis", "Host UTC at source packet receipt; recorded timestamps are preserved");
         writer.WritePropertyName("units"); JsonSerializer.Serialize(writer, ResearchExports.TelemetryUnits, WireJson.Options);
         writer.WritePropertyName("mission"); JsonSerializer.Serialize(writer, detail.Mission, WireJson.Options);
+        if(detail.Mission.SimulatorOrigin is not null)WriteSimulatorOriginEvidence(id,writer);
         writer.WritePropertyName("events");
         // Export every event, not the detail dialog's bounded preview.
         writer.WriteStartArray();
@@ -240,7 +243,7 @@ public sealed partial class MissionStore
     }
 
     public Guid Create(string name, TelemetryFrame? frame, DateTimeOffset now, ScienceMode mode = ScienceMode.Universal,
-        MissionPlan? plan = null, InstrumentConfiguration[]? instruments = null, string? objective = null)
+        MissionPlan? plan = null, InstrumentConfiguration[]? instruments = null, string? objective = null, SimulatorOrigin? simulatorOrigin = null)
     {
         if (!Enum.IsDefined(mode)) throw new ArgumentException("Unknown science operating mode.");
         var id = Guid.NewGuid();
@@ -261,6 +264,7 @@ public sealed partial class MissionStore
         cmd.Parameters.AddWithValue("$lat", (object?)frame?.Latitude ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$lon", (object?)frame?.Longitude ?? DBNull.Value);
         cmd.ExecuteNonQuery();
+        FreezeSimulatorOrigin(db,tx,id,now,simulatorOrigin);
         Event(db, tx, id, now, "started", "Mission recording started.");
         WriteResearch(db, tx, id, plan, instruments, objective);
         FreezeResearchCards(db, tx, id, plan);
@@ -280,6 +284,7 @@ public sealed partial class MissionStore
     private static void Append(SqliteConnection db, SqliteTransaction tx, Guid id, TelemetryFrame frame)
     {
         if (!frame.IsValid) throw new ArgumentException("Invalid telemetry cannot be recorded.");
+        RequireSampleOrigin(db,tx,id,frame);
         if (frame.MachNumber is { } mach && (!double.IsFinite(mach) || mach < 0)) frame = frame with { MachNumber = null };
         using var cmd = db.CreateCommand();
         cmd.Transaction = tx;
@@ -334,8 +339,9 @@ public sealed partial class MissionStore
         SELECT m.id,m.name,m.aircraft,m.source,m.started_utc,m.ended_utc,m.status,
           m.departure_lat,m.departure_lon,m.arrival_lat,m.arrival_lon,
           COUNT(t.sequence) sample_count, MIN(t.altitude_msl_ft) minimum_altitude,
-          MAX(t.altitude_msl_ft) maximum_altitude, CASE WHEN m.mode='Realistic' THEN 'Realistic' ELSE 'Universal' END
-        FROM missions m LEFT JOIN telemetry t ON t.mission_id=m.id
+          MAX(t.altitude_msl_ft) maximum_altitude, CASE WHEN m.mode='Realistic' THEN 'Realistic' ELSE 'Universal' END,
+          o.payload_json,o.sha256
+        FROM missions m LEFT JOIN telemetry t ON t.mission_id=m.id LEFT JOIN mission_simulator_origins o ON o.mission_id=m.id
         """;
 
     public IReadOnlyList<Mission> List(int limit = 50, int offset = 0, bool recordingOnly = false, string? search = null, string? status = null, string? sort = null)
@@ -343,7 +349,7 @@ public sealed partial class MissionStore
         using var db = Open();
         using var cmd = db.CreateCommand();
         var ordering=sort switch { "oldest"=>"m.started_utc ASC,m.id", "name"=>"m.name COLLATE NOCASE ASC,m.started_utc DESC,m.id", _=>"m.started_utc DESC,m.id" };
-        cmd.CommandText = Selection + " WHERE ($recording=0 OR m.status='Recording') AND ($search='' OR instr(lower(m.name || ' ' || COALESCE(m.aircraft,'')),lower($search))>0) AND ($status='' OR lower(m.status)=lower($status))"
+        cmd.CommandText = SelectionFor(db) + " WHERE ($recording=0 OR m.status='Recording') AND ($search='' OR instr(lower(m.name || ' ' || COALESCE(m.aircraft,'')),lower($search))>0) AND ($status='' OR lower(m.status)=lower($status))"
             + " GROUP BY m.id ORDER BY " + ordering + " LIMIT $limit OFFSET $offset";
         cmd.Parameters.AddWithValue("$recording", recordingOnly?1:0);cmd.Parameters.AddWithValue("$search",search?.Trim()??"");cmd.Parameters.AddWithValue("$status",status??"");
         cmd.Parameters.AddWithValue("$limit", limit);
@@ -358,7 +364,7 @@ public sealed partial class MissionStore
     {
         using var db = Open();
         using var cmd = db.CreateCommand();
-        cmd.CommandText = Selection + " WHERE m.id=$id GROUP BY m.id";
+        cmd.CommandText = SelectionFor(db) + " WHERE m.id=$id GROUP BY m.id";
         cmd.Parameters.AddWithValue("$id", id.ToString());
         Mission mission;
         using (var reader = cmd.ExecuteReader())
@@ -393,7 +399,8 @@ public sealed partial class MissionStore
         Parse(r.GetString(4)), r.IsDBNull(5) ? null : Parse(r.GetString(5)), Enum.Parse<MissionStatus>(r.GetString(6)),
         r.IsDBNull(7) ? null : new(r.GetDouble(7), r.GetDouble(8)),
         r.IsDBNull(9) ? null : new(r.GetDouble(9), r.GetDouble(10)), r.GetInt32(11),
-        r.IsDBNull(12) ? null : r.GetDouble(12), r.IsDBNull(13) ? null : r.GetDouble(13), Enum.Parse<ScienceMode>(r.GetString(14)));
+        r.IsDBNull(12) ? null : r.GetDouble(12), r.IsDBNull(13) ? null : r.GetDouble(13), Enum.Parse<ScienceMode>(r.GetString(14)))
+        {SimulatorOrigin=r.IsDBNull(15)?null:ReadSimulatorOrigin(r.GetString(15),r.GetString(16))};
 
     private static void Event(SqliteConnection db, SqliteTransaction? tx, Guid id, DateTimeOffset now, string kind, string message)
     {

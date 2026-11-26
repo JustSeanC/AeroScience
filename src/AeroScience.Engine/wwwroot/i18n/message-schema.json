@@ -81758,6 +81758,151 @@
       "critical": false,
       "surface": "simulator",
       "preservedTokens": []
+    },
+    "simulator.qualifiedConnected": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.qualifiedConnected",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.incomplete": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.incomplete",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.legacyUnknown": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.legacyUnknown",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.sourceSummary": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.sourceSummary",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.sourceBasis": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.sourceBasis",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": [
+        "AeroScience"
+      ]
+    },
+    "simulator.legacyBasis": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.legacyBasis",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.syntheticBasis": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.syntheticBasis",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.reportedVersion": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.reportedVersion",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.reportedBuild": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.reportedBuild",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.adapter": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.adapter",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": [
+        "AeroScience"
+      ]
+    },
+    "simulator.apiVersion": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.apiVersion",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.mapping": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.mapping",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.epoch": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.epoch",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.timestampBasis": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.timestampBasis",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.nativeActivity": {
+      "context": "P04 simulator provenance and qualified operation. Never infer historical identity or claim real-simulator validation. simulator.nativeActivity",
+      "parameters": [
+        "recording",
+        "science"
+      ],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.aircraftType": {
+      "context": "P04 exact source identity disclosure before evidence submission; unknown values remain unknown.",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.aircraftRegistration": {
+      "context": "P04 exact source identity disclosure before evidence submission; unknown values remain unknown.",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
     }
   }
 }

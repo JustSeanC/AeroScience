@@ -10,11 +10,14 @@ public static partial class FlightRegimeEvaluation
     public static string VersionFor(FlightRegimeDefinition rule)=>rule.TestPoint is null?Version:CustomVersion;
     public static bool RequiresAirspeed(FlightRegimeDefinition rule)=>rule.TestPoint?.AirspeedRequired??true;
     public static bool RequiresAltitude(FlightRegimeDefinition rule)=>rule.TestPoint?.AltitudeRequired??true;
-    public static bool SupportedSample(TelemetryFrame sample,FlightRegimeDefinition rule)=>rule.TestPoint is null
+    public static bool SupportedSample(TelemetryFrame sample,FlightRegimeDefinition rule)=>SourceQualified(sample)&&(rule.TestPoint is null
         ?sample.IsValid&&!sample.IsPaused&&Enum.IsDefined(sample.Source)&&sample.IndicatedAirspeedKnots>=0
         :sample.TimestampUtc.Offset==TimeSpan.Zero&&!string.IsNullOrWhiteSpace(sample.Aircraft)&&!sample.IsPaused&&Enum.IsDefined(sample.Source)
             &&(!RequiresAirspeed(rule)||double.IsFinite(sample.IndicatedAirspeedKnots)&&sample.IndicatedAirspeedKnots>=0)
-            &&(!RequiresAltitude(rule)||double.IsFinite(sample.AltitudeMslFeet));
+            &&(!RequiresAltitude(rule)||double.IsFinite(sample.AltitudeMslFeet)));
+    private static bool SourceQualified(TelemetryFrame sample)=>sample.SimulatorOrigin?.SimulatorId!=SimulatorPreferences.XPlane12
+        ||sample.SimulatorContext is {Version:1,Clock:{} clock} context&&context.ConnectionEpoch==sample.SimulatorOrigin.ConnectionEpoch
+            &&sample.TimestampUtc==context.HostReceivedUtc&&SimulatorAccessPolicy.QualifiedRate(context)&&!clock.Paused&&!clock.Replay;
     public const double MaximumGapSeconds = 1.5; // supports the existing 1 Hz recorder
 
     public static void Validate(FlightRegimeDefinition? rule)
@@ -52,6 +55,7 @@ public static partial class FlightRegimeEvaluation
 
         public void Add(TelemetryFrame sample)
         {
+            if(sample.ContinuityBreak)Break();
             var at = sample.TimestampUtc;
             if (at < start || at > end) return;
             if (!SupportedSample(sample,rule))

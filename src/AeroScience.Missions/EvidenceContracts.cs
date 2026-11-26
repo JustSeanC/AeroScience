@@ -66,6 +66,7 @@ public static class EvidenceContracts
         if (value.Version != CurrentVersion) throw new NotSupportedException($"Unsupported evidence contract version {value.Version}; preserve the original record.");
         switch (value)
         {
+            case SimulatorOrigin origin: SimulatorProvenance.Validate(origin); break;
             case CollectionPlan plan: ValidatePlan(plan); break;
             case CollectionControlRequest request: ValidateRequest(request); break;
             case CollectionState state: ValidateState(state); break;
@@ -203,6 +204,7 @@ public static class EvidenceContracts
 
     private static void ValidateSession(ScienceCollectionSession session)
     {
+        if(session.SimulatorOrigin is {} origin)SimulatorProvenance.Validate(origin);
         Id(session.Id); Id(session.MissionId); Require(session.Sequence > 0, "Session sequence starts at one.");
         Utc(session.StartedUtc); OptionalUtc(session.EndedUtc); Known(session.Status); OptionalText(session.PlannedSessionKey);
         Require(session.Status != CollectionSessionStatus.Unknown, "A session requires an explicit status.");

@@ -44,7 +44,7 @@ public sealed class SimulatorSettings(PreferenceStore preferences, EngineOptions
         if(connection.Message=="ApiAccessDenied")return "simulator.accessDenied";
         if(connection.Message=="UnsupportedApiVersion")return "simulator.unsupportedApi";
         if(connection.State==ConnectionState.Connected&&snapshot.Telemetry is not null)
-            return effective.Id==SimulatorPreferences.XPlane12?"simulator.readOnlyConnected":"simulator.connected";
+            return effective.Id==SimulatorPreferences.XPlane12?(coordinator.LiveOperationsAllowed?"simulator.qualifiedConnected":"simulator.readOnlyConnected"):"simulator.connected";
         if(connection.Message.Contains("Stale",StringComparison.Ordinal)||connection.Message is "SnapshotSpanExceeded" or "ConfirmationContinuityLost")
             return "simulator.stale";
         if(connection.Message is "WaitingForLoadedFlight" or "WaitingForInitialSnapshot" or "CoreMeasurementUnavailable" or "FlightProgressUnverified"

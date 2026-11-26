@@ -100,6 +100,6 @@ public sealed partial class ScienceStore
         if(AvailabilityError() is {} error)throw new IOException(error);if(!File.Exists(DatabasePath))yield break;
         using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT id,payload_json FROM observations WHERE mission_id=$id AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY timestamp_utc,id";
         cmd.Parameters.AddWithValue("$id",flight.ToString());cmd.Parameters.AddWithValue("$start",start.ToString("O",CultureInfo.InvariantCulture));cmd.Parameters.AddWithValue("$end",end.ToString("O",CultureInfo.InvariantCulture));
-        using var rows=cmd.ExecuteReader();while(rows.Read())yield return JsonSerializer.Deserialize<ScienceObservation>(rows.GetString(1),WireJson.Options)! with{Id=rows.GetInt64(0)};
+        using var rows=cmd.ExecuteReader();while(rows.Read())yield return ReadCatalog<ScienceObservation>(rows.GetString(1)) with{Id=rows.GetInt64(0)};
     }
 }

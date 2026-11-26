@@ -34,7 +34,7 @@ public static class InstrumentOperatingAssessment
                 Add("simulator."+reading.MeasurementId, reading.MeasurementId, reading.Unit, reading.Value,
                     AssessmentStatus.Unknown, good ? AssessmentStatus.Supported : AssessmentStatus.Unavailable,
                     good ? AssessmentStatus.Supported : AssessmentStatus.Unavailable,
-                    "Actual simulator channel availability; no undocumented physical operating envelope is imposed. " + ScienceCatalog.Definitions.Single(d=>d.Id==settings.InstrumentId).DataSource);
+                    "Actual simulator channel availability; no undocumented physical operating envelope is imposed. " + ScienceCatalog.DefinitionFor(settings.InstrumentId,atmosphere?.SimulatorOrigin).DataSource);
                 if (InstrumentCalibration.Derive(settings, reading, atmosphere!.TimestampUtc) is {} derived)
                     Add("calibration."+reading.MeasurementId, "user-defined adjustment", reading.Unit, derived.Value,
                         AssessmentStatus.Unknown, derived.Value is null ? AssessmentStatus.Invalid : AssessmentStatus.Supported,

@@ -260,15 +260,15 @@ public static class ResearchApi
         app.MapGet("/api/missions/{id:guid}/analysis", (Guid id, MissionStore store) => store.Detail(id) is null ? Results.NotFound() : Results.Ok(MissionAnalysis.Compare(store.Research(id).PlanSnapshot, store.StreamSamples(id), store.GetAnalysisSettings(id))));
         app.MapPost("/api/missions/{id:guid}/analysis", (Guid id, AnalysisSettings settings, MissionStore store) => store.SaveAnalysisSettings(id, settings));
         app.MapGet("/api/templates", () => ScienceCatalog.Templates);
-        app.MapGet("/api/instruments", () => ScienceCatalog.Definitions);
+        app.MapGet("/api/instruments", (SimulatorAccessPolicy policy) => ScienceCatalog.Definitions.Select(d=>ScienceCatalog.DefinitionForSimulator(d.Id,policy.SimulatorId)));
         app.MapGet("/api/instruments/configuration", (ResearchOperations research) => research.Configurations);
         app.MapGet("/api/instruments/operating",(ResearchOperations research)=>research.OperatingReports);
         app.MapGet("/api/instruments/operating-status",(MissionCoordinator missions)=>missions.OperatingIntelligence().Sensors);
         app.MapGet("/api/missions/{id:guid}/operating",(Guid id,DateTimeOffset? at,MissionStore store)=>store.OperatingReports(id,at));
-        app.MapGet("/api/instruments/calibration", (InstrumentCalibrationSettings settings, HttpContext context) =>
+        app.MapGet("/api/instruments/calibration", (InstrumentCalibrationSettings settings, HttpContext context,SimulatorAccessPolicy policy) =>
         {
             var definitions = settings.Get();
-            return new { instruments = ScienceCatalog.Definitions.Select(d => InstrumentCalibration.Describe(d.Id)), definitions,
+            return new { instruments = ScienceCatalog.Definitions.Select(d => InstrumentCalibration.DescribeForSimulator(d.Id,policy.SimulatorId)), definitions,
                 warning = settings.Warning, canConfigure = AccessControl.IsLoopback(context) };
         });
         app.MapPost("/api/instruments/calibration", (CalibrationDefinition definition, InstrumentCalibrationSettings settings, HttpContext context) =>
@@ -314,7 +314,7 @@ public static class ResearchApi
         app.MapGet("/api/science/artifacts/{id:guid}",(Guid id,ScienceStore science,MissionStore missions,ScientificAccessSettings settings,HttpContext c)=>{var artifact=science.Artifact(id);if(artifact.Kind is LidarProcessing.TileKind or LidarProcessing.IndexKind){c.Response.RegisterForDispose(science.BeginAnalysis());return Results.File(LidarProcessing.RequireCurrent(science,missions,artifact,settings.Get().Preferences,c.RequestAborted),"application/json",$"AeroScience-{artifact.Kind}-{id:N}.json");}var path=artifact.Kind==ContinuousTerrainSurveys.ArtifactKind?ContinuousTerrainSurveys.RequireCurrent(science,missions,artifact,c.RequestAborted):artifact.Kind is TerrainElevations.TileKind or TerrainElevations.IndexKind?TerrainElevations.RequireCurrent(science,missions,artifact,c.RequestAborted):science.VerifiedArtifactPath(artifact);return Results.File(path,artifact.Format=="tif"?"image/tiff":"application/json",$"AeroScience-{artifact.Kind}-{id:N}.{artifact.Format}");});
         app.MapPost("/api/instruments", (InstrumentConfiguration[] input, MissionCoordinator missions) =>
         { missions.ConfigureInstruments(input); return Results.Ok(missions.Snapshot().Research); });
-        app.MapPost("/api/science/estimate", (EstimateRequest request, ScienceStore science) => science.Estimate(request.Instruments, request.DurationMinutes));
+        app.MapPost("/api/science/estimate", (EstimateRequest request, ScienceStore science,SimulatorAccessPolicy policy) => science.Estimate(request.Instruments, request.DurationMinutes,policy.SimulatorId));
         app.MapPost("/api/mission-selection", (MissionSelection request, MissionCoordinator missions) => new { planId=missions.SelectPlan(request.PlanId) });
         app.MapGet("/api/plans", (int? limit, int? offset, MissionStore missions) => missions.Plans(limit ?? 50, offset ?? 0));
         app.MapGet("/api/plans/{id:guid}", (Guid id, MissionStore missions) => missions.Plan(id) is { } plan ? Results.Ok(plan) : Results.NotFound());

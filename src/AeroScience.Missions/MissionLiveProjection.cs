@@ -94,7 +94,7 @@ public sealed class MissionLiveProjection(MissionStore store,Guid mission,Scienc
         if(checkpoint?.CurrentSessionId is {} sid&&!sessions.Any(s=>s.Id==sid)&&store.CollectionSession(mission,sid) is {} open)sessions=[..sessions,open];
         var summaries=sessions.Select(s=>new SessionEvaluation(s,sessionResults.TryGetValue(s.Id,out var results)?results.Select(r=>r.InstrumentId).Distinct().Select(i=>ScienceYieldEvaluation.Calculate(mission,s.Id,i,asOf,results)).ToArray():[],[],[],["Bounded live session diagnostics; final archived reports retain complete events and grading evidence."])).ToArray();
         var input=new MissionEvaluationInput(1,mission,asOf,false,context,facts.ToArray(),yield,summaries,[],
-            ["Bounded incremental live projection: up to 1000 positions and 500 intents per update. No raster/coverage/archive scan on dashboard refresh. Future and unsupported evidence stays uncertain.",..(bounded?new[]{"Live memory bound reached; projection is partial. Full archived evaluation is required."}:Array.Empty<string>())],FlightSource:flight.Source);
+            ["Bounded incremental live projection: up to 1000 positions and 500 intents per update. No raster/coverage/archive scan on dashboard refresh. Future and unsupported evidence stays uncertain.",..(bounded?new[]{"Live memory bound reached; projection is partial. Full archived evaluation is required."}:Array.Empty<string>())],FlightSource:flight.Source){SimulatorOrigin=flight.SimulatorOrigin};
         return MissionGrading.Report(input,reason:"Incremental provisional evidence; End Flight determines final eligibility");
     }
     InstrumentConfiguration Configuration(MissionObligation o)=>context!.Configurations.Single(c=>c.Settings.InstrumentId==o.InstrumentId).Settings;

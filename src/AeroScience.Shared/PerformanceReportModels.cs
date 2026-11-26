@@ -9,7 +9,11 @@ public sealed record SessionEvaluation(ScienceCollectionSession Session,ScienceY
     GradingCriterionResult[] Criteria,CollectionEvent[] Events,string[] Limitations);
 public sealed record MissionEvaluationInput(int Version,Guid MissionId,DateTimeOffset AsOfUtc,bool Completed,
     MissionAssessmentContext? Context,CriterionEvidence[] Evidence,ScienceYield[] Yield,SessionEvaluation[] Sessions,
-    string[] References,string[] Limitations, ScientificSourceEvidence[]? Sources=null,DateTimeOffset? SourceCutoffUtc=null,TelemetrySource? FlightSource=null,bool Interrupted=false);
+    string[] References,string[] Limitations, ScientificSourceEvidence[]? Sources=null,DateTimeOffset? SourceCutoffUtc=null,TelemetrySource? FlightSource=null,bool Interrupted=false)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorOrigin? SimulatorOrigin { get; init; }
+}
 public sealed record MissionPerformanceReport(int Version,Guid MissionId,int Revision,DateTimeOffset CreatedUtc,
     string Reason,string? PreviousSha256,MissionEvaluationInput Input,MissionGrade Grade,
     CategoryPerformance[] Categories,double? SupportedScoreLower,double? SupportedScoreUpper,string Sha256);

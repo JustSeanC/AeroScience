@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "catalogVersion": 26,
+  "catalogVersion": 27,
   "fallback": "en-US",
   "locales": [
     {
@@ -35,6 +35,6 @@
     }
   ],
   "qualityContract": 1,
-  "catalogIdentity": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
-  "bundleIdentity": "ef48f415967ba821fef1efbcc51fdd9da0b1507ff53eced346fb12864ad2481b"
+  "catalogIdentity": "584719acdcf54d870479f98464112e170a04b85a22b0e960dadf1b1534cb9735",
+  "bundleIdentity": "f38d6de00c25db45c770fcaf782de0e196f96e2d6d572a1b06e2aaf995759d67"
 }

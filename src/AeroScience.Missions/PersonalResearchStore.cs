@@ -156,6 +156,7 @@ public sealed partial class MissionStore
             ?? (reference is not null && reference.Id == cardId ? ResearchCard(reference.Id, reference.Revision)
                 : throw new ArgumentException("This flight has no matching frozen personal test card. Select the card before recording."));
         SupportedCard(card);
+        SimulatorAccessPolicy.RequireCard(mission.SimulatorOrigin,card);
         cmd.Parameters.AddWithValue("$flight", mission.Id.ToString());
         using var scienceLease=card.ExperimentalSensor is not null||AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null||card.ObservationFlight is not null&&science?.AvailabilityError() is null?science?.BeginAnalysis():null;
         PersonalResearchAttempt attempt;

@@ -217,7 +217,9 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
             status.Text = WindowsPresentation.Text("simulator.nativeStatus", new Dictionary<string, object> {
                 ["name"] = SimulatorPreferences.Name(ActiveSimulator.Id), ["status"] = WindowsPresentation.Text(source.StatusKey,
                     new Dictionary<string,object>{["name"]=SimulatorPreferences.Name(ActiveSimulator.Id)}),
-                ["recording"] = WindowsPresentation.Text("simulator.noRecording") });
+                ["recording"] = WindowsPresentation.Text(source.ProductionRecordingReady?"simulator.nativeActivity":"simulator.noRecording",
+                    new Dictionary<string,object>{["recording"]=WindowsPresentation.Text(snapshot.ActiveMission is null?"windows.flight.noMission":"windows.flight.recording"),
+                        ["science"]=WindowsPresentation.Text(snapshot.Research?.CollectionStatus switch{ScienceCollectionStatus.Paused=>"home.science.paused",ScienceCollectionStatus.Collecting=>"home.science.collecting",ScienceCollectionStatus.AwaitingSource or ScienceCollectionStatus.Unavailable=>"home.science.unavailable",_=>"home.science.stopped"})}) });
             return;
         }
         status.Text = WindowsPresentation.Text("windows.mainForm.engineRunningToolbar", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{ApplicationProfile.Current.Name}"), ["value2"] = WindowsPresentation.Format($"{snapshot.Connection.Message}"), ["value3"] = WindowsPresentation.Format($"{(snapshot.ActiveMission is null ? WindowsPresentation.Text("windows.flight.noMission") : WindowsPresentation.Text("windows.flight.recording"))}"), ["value4"] = WindowsPresentation.Format($"{Toolbar.Message}") });

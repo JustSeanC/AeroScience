@@ -21,7 +21,7 @@ using Xunit;
 
 namespace AeroScience.Tests;
 
-public sealed class SimulatorIntegrationTests : IDisposable
+public sealed partial class SimulatorIntegrationTests : IDisposable
 {
     private readonly string directory=Path.Combine(Path.GetTempPath(),"aeroscience-p03-engine",Guid.NewGuid().ToString("N"));
     private sealed class NoSimulator : ITelemetryProvider
@@ -98,7 +98,7 @@ public sealed class SimulatorIntegrationTests : IDisposable
             Assert.Equal(HttpStatusCode.Conflict,(await client.PostAsJsonAsync($"/api/missions/{flight}/collection/control",new CollectionControlRequest(1,flight,Guid.NewGuid(),0,action,null),WireJson.Options)).StatusCode);
         Assert.Equal(HttpStatusCode.Conflict,(await client.PostAsJsonAsync("/api/research/control",new ResearchCardControl(1,flight,Guid.NewGuid(),0,ResearchCardAction.BeginAttempt,Guid.NewGuid(),null),WireJson.Options)).StatusCode);
         var sharing=host.Services.GetRequiredService<LiveFlightSharing>();
-        Assert.Contains("not yet enabled",(await Assert.ThrowsAsync<InvalidOperationException>(()=>sharing.Preview(Guid.NewGuid(),default))).Message);
+        Assert.Contains("current, confirmed",(await Assert.ThrowsAsync<InvalidOperationException>(()=>sharing.Preview(Guid.NewGuid(),default))).Message);
         await Assert.ThrowsAsync<InvalidOperationException>(()=>sharing.Start(new(Guid.NewGuid(),flight,1,"Pilot",true),default));
         foreach(var op in new[]{"state","start","science-start","science-resume"})
         {var json=host.Services.GetRequiredService<ToolbarCommandHandler>().Handle(JsonSerializer.Serialize(new ToolbarCommand(1,Guid.NewGuid(),op),WireJson.Options));var reply=JsonSerializer.Deserialize<ToolbarReply>(json,WireJson.Options)!;Assert.False(reply.Ok);Assert.Contains("X-Plane",reply.Error);}

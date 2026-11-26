@@ -55,7 +55,11 @@ public sealed record ScienceCollectionSession([property: JsonRequired] int Versi
     Guid MissionId, long Sequence, DateTimeOffset StartedUtc, CollectionSessionStatus Status,
     EffectiveInstrumentConfiguration[] Configurations, EvidenceLink[] Evidence,
     string? PlannedSessionKey = null, DateTimeOffset? EndedUtc = null,
-    CollectionEndReason? EndReason = null) : IVersionedEvidence;
+    CollectionEndReason? EndReason = null) : IVersionedEvidence
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorOrigin? SimulatorOrigin { get; init; }
+}
 
 public sealed record CollectionEvent([property: JsonRequired] int Version, Guid MissionId,
     long Sequence, DateTimeOffset RecordedUtc, DateTimeOffset InputUtc, Guid? SessionId,

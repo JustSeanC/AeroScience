@@ -77,6 +77,7 @@ public sealed class ResearchOperations : IDisposable
     public InstrumentConfiguration[] Configurations => configurations.Select(InstrumentCalibration.Freeze).ToArray();
     public void EnsureCanStart(InstrumentConfiguration[] input)
     {
+        SimulatorPolicy.RequireInstruments(input);
         if (!ScienceCatalog.Normalize(input).Any(c => c.Enabled)) return;
         try { science.Initialize(); }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or SqliteException)
@@ -85,11 +86,13 @@ public sealed class ResearchOperations : IDisposable
     public void Begin(Mission active, MissionResearch research)
     {
         SimulatorPolicy.RequireScience();
+        if(SimulatorPolicy.XPlane&&active.SimulatorOrigin is not {SimulatorId:SimulatorPreferences.XPlane12})
+            throw new InvalidOperationException("X-Plane scientific collection requires the recording's frozen, persisted simulator origin.");
         mission = active; context = research; configurations = ScienceCatalog.Normalize(research.Instruments);
         acquisitions.Clear(); baseline = null; intentionallyPaused = false; pauseStarted = null; pauseSeconds = 0;
         effective.Clear(); lastAssessment=null; operating=[];CollectionSessionId=null;
         OperatingContextUtc=active.StartedUtc;
-        foreach(var config in configurations)effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),1,active.StartedUtc);
+        foreach(var config in configurations)effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),1,active.StartedUtc,active.SimulatorOrigin);
         collectionManaged=false;collectionPhase=CollectionPhase.Unknown;ingressIntents=[];remote.Begin();
     }
     public void End()
@@ -113,7 +116,7 @@ public sealed class ResearchOperations : IDisposable
             if (JsonSerializer.Serialize(previous,WireJson.Options)!=JsonSerializer.Serialize(config,WireJson.Options) && acquisitions.TryGetValue(config.InstrumentId, out var run))
             { run.Anchor = null; run.Slot = -1; run.Error = null; run.CadenceReference = null; }
             if(JsonSerializer.Serialize(previous,WireJson.Options)!=JsonSerializer.Serialize(config,WireJson.Options))
-                effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),(effective.GetValueOrDefault(config.InstrumentId)?.Revision??0)+1,DateTimeOffset.UtcNow);
+                effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),(effective.GetValueOrDefault(config.InstrumentId)?.Revision??0)+1,DateTimeOffset.UtcNow,mission?.SimulatorOrigin);
         }
         configurations = next;
         OperatingContextUtc=DateTimeOffset.UtcNow;
@@ -143,6 +146,7 @@ public sealed class ResearchOperations : IDisposable
     {
         SimulatorPolicy.Observe(update);
         if(!SimulatorPolicy.ScienceAllowed)return;
+        if(SimulatorPolicy.XPlane)update=SimulatorPolicy.Qualify(update);
         if(mission is not null && update.Frame is {} assessed && (lastAssessment is null || assessed.TimestampUtc-lastAssessment>=TimeSpan.FromSeconds(1)))
         {
             
@@ -173,7 +177,7 @@ public sealed class ResearchOperations : IDisposable
                 baseline = observed;
             }
         }
-        if (mission is not null && context is not null && !intentionallyPaused && (!collectionManaged||collectionPhase==CollectionPhase.Collecting)) remote.Offer(mission, context, configurations, update,ingressIntents,collectionManaged);
+        if (!SimulatorPolicy.XPlane && mission is not null && context is not null && !intentionallyPaused && (!collectionManaged||collectionPhase==CollectionPhase.Collecting)) remote.Offer(mission, context, configurations, update,ingressIntents,collectionManaged);
         if (update.Atmosphere is not { } source) return;
         if (atmosphere is not null && source.TimestampUtc <= atmosphere.TimestampUtc) return;
         atmosphere = source;
@@ -201,9 +205,9 @@ public sealed class ResearchOperations : IDisposable
                 missions.AddDatasetReference(mission.Id, new(run.Dataset.Id, run.Dataset.LibraryId, run.Dataset.RelativePath, run.Dataset.ProvenanceJson));
                 var originalValues = valid.Select(v => new ScienceObservation(0, run.Dataset.Id, mission.Id, config.InstrumentId,
                     source.TimestampUtc, v.MeasurementId, v.Value!.Value, v.Unit, v.Provenance,
-                    (update.Connection.Source == TelemetrySource.Simulated ? "Synthetic test fixture / " : "MSFS 2024 / SimConnect ") + instrument.Definition.Measurements.Single(m => m.Id == v.MeasurementId).SimulatorVariable,
+                    (update.Connection.Source == TelemetrySource.Simulated ? "Synthetic test fixture / " : source.SimulatorOrigin?.SimulatorId==SimulatorPreferences.XPlane12?"X-Plane 12 / local read-only Web API v1 / ":"MSFS 2024 / SimConnect ") + ScienceCatalog.DefinitionFor(config.InstrumentId,source.SimulatorOrigin).Measurements.Single(m => m.Id == v.MeasurementId).SimulatorVariable,
                     located?.Latitude, located?.Longitude, located?.AltitudeMslFeet, gap > 0 ? ObservationQuality.AcquisitionGap : ObservationQuality.Valid,
-                    located?.TimestampUtc,SessionId:intent?.SessionId,IntentId:intent?.Id)).ToArray();
+                    located?.TimestampUtc,SessionId:intent?.SessionId,IntentId:intent?.Id){SimulatorOrigin=source.SimulatorOrigin,SimulatorContext=source.SimulatorContext}).ToArray();
                 var values = originalValues.Concat(originalValues.Select(v => InstrumentCalibration.Derive(config, v)).OfType<ScienceObservation>()).ToArray();
                 var count = science.Append(values);
                 if(intent is not null)missions.AcknowledgeScienceIntent(intent.Id,intent.SessionId,intent.Id,ScienceStore.ObservationBatchHash(values));

@@ -42,7 +42,7 @@ public static class MissionAnalysis
         foreach (var sample in samples)
         {
             if (!MissionPlanning.Position(sample.Latitude, sample.Longitude)) continue;
-            var p = new Coordinates(sample.Latitude, sample.Longitude); var continuity = previous is not null && (sample.TimestampUtc - previous.TimestampUtc).TotalSeconds is > 0 && (sample.TimestampUtc - previous.TimestampUtc).TotalSeconds <= settings.MaximumGapSeconds;
+            var p = new Coordinates(sample.Latitude, sample.Longitude); var continuity = !sample.ContinuityBreak && previous is not null && (sample.TimestampUtc - previous.TimestampUtc).TotalSeconds is > 0 && (sample.TimestampUtc - previous.TimestampUtc).TotalSeconds <= settings.MaximumGapSeconds;
             var last = previous is null ? p : new Coordinates(previous.Latitude, previous.Longitude);
             if (continuity) distance += Geodesy.Distance(last, p); else if (previous is not null) gaps++;
             for (var i = 0; i < route.Length; i++) closest[i] = Math.Min(closest[i], Geodesy.Distance(p, route[i]));

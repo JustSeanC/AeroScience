@@ -36,15 +36,17 @@ public static class TerrainProfiles
         var distances=new double[vertices.Length];var gaps=new bool[vertices.Length];
         for(var i=1;i<vertices.Length;i++){
             token.ThrowIfCancellationRequested();distances[i]=distances[i-1]+Geodesy.Distance(vertices[i-1].Position,vertices[i].Position);
-            gaps[i]=vertices[i].Frame is {} next&&vertices[i-1].Frame is {} prior&&(next.TimestampUtc<=prior.TimestampUtc||(next.TimestampUtc-prior.TimestampUtc).TotalSeconds>1.5||next.IsPaused||prior.IsPaused);
+            gaps[i]=vertices[i].Frame is {} next&&vertices[i-1].Frame is {} prior&&(next.ContinuityBreak||next.TimestampUtc<=prior.TimestampUtc||(next.TimestampUtc-prior.TimestampUtc).TotalSeconds>1.5||next.IsPaused||prior.IsPaused);
         }
         var total=distances[^1];if(!double.IsFinite(total)||total<=0)throw new ArgumentException("Choose a route with a nonzero horizontal distance.");
         var warnings=new List<string>();if(gaps.Any(g=>g))warnings.Add("Recorded position gaps are not reconstructed. The distance axis includes straight endpoint displacement across those gaps; it is not a complete flown-distance measurement.");
         var context=new List<SimulatorTerrainPoint>();
         if(request.SimulatorContext&&request.Path=="track"){
             var step=Math.Max(1,(int)Math.Ceiling(vertices.Length/2049d));
-            for(var i=0;i<vertices.Length;i+=step)if(vertices[i].Frame is {Source:TelemetrySource.Simulator,IsPaused:false,AltitudeAglFeet:>=0} f&&double.IsFinite(f.AltitudeAglFeet.Value))context.Add(new(distances[i],vertices[i].Position,(f.AltitudeMslFeet-f.AltitudeAglFeet.Value)*.3048,f.TimestampUtc));
-            warnings.Add("MSFS Terrain - Simulated Context: sparse estimates from recorded simulator MSL minus AGL. Vertical reference is unverified. These points are not historical DEM science and never count toward yield, coverage or grading.");
+            for(var i=0;i<vertices.Length;i+=step)if(vertices[i].Frame is {Source:TelemetrySource.Simulator,IsPaused:false,AltitudeAglFeet:>=0} f&&f.SimulatorOrigin?.SimulatorId!=SimulatorPreferences.XPlane12&&double.IsFinite(f.AltitudeAglFeet.Value))context.Add(new(distances[i],vertices[i].Position,(f.AltitudeMslFeet-f.AltitudeAglFeet.Value)*.3048,f.TimestampUtc));
+            warnings.Add(vertices.Any(v=>v.Frame?.SimulatorOrigin?.SimulatorId==SimulatorPreferences.XPlane12)
+                ?"X-Plane ground elevation is unqualified. No MSL-minus-AGL terrain estimate is shown; genuine external terrain retains its own datum and provenance."
+                :"MSFS Terrain - Simulated Context: sparse estimates from recorded simulator MSL minus AGL. Vertical reference is unverified. These points are not historical DEM science and never count toward yield, coverage or grading.");
         }
         using var lease=request.SourceId is not null?science.BeginAnalysis():null;
         ScientificSource? source=null;ScientificRaster? raster=null;RasterGrid? grid=null;double resolution=double.NaN;

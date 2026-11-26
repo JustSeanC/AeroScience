@@ -286,9 +286,12 @@ internal sealed class XPlaneSnapshotAssembler
             time.GetElapsedTime(current.StartedStamp, current.CompletedStamp).TotalMilliseconds, clock, timings,
             new(available, missing, ["Candidate flight/loading and attitude conventions require genuine X-Plane validation.",
                 "Read confirmations are a bounded non-atomic composite; field receipt times remain separate.",
-                "P02 is not registered for production recording or scientific collection; simulator UTC year is unknown.",
+                "Host policy independently qualifies recording and supported science; simulator UTC year is unknown.",
                 "A new epoch does not establish continuity with an earlier flight."]),
-            CoreSnapshotSpanMilliseconds: time.GetElapsedTime(current.StartedStamp, coreEnd.ReceivedStamp).TotalMilliseconds);
+            CoreSnapshotSpanMilliseconds: time.GetElapsedTime(current.StartedStamp, coreEnd.ReceivedStamp).TotalMilliseconds)
+            {ReportedValues=definitions.Values.Where(d=>available.Contains(d.Definition.Key)&&XPlaneDatarefs.ReportedUnits.ContainsKey(d.Definition.Key))
+                .Select(d=>new SimulatorReportedValue(d.Definition.Key,d.Definition.Name,Number(confirmed,d.Definition.Key)!.Value,XPlaneDatarefs.ReportedUnits[d.Definition.Key],
+                    current.Values.Single(v=>v.Id==d.Id).ReceivedUtc)).OrderBy(v=>v.Channel).ToArray()};
     }
 
     private static SimulatorClock? Clock(IReadOnlyDictionary<string, JsonElement?> values)

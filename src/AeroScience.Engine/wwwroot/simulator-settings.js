@@ -11,7 +11,7 @@ export function connectionStatus(snapshot){
   if(!source)return snapshot?.connection?.message||'';
   const reason=snapshot.connection?.message;
   const key=reason==='ApiAccessDenied'?'simulator.accessDenied':reason==='UnsupportedApiVersion'?'simulator.unsupportedApi'
-    :reason==='SimulatorSourceMismatch'?'simulator.sourceMismatch':snapshot.connection?.state==='connected'&&snapshot.telemetry?'simulator.readOnlyConnected'
+    :reason==='SimulatorSourceMismatch'?'simulator.sourceMismatch':snapshot.connection?.state==='connected'&&snapshot.telemetry?(source.productionRecordingReady?'simulator.qualifiedConnected':'simulator.readOnlyConnected')
     :reason?.includes('Stale')||reason==='SnapshotSpanExceeded'?'simulator.stale':snapshot.connection?.state==='unavailable'?'simulator.invalidApi':snapshot.connection?.state==='disconnected'?'simulator.waiting':'simulator.waitingData';
   return copy(key,{name:simulatorName(source.id)});
 }

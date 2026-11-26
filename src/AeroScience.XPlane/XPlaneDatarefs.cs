@@ -8,6 +8,15 @@ internal static class XPlaneDatarefs
 {
     // Official catalog names/units: docs/research/v0.8.1-xplane-feasibility.md.
     internal const string MappingRevision = "xplane-web-v1-map1";
+    // Bounded numeric source projection only; never include private aircraft paths
+    // or arbitrary API strings. Normalized frames retain these original units/values.
+    internal static readonly IReadOnlyDictionary<string,string> ReportedUnits=new Dictionary<string,string>
+    {
+        ["latitude"]="deg",["longitude"]="deg",["msl"]="m",["agl"]="m",["ias"]="kt",["tas"]="m/s",["groundspeed"]="m/s",
+        ["heading"]="degT",["track"]="degT",["pitch"]="deg",["bank"]="deg",["vertical-speed"]="m/s",["mach"]="1",
+        ["temperature"]="degC",["pressure"]="Pa",["wind-speed"]="m/s",["wind-direction"]="degT",["density"]="kg/m3",
+        ["running-seconds"]="s",["flight-seconds"]="s",["paused"]="1",["replay"]="1",["requested-rate"]="1",["actual-rate"]="1",["dilation-rate"]="1",["distance-rate"]="1"
+    };
     internal static readonly IReadOnlyList<XPlaneDataref> All = Array.AsReadOnly<XPlaneDataref>([
         new("latitude", "sim/flightmodel/position/latitude", "double", true),
         new("longitude", "sim/flightmodel/position/longitude", "double", true),

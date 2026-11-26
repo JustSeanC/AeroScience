@@ -1,6 +1,7 @@
 import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {t as textForUI} from './i18n.js';
 import {archivedSources} from "./archived-source-picker.js";
+import {simulatorOriginDetails} from './simulator-origin.js';
 import { ResearchMap } from "./map.js";
 import { planningArea, planningDistance, displayReading } from "./science-display.js";
 import {table as scientificTable} from './workstation-ui.js';
@@ -52,6 +53,7 @@ function table(parent, rows) {
 }
 
 export function missionWorkspace(parent, id, mission, api, review) {
+  simulatorOriginDetails(parent,mission.simulatorOrigin,mission.source);
   const existing = [...parent.childNodes],
     root = el("section"),
     nav = el("div"),

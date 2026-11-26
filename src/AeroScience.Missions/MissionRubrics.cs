@@ -19,9 +19,9 @@ public static class MissionRubrics
         var ordered=slots.Distinct().Order();
         return (target is {} count?ordered.TakeWhile((_,index)=>index<count):ordered).ToHashSet();
     }
-    public static MissionAssessmentContext Freeze(Guid mission,DateTimeOffset at,ScienceMode mode,string planHash,MissionPlan? plan,InstrumentConfiguration[] settings,string? objective=null,ReadinessAssessment? readiness=null)
+    public static MissionAssessmentContext Freeze(Guid mission,DateTimeOffset at,ScienceMode mode,string planHash,MissionPlan? plan,InstrumentConfiguration[] settings,string? objective=null,ReadinessAssessment? readiness=null,SimulatorOrigin? origin=null)
     {
-        var configs=settings.Where(c=>c.Enabled).Select((c,i)=>new EffectiveInstrumentConfiguration(MissionPlanning.StableWaypointId(mission,10000+i),1,at,c,c.Calibration,OperatingPolicy:new("hybrid-realistic-1",1,PreflightReadiness.Hash("hybrid-realistic-1")),Specification:InstrumentCalibration.Describe(c.InstrumentId).Specification)).ToArray();
+        var configs=settings.Where(c=>c.Enabled).Select((c,i)=>new EffectiveInstrumentConfiguration(MissionPlanning.StableWaypointId(mission,10000+i),1,at,c,c.Calibration,OperatingPolicy:new("hybrid-realistic-1",1,PreflightReadiness.Hash("hybrid-realistic-1")),Specification:InstrumentCalibration.Describe(c.InstrumentId,origin).Specification)).ToArray();
         var template=plan?.Template??MissionTemplateKind.GeneralResearch;
         var rubric=Define(template,configs.Any(c=>RemoteAcquisition.Instruments.ContainsKey(c.Settings.InstrumentId)));
         var obligations=new List<MissionObligation>();

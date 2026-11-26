@@ -28,11 +28,13 @@ public sealed partial class OrganizationConnectionIntegrationTests
             var card=await RealOpportunity(Server,template);if(incomplete)await Server.Post($"/api/organization/submissions/policies/{card.Id}",new SubmissionPolicyCommand(1,Guid.NewGuid(),1,SubmissionPolicyMode.AllowIncompleteSubmission));var claim=await BrowserClaim(Server,card);var preview=await Desktop.PreviewMission(Read,claim.Id,new(),Store,default);var saved=await Desktop.PrepareMission(Read,claim.Id,MissionSave(preview),Store,default);return(card,claim,saved);
         }
         public static TelemetryFrame Frame(DateTimeOffset at,double speed=120)=>new(at,TelemetrySource.Simulated,"SYNTHETIC evidence fixture, no MSFS",40,-75,3000,null,speed,speed,speed,0,0,0,0,0);
-        public async Task<PersonalResearchAttempt> Record(PreparedOrganizationMission p,int seconds=2,bool notes=false,bool fail=false)
+        public async Task<PersonalResearchAttempt> Record(PreparedOrganizationMission p,int seconds=2,bool notes=false,bool fail=false,SimulatorOrigin? origin=null)
         {
             // Wait for the real server's authoritative claim interval; never backdate a claim to authorize evidence.
-            var start=DateTimeOffset.UtcNow;await Task.Delay(TimeSpan.FromSeconds(seconds));var flight=Store.Create("Synthetic retained submission flight",Frame(start),start,plan:p.Plan);
-            for(var i=0;i<=seconds;i++)Store.Append(flight,Frame(start.AddSeconds(i),fail?150:120));if(notes)for(var i=0;i<3;i++)Store.AddMarker(flight,new("observation","Selected original pilot note "+i),start.AddSeconds(i*seconds/3d),Frame(start.AddSeconds(i*seconds/3d)),"PRIVATE-CONTEXT-NOT-SHARED");
+            var start=DateTimeOffset.UtcNow;await Task.Delay(TimeSpan.FromSeconds(seconds));
+            TelemetryFrame Input(DateTimeOffset at,double speed=120)=>origin is null?Frame(at,speed):Frame(at,speed) with{Source=TelemetrySource.Simulator,SimulatorOrigin=origin};
+            var flight=Store.Create("Synthetic retained submission flight",Input(start),start,plan:p.Plan,simulatorOrigin:origin);
+            for(var i=0;i<=seconds;i++)Store.Append(flight,Input(start.AddSeconds(i),fail?150:120));if(notes)for(var i=0;i<3;i++)Store.AddMarker(flight,new("observation","Selected original pilot note "+i),start.AddSeconds(i*seconds/3d),Input(start.AddSeconds(i*seconds/3d)),"PRIVATE-CONTEXT-NOT-SHARED");
             Store.Finish(flight,MissionStatus.Completed,start.AddSeconds(seconds),"complete");return Store.EvaluateResearchAttempt(new(Guid.NewGuid(),flight,start,start.AddSeconds(seconds),CardId:p.Card.Id),science:Science);
         }
         public SubmissionDraft Draft(PersonalResearchAttempt result,string[]? keys=null)=>Store.SaveSubmissionDraft(new(1,Guid.NewGuid(),0,result.FlightId,[result.Id],keys,"Explicit selected package",Upload),Science);

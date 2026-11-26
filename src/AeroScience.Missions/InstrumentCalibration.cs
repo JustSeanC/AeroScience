@@ -11,12 +11,19 @@ public static class InstrumentCalibration
     private const string Sdk = "https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimVars/Simulation_Variables.htm";
     private static readonly HashSet<string> Units = ["1", "degC", "inHg", "kt", "degT", "slug/ft3", "deg", "m", "nm", "Hz"];
 
-    public static InstrumentCalibrationInfo Describe(string instrument)
+    public static InstrumentCalibrationInfo Describe(string instrument,SimulatorOrigin? origin=null)
+    {
+        if(origin is not null)SimulatorProvenance.Validate(origin);
+        return DescribeForSimulator(instrument,origin?.SimulatorId);
+    }
+    public static InstrumentCalibrationInfo DescribeForSimulator(string instrument,string? simulatorId)
     {
         var definition = ScienceCatalog.Definitions.SingleOrDefault(d => d.Id == instrument)
             ?? throw new ArgumentException("Select a known scientific instrument.");
+        definition=ScienceCatalog.DefinitionForSimulator(instrument,simulatorId);
+        var xplane=simulatorId==SimulatorPreferences.XPlane12&&definition.Measurements.Length>0;
         var profiles = InstrumentProfiles.Catalog.Where(p => p.InstrumentId == instrument).ToArray();
-        var references = definition.Measurements.Length > 0 ? new[] { Sdk } : profiles.SelectMany(p => p.References).Distinct().ToArray();
+        var references = definition.Measurements.Length > 0 ? new[] { xplane?"https://developer.x-plane.com/article/x-plane-web-api/":Sdk } : profiles.SelectMany(p => p.References).Distinct().ToArray();
         var limitations = new[]
         {
             "Calibration accuracy, certificates, drift and internal sensor temperatures are not established.",
@@ -24,8 +31,8 @@ public static class InstrumentCalibration
                 ? "Simulator values remain authoritative. Optional user affine adjustments are separately labeled mathematical derivations, not calibrated real-world observations."
                 : "Camera/scanner reference geometry does not recalibrate external datasets. Provider scale, offset, QA, wavelengths and source dates remain authoritative; user radiometric adjustments are unsupported."
         };
-        var specification = new InstrumentSpecification(1, "aeroscience.instrument." + instrument, 1, definition, references, limitations);
-        var reference = new CalibrationDefinition(1, "aeroscience.calibration." + instrument, 1, instrument,
+        var specification = new InstrumentSpecification(1, (xplane?"aeroscience.instrument.xplane-web-v1.":"aeroscience.instrument.") + instrument, 1, definition, references, limitations);
+        var reference = new CalibrationDefinition(1, (xplane?"aeroscience.calibration.xplane-web-v1.":"aeroscience.calibration.") + instrument, 1, instrument,
             definition.Measurements.Length > 0 ? CalibrationInformationStatus.Unknown : CalibrationInformationStatus.Unavailable,
             [], references, limitations);
         // Detach catalog arrays: a client must not edit the process-wide reference catalog.
@@ -71,7 +78,8 @@ public static class InstrumentCalibration
         else
         {
             var reference = Describe(instrument).Reference;
-            if (EvidenceContracts.ContentHash(definition) != EvidenceContracts.ContentHash(reference))
+            if (EvidenceContracts.ContentHash(definition) != EvidenceContracts.ContentHash(reference)
+                &&EvidenceContracts.ContentHash(definition)!=EvidenceContracts.ContentHash(DescribeForSimulator(instrument,SimulatorPreferences.XPlane12).Reference))
                 throw new ArgumentException("Reference calibration metadata cannot be modified or asserted as a certificate. Identify edits as user-defined.");
         }
         foreach (var reference in definition.References)
@@ -83,10 +91,10 @@ public static class InstrumentCalibration
     public static InstrumentConfiguration Freeze(InstrumentConfiguration settings) => settings.Calibration is {} calibration
         ? settings with { Calibration = ValidateSelection(calibration, settings.InstrumentId) } : settings;
 
-    public static EffectiveInstrumentConfiguration Effective(InstrumentConfiguration settings, Guid id, int revision, DateTimeOffset at)
+    public static EffectiveInstrumentConfiguration Effective(InstrumentConfiguration settings, Guid id, int revision, DateTimeOffset at,SimulatorOrigin? origin=null)
     {
         settings = InstrumentProfiles.Freeze([settings]).Single();
-        var info = Describe(settings.InstrumentId);
+        var info = Describe(settings.InstrumentId,origin);
         return new(id, revision, at, settings, settings.Calibration ?? info.Reference, Specification: info.Specification);
     }
 

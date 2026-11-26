@@ -51,7 +51,7 @@ public sealed class FlightAttemptDetection(Guid session,FlightTestProcedurePoint
     {
         if(sequence<=State.Sequence)throw new InvalidOperationException("Detection requires increasing original sequence identities.");
         var at=frame.TimestampUtc;var previous=State.LastUtc;var shape=Classify(frame);
-        var broken=!shape.Supported||at.Offset!=TimeSpan.Zero||previous is {} prior&&((at-prior).TotalSeconds is <=0 or >FlightRegimeEvaluation.MaximumGapSeconds||State.Source!=frame.Source||State.Aircraft!=frame.Aircraft);
+        var broken=frame.ContinuityBreak||!shape.Supported||at.Offset!=TimeSpan.Zero||previous is {} prior&&((at-prior).TotalSeconds is <=0 or >FlightRegimeEvaluation.MaximumGapSeconds||State.Source!=frame.Source||State.Aircraft!=frame.Aircraft);
         if(broken){Interrupt(previous??at,"Original required readings, UTC continuity, source or aircraft changed or became unavailable.");State=State with{Sequence=sequence,LastUtc=previous is {} last&&at<=last?last:at,Source=frame.Source,Aircraft=frame.Aircraft};return;}
         State=State with{Sequence=sequence,LastUtc=at,Source=frame.Source,Aircraft=frame.Aircraft};
         if(State.ManualBlocked)return;

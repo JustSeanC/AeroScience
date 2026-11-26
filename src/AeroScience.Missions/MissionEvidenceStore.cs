@@ -304,6 +304,12 @@ public sealed partial class MissionStore
         using var cmd = db.CreateCommand(); cmd.Transaction = tx; cmd.Parameters.AddWithValue("$mission", next.MissionId.ToString());
         if (original is null)
         {
+            cmd.CommandText="SELECT payload_json,sha256 FROM mission_simulator_origins WHERE mission_id=$mission";
+            using(var originRow=cmd.ExecuteReader())
+            {
+                var frozen=originRow.Read()?ReadSimulatorOrigin(originRow.GetString(0),originRow.GetString(1)):null;
+                EvidenceRequire(frozen==session.SimulatorOrigin,"A new science session must retain the recording's exact frozen source; legacy sessions cannot invent an origin.");
+            }
             cmd.CommandText = "SELECT COALESCE(MAX(sequence),0)+1 FROM science_sessions WHERE mission_id=$mission";
             EvidenceRequire(session.Sequence == Convert.ToInt64(cmd.ExecuteScalar(), CultureInfo.InvariantCulture)
                 && current.CurrentSessionId is null && next.CurrentSessionId == session.Id && session.Status == CollectionSessionStatus.Collecting
@@ -316,7 +322,7 @@ public sealed partial class MissionStore
             EvidenceRequire(current.CurrentSessionId == session.Id && original.Status is CollectionSessionStatus.Collecting or CollectionSessionStatus.Paused,
                 "Closed session records are immutable.");
             EvidenceRequire(original.MissionId == session.MissionId && original.Sequence == session.Sequence && original.StartedUtc == session.StartedUtc
-                && original.PlannedSessionKey == session.PlannedSessionKey, "Session identity/start/provenance cannot be rewritten.");
+                && original.PlannedSessionKey == session.PlannedSessionKey && original.SimulatorOrigin==session.SimulatorOrigin, "Session identity/start/provenance cannot be rewritten.");
             EvidenceRequire(session.Configurations.Length >= original.Configurations.Length && original.Configurations.Select((c, i) => JsonSerializer.Serialize(c, WireJson.Options) == JsonSerializer.Serialize(session.Configurations[i], WireJson.Options)).All(v => v),
                 "Effective configuration history is append-only.");
             EvidenceRequire(session.Evidence.Length >= original.Evidence.Length && original.Evidence.Select((e, i) => e == session.Evidence[i]).All(v => v), "Session provenance history is append-only.");

@@ -8,7 +8,8 @@ public enum SubmissionEvidenceKind { Definition, Result, Telemetry, ScientificOb
 public sealed record SubmissionPolicy(int Version,Guid OpportunityId,int Revision,SubmissionPolicyMode Mode,string MinimumRule,int MaximumPayloadBytes,DateTimeOffset PublishedUtc,string RetentionDisclosure);
 public sealed record SubmissionPolicyCommand(int Version,Guid RequestId,int ExpectedRevision,SubmissionPolicyMode Mode);
 public sealed record SubmissionCapabilities(Guid OrganizationId,Guid PilotId,SubmissionPolicy Policy,OrganizationDesktopPermission Permission,
-    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingDefault)] int SupportingProductsVersion=0);
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingDefault)] int SupportingProductsVersion=0,
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingDefault)] int SimulatorOriginsVersion=0);
 public sealed record SubmissionCardBinding(Guid ClaimId,Guid OpportunityId,Guid CampaignId,int IssuedRevision,string IssuedSha256,
     Guid CardId,int CardRevision,string DefinitionSha256,DateTimeOffset StartUtc,DateTimeOffset EndUtc,long KnownRecordedAttempts);
 public sealed record SubmissionEvidenceReference(string Key,SubmissionEvidenceKind Kind,Guid CardId,Guid ResultId,Guid FlightId,
@@ -16,7 +17,11 @@ public sealed record SubmissionEvidenceReference(string Key,SubmissionEvidenceKi
 public sealed record SubmissionManifest(int Version,Guid Id,string Name,string Origin,Guid OrganizationId,string OrganizationName,
     Guid CampaignId,string CampaignName,Guid PilotId,Guid FlightId,Guid[] ResultIds,SubmissionCardBinding[] Cards,SubmissionPolicy[] Policies,
     SubmissionEvidenceReference[] Items,string HistoryDisclosure,string PrivacyDisclosure,
-    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SubmissionReviewLink? ReviewLink=null);
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SubmissionReviewLink? ReviewLink=null)
+{
+    [JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorOrigin? SimulatorOrigin { get; init; }
+}
 public sealed record SubmissionConsent(int Version,Guid GrantId,string ManifestSha256,string PayloadSha256,int PayloadBytes,
     DateTimeOffset ApprovedUtc,bool ExplicitApproval,string Scope="submitEvidence");
 public sealed record SubmissionReceipt(int Version,Guid Id,Guid SubmissionId,Guid OrganizationId,Guid PilotId,Guid CampaignId,

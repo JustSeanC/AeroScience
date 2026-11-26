@@ -1,5 +1,5 @@
 {
-  "version": 26,
+  "version": 27,
   "locale": "en-US",
   "messages": {
     "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -7113,6 +7113,23 @@
     "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
     "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
     "simulator.nativeStatus": "{name} · {status} · {recording}",
-    "simulator.noRecording": "Recording and science unavailable in this development build."
+    "simulator.noRecording": "Recording and science unavailable in this development build.",
+    "simulator.qualifiedConnected": "X-Plane connected. Qualified flight recording and supported atmospheric collection are available. Installed simulator acceptance is pending.",
+    "simulator.incomplete": "Wait for current, confirmed aircraft data before starting X-Plane recording or science. A connection alone is insufficient.",
+    "simulator.legacyUnknown": "Legacy simulator — identity unknown",
+    "simulator.sourceSummary": "Simulator source: {name}",
+    "simulator.sourceBasis": "Simulator-reported measurements and AeroScience derivations are separate from independently acquired historical scientific sources. Source identity does not certify installed simulator acceptance.",
+    "simulator.legacyBasis": "This original record has no explicit simulator identity. The current simulator setting does not identify or relabel it.",
+    "simulator.syntheticBasis": "Synthetic fixture data. This is not an installed simulator observation.",
+    "simulator.reportedVersion": "Reported simulator version",
+    "simulator.reportedBuild": "Reported simulator build",
+    "simulator.adapter": "AeroScience adapter and version",
+    "simulator.apiVersion": "API version",
+    "simulator.mapping": "Mapping revision",
+    "simulator.epoch": "Connection epoch",
+    "simulator.timestampBasis": "Measurement time basis",
+    "simulator.nativeActivity": "{recording} · Science: {science}. Installed simulator acceptance is pending.",
+    "simulator.aircraftType": "Reported aircraft type",
+    "simulator.aircraftRegistration": "Reported aircraft registration"
   }
 }

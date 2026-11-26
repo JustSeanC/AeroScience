@@ -21,13 +21,13 @@ public static class SubmissionEvidenceProtocol
     {
         if(document is null)throw new ArgumentException("Choose a supported evidence document.");
         var m=document.Manifest;
-        if(m is null||m.Version is not(1 or SubmissionSupportingProducts.DocumentVersion)||m.Id==Guid.Empty||m.OrganizationId==Guid.Empty||m.PilotId==Guid.Empty||m.FlightId==Guid.Empty||m.CampaignId==Guid.Empty
+        if(m is null||!SubmissionSimulatorOrigins.KnownVersion(m.Version)||m.Id==Guid.Empty||m.OrganizationId==Guid.Empty||m.PilotId==Guid.Empty||m.FlightId==Guid.Empty||m.CampaignId==Guid.Empty
             ||string.IsNullOrWhiteSpace(m.Name)||m.Name.Length>120||m.Name.Any(char.IsControl)||m.OrganizationName is not {Length:>=1 and <=120}||m.CampaignName is not {Length:>=1 and <=200}
             ||!Uri.TryCreate(m.Origin,UriKind.Absolute,out var origin)||origin.UserInfo!=""||origin.Query!=""||origin.Fragment!=""||origin.AbsolutePath!="/"
             ||m.ResultIds is not {Length:>=1 and <=16}||m.ResultIds.Any(id=>id==Guid.Empty)||m.ResultIds.Distinct().Count()!=m.ResultIds.Length
             ||m.Cards is not {Length:>=1 and <=4}||m.Cards.Any(c=>c is null)||m.Cards.Select(c=>c.CardId).Distinct().Count()!=m.Cards.Length||m.Cards.Select(c=>c.ClaimId).Distinct().Count()!=m.Cards.Length
             ||m.Policies is null||m.Policies.Length!=m.Cards.Length||m.Policies.Any(p=>p is null)||m.Policies.Select(p=>p.OpportunityId).Distinct().Count()!=m.Policies.Length||m.Items is not {Length:>=1 and <=MaximumItems}||m.Items.Any(i=>i is null)||m.Items.Select(i=>i.Key).Distinct().Count()!=m.Items.Length
-            ||document.Evidence is null||document.Evidence.Length!=m.Items.Length||document.Evidence.Any(i=>i is null||i.Reference is null||i.Data is null)||document.Evidence.Select(i=>i.Reference.Key).Distinct().Count()!=document.Evidence.Length||m.HistoryDisclosure!=HistoryDisclosure||m.PrivacyDisclosure!=PrivacyDisclosure)
+            ||document.Evidence is null||document.Evidence.Length!=m.Items.Length||document.Evidence.Any(i=>i is null||i.Reference is null||i.Data is null)||document.Evidence.Select(i=>i.Reference.Key).Distinct().Count()!=document.Evidence.Length||m.HistoryDisclosure!=HistoryDisclosure||m.PrivacyDisclosure!=(m.Version==SubmissionSimulatorOrigins.DocumentVersion?SubmissionSimulatorOrigins.PrivacyDisclosure:PrivacyDisclosure))
             throw new ArgumentException("The submission has an unsupported identity, scope, size or disclosure. Review the selected evidence again.");
         if(m.ReviewLink is {} link&&(link.Version!=1||link.RootReceiptId==Guid.Empty||link.RequestEventId==Guid.Empty||!Digest(link.RootPayloadSha256)))throw new ArgumentException("Choose an exact original review/request identity for supplemental evidence.");
         foreach(var card in m.Cards){
@@ -58,7 +58,7 @@ public static class SubmissionEvidenceProtocol
                 SubmissionEvidenceKind.PilotDocumentation=>d.Documentation is {Length:>=1 and <=MaximumSamples} docs&&docs.All(p=>p is not null&&p.TimestampUtc>=r.StartUtc&&p.TimestampUtc<=r.EndUtc&&p.Text is {Length:<=8000}&&p.Kind is not null&&p.Kind.StartsWith("Pilot Observation",StringComparison.Ordinal)&&p.SupportingObservationIds is {Length:0}),
                 SubmissionEvidenceKind.CollectionSessions=>d.Sessions is {Length:>=1 and <=100} sessions&&sessions.All(s=>s is not null&&s.MissionId==m.FlightId),
                 SubmissionEvidenceKind.MissionConfiguration=>d.Configuration is {} configuration&&configuration.FlightId==m.FlightId&&Digest(configuration.OriginalPlanSha256)&&configuration.Instruments is {Length:<=32}&&configuration.Instruments.All(i=>i is not null),
-                SubmissionEvidenceKind.SupportingProductReference=>m.Version==SubmissionSupportingProducts.DocumentVersion&&d.SupportingProduct is {} p
+                SubmissionEvidenceKind.SupportingProductReference=>m.Version is SubmissionSupportingProducts.DocumentVersion or SubmissionSimulatorOrigins.DocumentVersion&&d.SupportingProduct is {} p
                     &&SupportingValid(p,m.FlightId)&&r.SourceSha256==p.Sha256&&r.OriginalId==p.Id.ToString()&&r.ResultId==Guid.Empty
                     &&r.Key==$"supporting:{r.CardId}:{p.Id}"&&document.Evidence.Any(i=>i.Reference.CardId==r.CardId&&i.Data.Definition is {} card&&SubmissionSupportingProducts.Eligible(card)),
                 _=>false};
@@ -66,6 +66,7 @@ public static class SubmissionEvidenceProtocol
             if(records!=r.Records||d.Telemetry is {} originalTelemetry&&Hash(originalTelemetry)!=r.SourceSha256||d.Observations is {} originals&&(originals.Length!=1||Hash(originals[0])!=r.SourceSha256))valid=false;
             if(!valid)throw new ArgumentException("Selected evidence contains unsupported data or another flight/card's private context.");
         }
+        SubmissionSimulatorOrigins.Validate(document);
         var supporting=document.Evidence.Where(i=>i.Data.SupportingProduct is not null).ToArray();
         if(supporting.Length>SubmissionSupportingProducts.MaximumProducts||supporting.Select(i=>i.Data.SupportingProduct!.Id).Distinct().Count()!=supporting.Length)throw new ArgumentException("Choose at most three distinct supporting product references.");
         foreach(var card in m.Cards)if(document.Evidence.Count(i=>i.Reference.CardId==card.CardId&&i.Data.Definition is not null)!=1)throw new ArgumentException("Each claim needs its exact scoped frozen card definition.");

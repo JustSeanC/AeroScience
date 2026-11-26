@@ -25,7 +25,7 @@ public sealed partial class OrganizationConnections
             if(value.OrganizationId!=draft.Manifest.OrganizationId||value.PilotId!=draft.Manifest.PilotId||value.Policy.OpportunityId!=card.OpportunityId||value.Permission!=saved.Permission)throw new OrganizationSubmissionAuthorizationRequired("This connection belongs to a different pilot or scope. The original claim cannot be substituted.");
             store.CacheSubmissionCapabilities(connection,saved.Origin,value);results.Add(value);
         }
-        if(draft.Manifest.Version==SubmissionSupportingProducts.DocumentVersion&&results.Any(c=>c.SupportingProductsVersion!=SubmissionSupportingProducts.Version))throw new OrganizationSubmissionReviewRequired("This server does not advertise the selected supporting-product format. Keep the draft or explicitly remove these references and review a new package; no upload was attempted.");
+        if(results.Any(c=>!SubmissionSimulatorOrigins.FormatSupported(draft.Manifest,c)))throw new OrganizationSubmissionReviewRequired("This server does not advertise the exact simulator-origin/supporting-product evidence format. Keep the draft; update the receiver and review again. No identity was stripped, downgraded or uploaded.");
         return results.ToArray();
     }
     public async Task<SubmissionDraft> ApproveSubmission(Guid id,SubmissionApproval request,MissionStore store,ScienceStore science,CancellationToken ct)
@@ -38,7 +38,7 @@ public sealed partial class OrganizationConnections
         }
         var cached=store.CachedSubmissionCapabilities(connection.Id,connection.Origin);
         if(cached is null||cached.OrganizationId!=draft.Manifest.OrganizationId||cached.PilotId!=draft.Manifest.PilotId||cached.Permission!=OrganizationDesktopPermission.SubmitEvidence)throw new OrganizationSubmissionAuthorizationRequired("Connect once with Submit Evidence permission to verify this pilot and policy. You can keep the offline draft; no upload is authorized yet.");
-        if(draft.Manifest.Version==SubmissionSupportingProducts.DocumentVersion&&cached.SupportingProductsVersion!=SubmissionSupportingProducts.Version)throw new OrganizationSubmissionReviewRequired("This server has not advertised the supporting-product reference format. Keep these products local or remove them and review a new original-evidence-only package. No downgrade or upload was attempted.");
+        if(!SubmissionSimulatorOrigins.FormatSupported(draft.Manifest,cached))throw new OrganizationSubmissionReviewRequired("This server has not advertised the exact simulator-origin/supporting-product evidence format. Keep the draft and update the receiver; no downgrade or upload was attempted.");
         return store.ApproveSubmission(id,request,science,cached.PilotId,cached.OrganizationId,ct);
     }
     internal async Task<SubmissionRemoteState> SubmissionStatus(SubmissionDraft draft,CancellationToken ct)
@@ -49,10 +49,10 @@ public sealed partial class OrganizationConnections
     internal async Task<SubmissionReceipt> SendSubmission(SubmissionDraft draft,SubmissionDocument document,CancellationToken ct)
     {
         var (saved,credential)=await SubmissionConnection(draft.ConnectionId??Guid.Empty,draft.Manifest,ct);
-        if(document.Manifest.Version==SubmissionSupportingProducts.DocumentVersion){
+        if(document.Manifest.Version is SubmissionSupportingProducts.DocumentVersion or SubmissionSimulatorOrigins.DocumentVersion){
             foreach(var card in document.Manifest.Cards){
                 var current=await Request<SubmissionCapabilities>(saved.Origin,$"/api/member/claims/{card.ClaimId}/submission-policy",null,ct,credential,evidence:true);
-                if(current.OrganizationId!=document.Manifest.OrganizationId||current.PilotId!=document.Manifest.PilotId||current.Permission!=OrganizationDesktopPermission.SubmitEvidence||current.SupportingProductsVersion!=SubmissionSupportingProducts.Version)
+                if(!SubmissionSimulatorOrigins.Supported(document.Manifest,current))
                     throw new OrganizationSubmissionReviewRequired("The server does not currently support this exact reference format/identity. Delivery is held; no replacement or downgrade was sent.");
             }
         }

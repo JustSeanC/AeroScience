@@ -11,8 +11,15 @@ public sealed partial class ScienceStore
 {
     private static T ReadCatalog<T>(string json) where T:class
     {
-        try{return JsonSerializer.Deserialize<T>(json,WireJson.Options)??throw new IOException("Scientific catalogue metadata is missing; original files were preserved.");}
+        try
+        {
+            var value=JsonSerializer.Deserialize<T>(json,WireJson.Options)??throw new IOException("Scientific catalogue metadata is missing; original files were preserved.");
+            if(value is ScienceObservation observation)ScientificSimulatorEvidence.Validate(observation);
+            return value;
+        }
         catch(JsonException error){throw new IOException("Scientific catalogue metadata is invalid; review/recover the selected library. Original data were preserved.",error);}
+        catch(Exception error)when(error is ArgumentException or NotSupportedException)
+        {throw new IOException("Scientific source metadata is unsupported or invalid. Preserve the original evidence; no downgrade or source inference is allowed.",error);}
     }
     public (long Count, long Bytes, string[] Paths) ManagedProductSummary()
     {

@@ -2,6 +2,7 @@ import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {node,link,button,informationDetails,scientificNotice} from './workstation-ui.js';
 import {researchCardTargets} from './personal-research-start.js';
 import {currentFlightPresentation} from './current-flight-state.js';
+import {simulatorSourceLabel} from './simulator-origin.js';
 import {t as textForUI,t} from './i18n.js';
 
 // A view of existing recording/collection controllers, never a recorder or evaluator.
@@ -10,6 +11,7 @@ export function scienceJourney(parent,api){
  const title=node('h2',localizedCopy("ui.scienceJourney.messageReadyToStart")),steps=node('ol'),summary=node('p'),connection=node('p'),recording=node('p'),collection=node('p'),count=node('p'),next=node('p'),actions=node('div',undefined,'action-row'),results=node('div',undefined,'action-row');
  const name=node('h3',undefined,'current-flight-name'),aircraft=node('p',undefined,'current-flight-aircraft'),session=node('p',undefined,'current-flight-session'),payload=node('p',undefined,'current-flight-payload');
  const statuses=node('div',undefined,'current-flight-statuses');statuses.append(recording,collection);
+ const source=node('p');source.dataset.flightSource='';
  recording.dataset.flightRecording='';collection.dataset.flightScience='';connection.dataset.flightConnection='';session.dataset.flightSession='';
  // The existing collection controller moves its own command buttons here.
  // This is one command authority, not another recorder or optimistic shortcut.
@@ -17,13 +19,14 @@ export function scienceJourney(parent,api){
  for(const label of [textForUI("ui.personalResearchStart.messageChooseResearch"),textForUI("ui.scienceJourney.messagePrepareForFlight"),textForUI("flight.action.record"),textForUI("ui.scienceJourney.messageCollectScience"),textForUI("ui.missionOperations.messageReviewResults")])steps.append(node('li',label));
  recording.setAttribute('role','status');collection.setAttribute('role','status');count.dataset.retainedScience='';
  const explanation=informationDetails(root,localizedCopy("ui.scienceJourney.messageRecordingSourceCountDetails"),node('p',localizedCopy("ui.scienceJourney.messageFlightSamplesAreRecordedAircraftTelemetryOriginal")));
- root.prepend(title,name,aircraft,steps,summary,connection,statuses,session,payload,count,next,collectionControls,actions,results);parent.prepend(root);
+ root.prepend(title,name,aircraft,source,steps,summary,connection,statuses,session,payload,count,next,collectionControls,actions,results);parent.prepend(root);
  link(actions,localizedCopy("ui.personalResearchStart.messageChooseResearch"),'#my-research');const instruments=link(actions,localizedCopy("ui.scienceJourney.messageReviewInstruments"),'#science');
   const show=button(actions,localizedCopy("ui.scienceJourney.messageScienceDetails"),()=>{const panel=document.getElementById('mission-intelligence');panel?.scrollIntoView({block:'center'});const details=panel?.querySelector('details');if(details){details.open=true;details.querySelector('summary')?.focus({preventScroll:true});}});
  let flight=null,intelligence=null,plan=null,card=null,last=null,stale=false,recovered=false,recoveryEpoch=0;
  function paint(){
   const cockpit=currentFlightPresentation(intelligence,flight,{stale});
   const active=flight?.activeMission,telemetry=flight?.telemetry,age=telemetry?Date.now()-Date.parse(telemetry.timestampUtc):Infinity;
+  setPresentationText(source,localizedCopy('simulator.sourceSummary',{name:simulatorSourceLabel(active?.simulatorOrigin||flight?.connection?.origin,active?.source||flight?.connection?.source)}));
   const fresh=flight?.connection?.state==='connected'&&telemetry?.isValid!==false&&age>=-2000&&age<=6000;
   const same=intelligence?.flight?.activeMission?.id===active?.id&&active;
   const state=same&&!stale?intelligence.collection?.state:null,enabled=(same?intelligence.flight.research?.instruments:(plan?.instruments??flight?.research?.instruments))||[];

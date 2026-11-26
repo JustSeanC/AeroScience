@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 26,
+    "catalogVersion": 27,
     "fallback": "en-US",
     "locales": [
       {
@@ -37,8 +37,8 @@ export const localeData = {
       }
     ],
     "qualityContract": 1,
-    "catalogIdentity": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
-    "bundleIdentity": "ef48f415967ba821fef1efbcc51fdd9da0b1507ff53eced346fb12864ad2481b"
+    "catalogIdentity": "584719acdcf54d870479f98464112e170a04b85a22b0e960dadf1b1534cb9735",
+    "bundleIdentity": "f38d6de00c25db45c770fcaf782de0e196f96e2d6d572a1b06e2aaf995759d67"
   },
   "schema": {
     "version": 1,
@@ -25069,14 +25069,70 @@ export const localeData = {
       },
       "simulator.noRecording": {
         "parameters": []
+      },
+      "simulator.qualifiedConnected": {
+        "parameters": []
+      },
+      "simulator.incomplete": {
+        "parameters": []
+      },
+      "simulator.legacyUnknown": {
+        "parameters": []
+      },
+      "simulator.sourceSummary": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "simulator.sourceBasis": {
+        "parameters": []
+      },
+      "simulator.legacyBasis": {
+        "parameters": []
+      },
+      "simulator.syntheticBasis": {
+        "parameters": []
+      },
+      "simulator.reportedVersion": {
+        "parameters": []
+      },
+      "simulator.reportedBuild": {
+        "parameters": []
+      },
+      "simulator.adapter": {
+        "parameters": []
+      },
+      "simulator.apiVersion": {
+        "parameters": []
+      },
+      "simulator.mapping": {
+        "parameters": []
+      },
+      "simulator.epoch": {
+        "parameters": []
+      },
+      "simulator.timestampBasis": {
+        "parameters": []
+      },
+      "simulator.nativeActivity": {
+        "parameters": [
+          "recording",
+          "science"
+        ]
+      },
+      "simulator.aircraftType": {
+        "parameters": []
+      },
+      "simulator.aircraftRegistration": {
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "de-DE": {
-      "version": 26,
+      "version": 27,
       "locale": "de-DE",
-      "sourceHash": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
+      "sourceHash": "584719acdcf54d870479f98464112e170a04b85a22b0e960dadf1b1534cb9735",
       "pendingEnglishFallbackKeys": [
         "contextHelp.terrain.title",
         "flight.elapsed",
@@ -25397,7 +25453,24 @@ export const localeData = {
         "windows.science.category11Title",
         "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions",
         "windows.storage.openExisting",
-        "windows.toolbarProgressForm.aeroscienceMsfsToolbar"
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar",
+        "simulator.qualifiedConnected",
+        "simulator.incomplete",
+        "simulator.legacyUnknown",
+        "simulator.sourceSummary",
+        "simulator.sourceBasis",
+        "simulator.legacyBasis",
+        "simulator.syntheticBasis",
+        "simulator.reportedVersion",
+        "simulator.reportedBuild",
+        "simulator.adapter",
+        "simulator.apiVersion",
+        "simulator.mapping",
+        "simulator.epoch",
+        "simulator.timestampBasis",
+        "simulator.nativeActivity",
+        "simulator.aircraftType",
+        "simulator.aircraftRegistration"
       ],
       "messages": {
         "common.messageUnavailable": "Details sind nicht verfügbar. Aktualisieren Sie die Ansicht, um die aktuellen Informationen zu prüfen.",
@@ -32511,11 +32584,28 @@ export const localeData = {
         "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
         "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
         "simulator.nativeStatus": "{name} · {status} · {recording}",
-        "simulator.noRecording": "Recording and science unavailable in this development build."
+        "simulator.noRecording": "Recording and science unavailable in this development build.",
+        "simulator.qualifiedConnected": "X-Plane connected. Qualified flight recording and supported atmospheric collection are available. Installed simulator acceptance is pending.",
+        "simulator.incomplete": "Wait for current, confirmed aircraft data before starting X-Plane recording or science. A connection alone is insufficient.",
+        "simulator.legacyUnknown": "Legacy simulator — identity unknown",
+        "simulator.sourceSummary": "Simulator source: {name}",
+        "simulator.sourceBasis": "Simulator-reported measurements and AeroScience derivations are separate from independently acquired historical scientific sources. Source identity does not certify installed simulator acceptance.",
+        "simulator.legacyBasis": "This original record has no explicit simulator identity. The current simulator setting does not identify or relabel it.",
+        "simulator.syntheticBasis": "Synthetic fixture data. This is not an installed simulator observation.",
+        "simulator.reportedVersion": "Reported simulator version",
+        "simulator.reportedBuild": "Reported simulator build",
+        "simulator.adapter": "AeroScience adapter and version",
+        "simulator.apiVersion": "API version",
+        "simulator.mapping": "Mapping revision",
+        "simulator.epoch": "Connection epoch",
+        "simulator.timestampBasis": "Measurement time basis",
+        "simulator.nativeActivity": "{recording} · Science: {science}. Installed simulator acceptance is pending.",
+        "simulator.aircraftType": "Reported aircraft type",
+        "simulator.aircraftRegistration": "Reported aircraft registration"
       }
     },
     "en-US": {
-      "version": 26,
+      "version": 27,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -39629,13 +39719,30 @@ export const localeData = {
         "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
         "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
         "simulator.nativeStatus": "{name} · {status} · {recording}",
-        "simulator.noRecording": "Recording and science unavailable in this development build."
+        "simulator.noRecording": "Recording and science unavailable in this development build.",
+        "simulator.qualifiedConnected": "X-Plane connected. Qualified flight recording and supported atmospheric collection are available. Installed simulator acceptance is pending.",
+        "simulator.incomplete": "Wait for current, confirmed aircraft data before starting X-Plane recording or science. A connection alone is insufficient.",
+        "simulator.legacyUnknown": "Legacy simulator — identity unknown",
+        "simulator.sourceSummary": "Simulator source: {name}",
+        "simulator.sourceBasis": "Simulator-reported measurements and AeroScience derivations are separate from independently acquired historical scientific sources. Source identity does not certify installed simulator acceptance.",
+        "simulator.legacyBasis": "This original record has no explicit simulator identity. The current simulator setting does not identify or relabel it.",
+        "simulator.syntheticBasis": "Synthetic fixture data. This is not an installed simulator observation.",
+        "simulator.reportedVersion": "Reported simulator version",
+        "simulator.reportedBuild": "Reported simulator build",
+        "simulator.adapter": "AeroScience adapter and version",
+        "simulator.apiVersion": "API version",
+        "simulator.mapping": "Mapping revision",
+        "simulator.epoch": "Connection epoch",
+        "simulator.timestampBasis": "Measurement time basis",
+        "simulator.nativeActivity": "{recording} · Science: {science}. Installed simulator acceptance is pending.",
+        "simulator.aircraftType": "Reported aircraft type",
+        "simulator.aircraftRegistration": "Reported aircraft registration"
       }
     },
     "es-ES": {
-      "version": 26,
+      "version": 27,
       "locale": "es-ES",
-      "sourceHash": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
+      "sourceHash": "584719acdcf54d870479f98464112e170a04b85a22b0e960dadf1b1534cb9735",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -39822,7 +39929,24 @@ export const localeData = {
         "ui.tfrPresentation.messageFtMSLSaved",
         "ui.transferProgress.messageOriginalBytesPresent",
         "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate",
-        "windows.mainForm.chooseAHistoricalLasLazOriginal"
+        "windows.mainForm.chooseAHistoricalLasLazOriginal",
+        "simulator.qualifiedConnected",
+        "simulator.incomplete",
+        "simulator.legacyUnknown",
+        "simulator.sourceSummary",
+        "simulator.sourceBasis",
+        "simulator.legacyBasis",
+        "simulator.syntheticBasis",
+        "simulator.reportedVersion",
+        "simulator.reportedBuild",
+        "simulator.adapter",
+        "simulator.apiVersion",
+        "simulator.mapping",
+        "simulator.epoch",
+        "simulator.timestampBasis",
+        "simulator.nativeActivity",
+        "simulator.aircraftType",
+        "simulator.aircraftRegistration"
       ],
       "messages": {
         "common.messageUnavailable": "Los detalles no están disponibles. Actualiza la vista para consultar la información actual.",
@@ -46942,13 +47066,30 @@ export const localeData = {
         "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
         "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
         "simulator.nativeStatus": "{name} · {status} · {recording}",
-        "simulator.noRecording": "Recording and science unavailable in this development build."
+        "simulator.noRecording": "Recording and science unavailable in this development build.",
+        "simulator.qualifiedConnected": "X-Plane connected. Qualified flight recording and supported atmospheric collection are available. Installed simulator acceptance is pending.",
+        "simulator.incomplete": "Wait for current, confirmed aircraft data before starting X-Plane recording or science. A connection alone is insufficient.",
+        "simulator.legacyUnknown": "Legacy simulator — identity unknown",
+        "simulator.sourceSummary": "Simulator source: {name}",
+        "simulator.sourceBasis": "Simulator-reported measurements and AeroScience derivations are separate from independently acquired historical scientific sources. Source identity does not certify installed simulator acceptance.",
+        "simulator.legacyBasis": "This original record has no explicit simulator identity. The current simulator setting does not identify or relabel it.",
+        "simulator.syntheticBasis": "Synthetic fixture data. This is not an installed simulator observation.",
+        "simulator.reportedVersion": "Reported simulator version",
+        "simulator.reportedBuild": "Reported simulator build",
+        "simulator.adapter": "AeroScience adapter and version",
+        "simulator.apiVersion": "API version",
+        "simulator.mapping": "Mapping revision",
+        "simulator.epoch": "Connection epoch",
+        "simulator.timestampBasis": "Measurement time basis",
+        "simulator.nativeActivity": "{recording} · Science: {science}. Installed simulator acceptance is pending.",
+        "simulator.aircraftType": "Reported aircraft type",
+        "simulator.aircraftRegistration": "Reported aircraft registration"
       }
     },
     "fr-FR": {
-      "version": 26,
+      "version": 27,
       "locale": "fr-FR",
-      "sourceHash": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
+      "sourceHash": "584719acdcf54d870479f98464112e170a04b85a22b0e960dadf1b1534cb9735",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -47267,7 +47408,24 @@ export const localeData = {
         "windows.settingsForm.aeroscienceSettings",
         "windows.setupWizardForm.aeroscienceStepOf4",
         "windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs",
-        "windows.toolbarProgressForm.aeroscienceMsfsToolbar"
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar",
+        "simulator.qualifiedConnected",
+        "simulator.incomplete",
+        "simulator.legacyUnknown",
+        "simulator.sourceSummary",
+        "simulator.sourceBasis",
+        "simulator.legacyBasis",
+        "simulator.syntheticBasis",
+        "simulator.reportedVersion",
+        "simulator.reportedBuild",
+        "simulator.adapter",
+        "simulator.apiVersion",
+        "simulator.mapping",
+        "simulator.epoch",
+        "simulator.timestampBasis",
+        "simulator.nativeActivity",
+        "simulator.aircraftType",
+        "simulator.aircraftRegistration"
       ],
       "messages": {
         "common.messageUnavailable": "Les détails sont indisponibles. Actualisez la vue pour consulter les informations actuelles.",
@@ -54387,13 +54545,30 @@ export const localeData = {
         "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
         "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
         "simulator.nativeStatus": "{name} · {status} · {recording}",
-        "simulator.noRecording": "Recording and science unavailable in this development build."
+        "simulator.noRecording": "Recording and science unavailable in this development build.",
+        "simulator.qualifiedConnected": "X-Plane connected. Qualified flight recording and supported atmospheric collection are available. Installed simulator acceptance is pending.",
+        "simulator.incomplete": "Wait for current, confirmed aircraft data before starting X-Plane recording or science. A connection alone is insufficient.",
+        "simulator.legacyUnknown": "Legacy simulator — identity unknown",
+        "simulator.sourceSummary": "Simulator source: {name}",
+        "simulator.sourceBasis": "Simulator-reported measurements and AeroScience derivations are separate from independently acquired historical scientific sources. Source identity does not certify installed simulator acceptance.",
+        "simulator.legacyBasis": "This original record has no explicit simulator identity. The current simulator setting does not identify or relabel it.",
+        "simulator.syntheticBasis": "Synthetic fixture data. This is not an installed simulator observation.",
+        "simulator.reportedVersion": "Reported simulator version",
+        "simulator.reportedBuild": "Reported simulator build",
+        "simulator.adapter": "AeroScience adapter and version",
+        "simulator.apiVersion": "API version",
+        "simulator.mapping": "Mapping revision",
+        "simulator.epoch": "Connection epoch",
+        "simulator.timestampBasis": "Measurement time basis",
+        "simulator.nativeActivity": "{recording} · Science: {science}. Installed simulator acceptance is pending.",
+        "simulator.aircraftType": "Reported aircraft type",
+        "simulator.aircraftRegistration": "Reported aircraft registration"
       }
     },
     "pt-BR": {
-      "version": 26,
+      "version": 27,
       "locale": "pt-BR",
-      "sourceHash": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
+      "sourceHash": "584719acdcf54d870479f98464112e170a04b85a22b0e960dadf1b1534cb9735",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -54560,7 +54735,24 @@ export const localeData = {
         "ui.tfrLayers.messageOriginalIssuanceTextTimezoneNotSuppliedIn",
         "windows.mainForm.chooseAHistoricalLasLazOriginal",
         "windows.science.category14Description",
-        "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd"
+        "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd",
+        "simulator.qualifiedConnected",
+        "simulator.incomplete",
+        "simulator.legacyUnknown",
+        "simulator.sourceSummary",
+        "simulator.sourceBasis",
+        "simulator.legacyBasis",
+        "simulator.syntheticBasis",
+        "simulator.reportedVersion",
+        "simulator.reportedBuild",
+        "simulator.adapter",
+        "simulator.apiVersion",
+        "simulator.mapping",
+        "simulator.epoch",
+        "simulator.timestampBasis",
+        "simulator.nativeActivity",
+        "simulator.aircraftType",
+        "simulator.aircraftRegistration"
       ],
       "messages": {
         "common.messageUnavailable": "Os detalhes estão indisponíveis. Atualize a visualização para consultar as informações atuais.",
@@ -61680,7 +61872,24 @@ export const localeData = {
         "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
         "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
         "simulator.nativeStatus": "{name} · {status} · {recording}",
-        "simulator.noRecording": "Recording and science unavailable in this development build."
+        "simulator.noRecording": "Recording and science unavailable in this development build.",
+        "simulator.qualifiedConnected": "X-Plane connected. Qualified flight recording and supported atmospheric collection are available. Installed simulator acceptance is pending.",
+        "simulator.incomplete": "Wait for current, confirmed aircraft data before starting X-Plane recording or science. A connection alone is insufficient.",
+        "simulator.legacyUnknown": "Legacy simulator — identity unknown",
+        "simulator.sourceSummary": "Simulator source: {name}",
+        "simulator.sourceBasis": "Simulator-reported measurements and AeroScience derivations are separate from independently acquired historical scientific sources. Source identity does not certify installed simulator acceptance.",
+        "simulator.legacyBasis": "This original record has no explicit simulator identity. The current simulator setting does not identify or relabel it.",
+        "simulator.syntheticBasis": "Synthetic fixture data. This is not an installed simulator observation.",
+        "simulator.reportedVersion": "Reported simulator version",
+        "simulator.reportedBuild": "Reported simulator build",
+        "simulator.adapter": "AeroScience adapter and version",
+        "simulator.apiVersion": "API version",
+        "simulator.mapping": "Mapping revision",
+        "simulator.epoch": "Connection epoch",
+        "simulator.timestampBasis": "Measurement time basis",
+        "simulator.nativeActivity": "{recording} · Science: {science}. Installed simulator acceptance is pending.",
+        "simulator.aircraftType": "Reported aircraft type",
+        "simulator.aircraftRegistration": "Reported aircraft registration"
       }
     }
   }

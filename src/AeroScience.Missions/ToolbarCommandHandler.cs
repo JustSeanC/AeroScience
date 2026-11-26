@@ -134,11 +134,15 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
         // Display-only text bounds keep native CommBus below 8 KiB; database/export values stay intact.
         state = state with
         {
-            Connection = state.Connection with { Message = Short(state.Connection.Message, 160)! },
-            Telemetry = state.Telemetry is { } t ? t with { Aircraft = Short(t.Aircraft, 80)!, Environment=null, Atmosphere=null, Guidance=null } : null,
-            ActiveMission = state.ActiveMission is { } m ? m with { Name = Short(m.Name, 80)!, Aircraft = Short(m.Aircraft, 80) } : null,
+            // This is the original MSFS-only display protocol, not an evidence
+            // exporter. The source authorization runs before command dispatch;
+            // full immutable origin/timing stays in archives and local APIs.
+            Connection = state.Connection with { Message = Short(state.Connection.Message, 160)!,Origin=null },
+            Telemetry = state.Telemetry is { } t ? t with { Aircraft = Short(t.Aircraft, 80)!, Environment=null, Atmosphere=null, Guidance=null,SimulatorOrigin=null,SimulatorContext=null } : null,
+            ActiveMission = state.ActiveMission is { } m ? m with { Name = Short(m.Name, 80)!, Aircraft = Short(m.Aircraft, 80),SimulatorOrigin=null } : null,
             Research = state.Research is { } r ? r with
             {
+                Atmosphere=r.Atmosphere is {} a?a with{SimulatorOrigin=null,SimulatorContext=null}:null,
                 ScienceStorageError = Short(r.ScienceStorageError, 120),
                 Instruments = r.Instruments.Select(i => i with { Message = Short(i.Message, 80) }).ToArray()
             } : null

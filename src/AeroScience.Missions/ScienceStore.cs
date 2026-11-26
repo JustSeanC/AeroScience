@@ -110,7 +110,7 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             if(query.ExecuteScalar() is string saved)return ReadCatalog<ScienceDataset>(saved);
         }
         Initialize();
-        var definition = ScienceCatalog.Definitions.Single(d => d.Id == configuration.InstrumentId);
+        var definition = ScienceCatalog.DefinitionFor(configuration.InstrumentId,mission.SimulatorOrigin);
         var dataset = new ScienceDataset(Guid.NewGuid(), LibraryId, mission.Id, mission.Name, definition.Id, DateTimeOffset.UtcNow,
             RelativeDatabasePath, 0, JsonSerializer.Serialize(new
             {
@@ -120,7 +120,10 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
                 mission.Source,
                 research.PlanSnapshot,
                 research.Objective,
-                timestampBasis = "Host UTC when the SimConnect packet was received",
+                mission.SimulatorOrigin,
+                timestampBasis = mission.SimulatorOrigin?.TimestampBasis??"Host UTC at original source receipt; legacy simulator identity is unknown",
+                nativeSourceUnits = mission.SimulatorOrigin?.SimulatorId==SimulatorPreferences.XPlane12?
+                    new{temperature="degC",pressure="Pa to inHg",windSpeed="m/s to kt",windDirection="degrees true",density="kg/m3 to slug/ft3"}:null,
                 disclaimer = RemoteAcquisition.Instruments.ContainsKey(definition.Id) ? "Historical external geographic datasets sampled along a simulator-derived approximate footprint. Source dates, CRS, vertical datum, masks and raw values are retained with each product; not a live airborne sensor." : "Simulator-reported atmospheric values; not independent calibrated real-world measurements. No modeled instrument output is substituted."
             }, WireJson.Options));
         using var db = Open(write: true); using var cmd = db.CreateCommand();
@@ -136,12 +139,19 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
         if (observations.Count == 0) return 0;
         lock (gate)
         {
-            Management?.RequireScienceCapacity(65536);
+            long writeBudget=65536;
+            if(observations.Any(o=>o.SimulatorOrigin is not null))
+            {
+                foreach(var o in observations){ScientificSimulatorEvidence.Validate(o);if(!double.IsFinite(o.Value))throw new ArgumentException("Scientific observations require finite original values.");}
+                writeBudget=Math.Max(writeBudget,checked(JsonSerializer.SerializeToUtf8Bytes(observations,WireJson.Options).LongLength*2+32768));
+            }
+            Management?.RequireScienceCapacity(writeBudget);
             if (disk.FreeBytes(DirectoryPath) < StorageManager.MinimumFreeBytes) throw new IOException("Science storage is low. No data was deleted; science acquisition is paused.");
             using var db = Open(write: true); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
             var inserted = 0;
             foreach (var item in observations)
             {
+                ScientificSimulatorEvidence.Validate(item);
                 if (!double.IsFinite(item.Value) || item.TimestampUtc.Offset != TimeSpan.Zero
                     || item.Latitude is { } latitude && item.Longitude is { } longitude && !MissionPlanning.Position(latitude, longitude))
                     throw new ArgumentException("Scientific observations require finite values, UTC timestamps and valid available positions.");
@@ -186,7 +196,7 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
         cmd.Parameters.AddWithValue("$instrument",instrumentId??"");cmd.Parameters.AddWithValue("$after", Math.Max(after, 0)); cmd.Parameters.AddWithValue("$mission", missionId?.ToString() ?? ""); cmd.Parameters.AddWithValue("$dataset", datasetId?.ToString() ?? "");
         if (limit is not null) cmd.Parameters.AddWithValue("$limit", Math.Clamp(limit.Value, 1, 5000));
         using var reader = cmd.ExecuteReader();
-        while (reader.Read()) yield return JsonSerializer.Deserialize<ScienceObservation>(reader.GetString(1), WireJson.Options)! with { Id = reader.GetInt64(0) };
+        while (reader.Read()) yield return ReadCatalog<ScienceObservation>(reader.GetString(1)) with { Id = reader.GetInt64(0) };
     }
     public IReadOnlyList<MeasurementSummary> Summary(Guid missionId)
     {
@@ -214,11 +224,14 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             "Original imported Sources, flight recordings, telemetry, plans, settings, library identity and unrelated files. Targeted scientific content is also purged from managed backups; unresolved shared copies block completion", "", managed.Count, managed.Bytes, managed.Paths, ProtectedDatasetCount(),caches.LongLength);
     }
     public CollectedScienceDeletionResult Clear(SourceDeletionExecution reviewed,MissionStore missions,Func<IDisposable> maintenance)=>DeleteCollectedScience(reviewed,missions,maintenance);
-    public ScienceStorageEstimate Estimate(InstrumentConfiguration[]? input, double? minutes)
+    public ScienceStorageEstimate Estimate(InstrumentConfiguration[]? input, double? minutes,string? simulatorId=null)
     {
         var configurations = ScienceCatalog.Normalize(input); var counts = new Dictionary<string, long>();
         long? free = null;
         try { if (AvailabilityError() is null) free = disk.FreeBytes(DirectoryPath); } catch (IOException) { }
+        if(simulatorId==SimulatorPreferences.XPlane12)
+            return new(null,free,false,"X-Plane source/timing proof storage size is not yet benchmarked; no byte estimate is claimed.",
+                ["Original native values and field confirmations add variable metadata. Actual serialized acquisition bytes and free space are checked before writes; P05/P06 retain storage/performance acceptance."],counts);
         if (minutes is null || !double.IsFinite(minutes.Value) || minutes <= 0 || minutes > 43200)
             return new(null, free, false, "Science products only; enter an estimated duration of up to 30 days.", ["No flight-telemetry, future imagery or unknown instrument data rates included."], counts);
         // Estimate the actual serialized observation model plus duplicated SQL keys/value columns,

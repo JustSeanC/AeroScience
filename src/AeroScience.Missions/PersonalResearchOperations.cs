@@ -156,6 +156,8 @@ public sealed partial class MissionStore
         var state=ReadResearchOperations(db,tx,request.FlightId);
         if(!state.Recording||state.Revision!=request.ExpectedRevision)throw new InvalidOperationException("Flight or test-card state changed. Synchronize before trying again.");
         var selected=state.Cards.SingleOrDefault(c=>c.Card.Id==request.CardId)??throw new ArgumentException("This card was not selected before this flight.");
+        if(request.Action is ResearchCardAction.BeginAttempt or ResearchCardAction.EnableAutomatic)
+            SimulatorAccessPolicy.RequireCard(SimulatorOrigin(request.FlightId),selected.Card);
         if(selected.OpenAttempt?.Id!=request.ExpectedAttemptId)throw new InvalidOperationException("The current card attempt changed. Synchronize before trying again.");
         var attempt=selected.OpenAttempt;
         if(request.Action==ResearchCardAction.BeginAttempt&&attempt?.Automatic is not null){DeferAutomaticOpen(db,tx,attempt);attempt=null;}

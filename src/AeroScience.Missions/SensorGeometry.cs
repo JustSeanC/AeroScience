@@ -26,6 +26,8 @@ public static class SensorGeometry
     }
     public static ObservationFootprint Footprint(TelemetryFrame frame, SensorMount? mount = null)
     {
+        if(frame.SimulatorOrigin?.SimulatorId==SimulatorPreferences.XPlane12)
+            throw new InvalidOperationException("X-Plane ground-intersection geometry is unqualified. Candidate attitude and AGL mappings require genuine simulator validation; no footprint or measured coverage was inferred.");
         mount ??= new();
         if (!frame.IsValid || !SupportsAgl(frame.AltitudeAglFeet))
             throw new InvalidOperationException("Simulator AGL must be valid and within the ground-plane model's supported 1–200,000 ft range. Ground intersection is unavailable; MSL is not substituted.");

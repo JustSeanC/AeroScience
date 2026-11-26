@@ -42,7 +42,8 @@ public sealed class GeographicCollectionEngine(MissionPlan mission,ScienceCollec
         var current=new CollectionInputReceipt("geographic:"+Guid.NewGuid().ToString("N"),update);
         var before=previous?.Packet.Frame;
         if(before is not null&&frame.TimestampUtc==before.TimestampUtc&&frame.Latitude==before.Latitude&&frame.Longitude==before.Longitude&&frame.IsPaused==before.IsPaused)return;
-        if(!frame.IsValid||frame.IsPaused||!MissionPlanning.Position(frame.Latitude,frame.Longitude)||Math.Abs(frame.Latitude)>80||
+        if(!frame.IsValid||frame.IsPaused||frame.ContinuityBreak||frame.SimulatorOrigin?.SimulatorId==SimulatorPreferences.XPlane12&&
+            (frame.SimulatorContext is null||!SimulatorAccessPolicy.QualifiedRate(frame.SimulatorContext))||!MissionPlanning.Position(frame.Latitude,frame.Longitude)||Math.Abs(frame.Latitude)>80||
             (evaluatedUtc-frame.TimestampUtc).TotalSeconds is var age&&(age< -2||age>plan.Continuity.MaximumPositionAgeSeconds))
         {Hold("Paused, stale or unsupported position evidence; no geographic crossing was inferred.",frame.IsValid?[current]:[],frame.IsValid?frame.TimestampUtc:evaluatedUtc);return;}
         var delta=before is null?0:(frame.TimestampUtc-before.TimestampUtc).TotalSeconds;

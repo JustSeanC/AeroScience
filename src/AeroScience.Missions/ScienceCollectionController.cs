@@ -31,6 +31,10 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
         ScienceCollectionSession? changed=null;
         if(outcome==CollectionEventOutcome.Applied)
         {
+            // Geographic automation uses this same controller directly. Enforce
+            // source capability here as well as at manual coordinator commands.
+            if(request.Action is CollectionAction.StartData or CollectionAction.ResumeData or CollectionAction.RearmAutomation)
+                SimulatorAccessPolicy.RequireCollectionConfiguration(store.SimulatorOrigin(missionId),store.Research(missionId).PlanSnapshot,settings());
             var manual=!automatic;
             switch(request.Action)
             {
@@ -38,8 +42,9 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
                     if(session is not null || current.Phase==CollectionPhase.Stopped || !settings().Any(c=>c.Enabled))
                     {outcome=CollectionEventOutcome.NoOp;reason="Start requires no open session and an enabled instrument in an active flight.";break;}
                     var id=Guid.NewGuid();
-                    var configurations=settings().Select(c=>InstrumentCalibration.Effective(c,Guid.NewGuid(),1,at)).ToArray();
-                    changed=new(1,id,missionId,store.CollectionSessionCount(missionId)+1,at,CollectionSessionStatus.Collecting,configurations,[],plannedSession);
+                    var sourceOrigin=store.SimulatorOrigin(missionId);
+                    var configurations=settings().Select(c=>InstrumentCalibration.Effective(c,Guid.NewGuid(),1,at,sourceOrigin)).ToArray();
+                    changed=new(1,id,missionId,store.CollectionSessionCount(missionId)+1,at,CollectionSessionStatus.Collecting,configurations,[],plannedSession){SimulatorOrigin=sourceOrigin};
                     next=next with{Phase=CollectionPhase.Collecting,CurrentSessionId=id,Authority=manual?CollectionAuthority.Manual:CollectionAuthority.Automatic,
                         ManualAutomationHold=manual||current.ManualAutomationHold,Holds=(current.Holds??[]).Where(h=>h.Kind is CollectionHoldKind.Continuity).ToArray()};
                     break;
@@ -129,7 +134,7 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
     {
         var current=State;var session=Session;
         var added=session is null?[]:(updated??settings()).Where(c=>JsonSerializer.Serialize(session.Configurations.Where(p=>p.Settings.InstrumentId==c.InstrumentId).MaxBy(p=>p.Revision)!.Settings,WireJson.Options)!=JsonSerializer.Serialize(c,WireJson.Options)).Select(c=>InstrumentCalibration.Effective(c,Guid.NewGuid(),
-            session.Configurations.Where(p=>p.Settings.InstrumentId==c.InstrumentId).Max(p=>p.Revision)+1,at)).ToArray();
+            session.Configurations.Where(p=>p.Settings.InstrumentId==c.InstrumentId).Max(p=>p.Revision)+1,at,session.SimulatorOrigin)).ToArray();
         var next=current with{Revision=current.Revision+1,ControlRevision=current.Revision+1};
         var transition=new CollectionEvent(1,missionId,next.Revision,at,at,session?.Id,CollectionAction.Unknown,CollectionEventOrigin.Engine,
             CollectionEventOutcome.Applied,current.Phase,current.Phase,current.Authority,"Frozen effective instrument configuration changed.",[],ExpectedSessionId:session?.Id);

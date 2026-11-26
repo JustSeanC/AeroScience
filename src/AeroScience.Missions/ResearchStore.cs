@@ -202,6 +202,7 @@ public sealed partial class MissionStore
         cmd.CommandText = "SELECT COUNT(*),COALESCE(MAX(sequence),0) FROM telemetry WHERE mission_id=$id"; cmd.Parameters.AddWithValue("$id", id.ToString());
         long count, last; using (var reader = cmd.ExecuteReader()) { reader.Read(); count = reader.GetInt64(0); last = reader.GetInt64(1); }
         DateTimeOffset? previousTime = null;
+        var qualifiedOrigin=SimulatorOrigin(id)?.SimulatorId==SimulatorPreferences.XPlane12;cmd.Parameters.AddWithValue("$gap",qualifiedOrigin?2.001:5.001);
         if (after is not null)
         {
             cmd.CommandText = "SELECT timestamp_utc FROM telemetry WHERE mission_id=$id AND sequence<=$after ORDER BY sequence DESC LIMIT 1";
@@ -210,18 +211,18 @@ public sealed partial class MissionStore
         }
         cmd.Parameters.AddWithValue("$limit", limit + 1);
         if (after is not null)
-            cmd.CommandText = "SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,0 FROM telemetry WHERE mission_id=$id AND sequence>$after ORDER BY sequence LIMIT $limit";
+            cmd.CommandText = "SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,COALESCE(json_extract(payload_json,'$.continuityBreak'),0) FROM telemetry WHERE mission_id=$id AND sequence>$after ORDER BY sequence LIMIT $limit";
         else if (recent)
-            cmd.CommandText = "SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,0 FROM telemetry WHERE mission_id=$id ORDER BY sequence DESC LIMIT $limit";
+            cmd.CommandText = "SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,COALESCE(json_extract(payload_json,'$.continuityBreak'),0) FROM telemetry WHERE mission_id=$id ORDER BY sequence DESC LIMIT $limit";
         else
         {
             // Cumulative gap counts preserve real discontinuities between reduced display
             // vertices, without treating deliberate downsampling as missing telemetry.
             cmd.CommandText = """
-                WITH samples AS (SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,
+                WITH samples AS (SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,payload_json,
                   LAG(timestamp_utc) OVER(ORDER BY sequence) previous FROM telemetry WHERE mission_id=$id),
                 ranked AS (SELECT *,ROW_NUMBER() OVER(ORDER BY sequence) n,
-                  SUM(CASE WHEN previous IS NOT NULL AND ((julianday(timestamp_utc)-julianday(previous))*86400>5.001
+                  SUM(CASE WHEN previous IS NOT NULL AND ((julianday(timestamp_utc)-julianday(previous))*86400>$gap OR json_extract(payload_json,'$.continuityBreak')=1
                     OR julianday(timestamp_utc)<=julianday(previous)) THEN 1 ELSE 0 END) OVER(ORDER BY sequence) gaps FROM samples)
                 SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,gaps FROM ranked
                   WHERE n=1 OR sequence=$last OR (n-1)%$stride=0 ORDER BY sequence LIMIT $limit
@@ -236,7 +237,7 @@ public sealed partial class MissionStore
         long gaps = 0; var points = new List<TrackPoint>();
         foreach (var item in found)
         {
-            var discontinuity = after is null && !recent ? item.Gaps > gaps : previousTime is { } t && (item.Point.TimestampUtc - t).TotalSeconds is > 5.001 or <= 0;
+            var discontinuity = after is null && !recent ? item.Gaps > gaps : item.Gaps>0||previousTime is { } t && ((item.Point.TimestampUtc-t).TotalSeconds>(qualifiedOrigin?2.001:5.001)||item.Point.TimestampUtc<=t);
             points.Add(item.Point with { BreakBefore = discontinuity }); gaps = item.Gaps; previousTime = item.Point.TimestampUtc;
         }
         return new(points.ToArray(), after is null ? last : points.LastOrDefault()?.Sequence ?? after.Value, more, count, after is null && count > points.Count);
