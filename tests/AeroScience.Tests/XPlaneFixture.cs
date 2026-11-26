@@ -126,6 +126,8 @@ internal sealed class XPlaneFixture
         private readonly CancellationTokenSource stopped = new();
         internal readonly ConcurrentQueue<JsonElement> Sent = new();
         internal Uri? Endpoint;
+        internal bool IgnoreClose;
+        internal int CloseAttempts;
         public bool IsOpen { get; private set; }
         public Task ConnectAsync(Uri endpoint, CancellationToken token) { token.ThrowIfCancellationRequested(); Endpoint = endpoint; IsOpen = true; return Task.CompletedTask; }
         public async Task SendAsync(ReadOnlyMemory<byte> bytes, CancellationToken token)
@@ -146,6 +148,11 @@ internal sealed class XPlaneFixture
             return await incoming.Reader.ReadAsync(linked.Token);
         }
         internal ValueTask Inject(byte[]? bytes, CancellationToken token = default) => incoming.Writer.WriteAsync(bytes, token);
+        public async Task CloseOutputAsync(CancellationToken token)
+        {
+            Interlocked.Increment(ref CloseAttempts); IsOpen = false;
+            if (!IgnoreClose) await incoming.Writer.WriteAsync(null, token);
+        }
         public void Abort() { IsOpen = false; stopped.Cancel(); }
         public void Dispose() { Abort(); stopped.Dispose(); }
     }
@@ -154,9 +161,10 @@ internal sealed class XPlaneFixture
 internal sealed class XPlaneTestClock : TimeProvider
 {
     private long ticks;
+    internal DateTimeOffset StartUtc = new(2026, 11, 25, 12, 0, 0, TimeSpan.Zero);
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
     public override long GetTimestamp() => ticks;
-    public override DateTimeOffset GetUtcNow() => new DateTimeOffset(2026, 11, 25, 12, 0, 0, TimeSpan.Zero).AddTicks(ticks);
+    public override DateTimeOffset GetUtcNow() => StartUtc.AddTicks(ticks);
     internal void Advance(TimeSpan elapsed) => ticks += elapsed.Ticks;
 }
 

@@ -25,7 +25,7 @@ public sealed class ValidationCopy081Tests:IDisposable
         var missionRecord=Assert.Single(Directory.GetFiles(Path.Combine(original.MissionDirectory,"Metadata","ScientificBackupLocations"),"*.json"));
         using(var record=JsonDocument.Parse(File.ReadAllText(missionRecord))){Assert.Equal(Path.Combine(copy.MissionDirectory,"missions.db"),record.RootElement.GetProperty("backup").GetString());Assert.True(File.Exists(record.RootElement.GetProperty("backup").GetString()));}
         var records=Directory.GetFiles(Path.Combine(original.ScienceLibraryDirectory,"Metadata","ManagedCopies"),"*.json").Select(p=>JsonDocument.Parse(File.ReadAllText(p))).ToArray();
-        try{Assert.Equal(2,records.Length);Assert.Contains(records,r=>r.RootElement.GetProperty("Path").GetString()==Path.Combine(copy.ScienceLibraryDirectory,ScienceStore.RelativeDatabasePath));Assert.All(records,r=>Assert.True(File.Exists(r.RootElement.GetProperty("Path").GetString())));}finally{foreach(var r in records)r.Dispose();}
+        try{Assert.Equal(2,records.Length);Assert.Contains(records,r=>r.RootElement.GetProperty("Path").GetString()==Path.GetFullPath(Path.Combine(copy.ScienceLibraryDirectory,ScienceStore.RelativeDatabasePath)));Assert.All(records,r=>Assert.True(File.Exists(r.RootElement.GetProperty("Path").GetString())));}finally{foreach(var r in records)r.Dispose();}
         ValidationArchiveCopy.Select(confined,copy);Assert.False(new ScientificAccessSettings(confined.DirectoryPath).Get().Preferences.OnlineEnabled);
         Assert.Equal(original,originalPreferences.Load());
     }

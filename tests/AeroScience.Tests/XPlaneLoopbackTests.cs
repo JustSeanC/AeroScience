@@ -41,6 +41,32 @@ public sealed class XPlaneLoopbackTests
         Assert.Equal(new[] { "dataref_subscribe_values", "dataref_unsubscribe_values" }, host.Messages.ToArray());
     }
 
+    [Fact]
+    public async Task OrderlyShutdownDeliversUnsubscribeBeforeClosingADelayedReader()
+    {
+        await using var host = await LocalApi.Start("delayed-unsubscribe-read");
+        using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var stream = new XPlaneTelemetryProvider(host.Options with { ShutdownTimeout = TimeSpan.FromSeconds(2) })
+            .ReadAsync(stop.Token).GetAsyncEnumerator();
+        try
+        {
+            while (await stream.MoveNextAsync()) if (stream.Current.Frame is not null) break;
+            Assert.NotNull(stream.Current.Frame);
+            await host.WaitingToRead.Task.WaitAsync(TimeSpan.FromSeconds(2));
+            var shutdown = stream.DisposeAsync().AsTask();
+            try
+            {
+                await Task.WhenAny(shutdown, Task.Delay(100));
+                Assert.False(shutdown.IsCompleted, "Orderly close must allow the peer to receive unsubscribe before aborting.");
+            }
+            finally { host.AllowRead.TrySetResult(); await shutdown.WaitAsync(TimeSpan.FromSeconds(3)); }
+            await host.Unsubscribed.Task.WaitAsync(TimeSpan.FromSeconds(2));
+            Assert.Equal(new[] { "dataref_subscribe_values", "dataref_unsubscribe_values" }, host.Messages.ToArray());
+            Assert.All(host.Requests, r => Assert.Equal("GET", r.Method));
+        }
+        finally { host.AllowRead.TrySetResult(); await stream.DisposeAsync(); }
+    }
+
     [Theory]
     [InlineData(false)] [InlineData(true)]
     public async Task NeitherHttpNorWebsocketFollowsARedirect(bool websocket)
@@ -108,6 +134,8 @@ public sealed class XPlaneLoopbackTests
         internal readonly ConcurrentQueue<(string Method, string Path)> Requests = new();
         internal readonly ConcurrentQueue<string> Messages = new();
         internal readonly TaskCompletionSource Unsubscribed = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        internal readonly TaskCompletionSource WaitingToRead = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        internal readonly TaskCompletionSource AllowRead = new(TaskCreationOptions.RunContinuationsAsynchronously);
         internal XPlaneOptions Options = null!;
         private LocalApi(WebApplication app) => this.app = app;
         internal static async Task<LocalApi> Start(string mode = "normal")
@@ -168,6 +196,11 @@ public sealed class XPlaneLoopbackTests
                         var id = message.RootElement.GetProperty("req_id").GetInt64();
                         await socket.SendAsync(XPlaneFixture.Ack(id), WebSocketMessageType.Text, true, context.RequestAborted);
                         await socket.SendAsync(host.fixture.Seed(), WebSocketMessageType.Text, true, context.RequestAborted);
+                        if (mode == "delayed-unsubscribe-read")
+                        {
+                            host.WaitingToRead.TrySetResult();
+                            await host.AllowRead.Task.WaitAsync(context.RequestAborted);
+                        }
                     }
                 }
                 catch (Exception error) when (error is WebSocketException or OperationCanceledException) { }

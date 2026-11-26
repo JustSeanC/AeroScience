@@ -29,12 +29,26 @@ public sealed partial class SimulatorIntegrationTests : IDisposable
         public async IAsyncEnumerable<TelemetryUpdate> ReadAsync([EnumeratorCancellation] CancellationToken cancellationToken=default)
         {await Task.Delay(Timeout.Infinite,cancellationToken);yield break;}
     }
-    private WebApplicationFactory<Program> Host(string simulator="XPlane")=>new WebApplicationFactory<Program>().WithWebHostBuilder(builder=>{
+    private WebApplicationFactory<Program> Host(string simulator="XPlane",XPlaneTestClock? clock=null)=>new WebApplicationFactory<Program>().WithWebHostBuilder(builder=>{
         builder.UseEnvironment("Testing");
         builder.ConfigureAppConfiguration((_,config)=>config.AddInMemoryCollection(new Dictionary<string,string?>{
             ["AeroScience:DataDirectory"]=directory,["AeroScience:ConfigurationDirectory"]=directory,
             ["AeroScience:Telemetry"]=simulator,["AeroScience:EnableToolbarBridge"]="true"}));
-        builder.ConfigureTestServices(services=>{services.RemoveAll<ITelemetryProvider>();services.AddSingleton<ITelemetryProvider,NoSimulator>();});
+        builder.ConfigureTestServices(services=>{
+            services.RemoveAll<ITelemetryProvider>();services.AddSingleton<ITelemetryProvider,NoSimulator>();
+            if(clock is not null)
+            {
+                // Exercise the real API/controller/storage graph with one explicit
+                // synthetic clock. Host/JIT delays must not fabricate a flight gap.
+                services.RemoveAll<SimulatorAccessPolicy>();
+                services.AddSingleton(sp=>new SimulatorAccessPolicy(sp.GetRequiredService<EngineOptions>().SimulatorId,clock.GetUtcNow));
+                services.RemoveAll<MissionCoordinator>();
+                services.AddSingleton(sp=>new MissionCoordinator(sp.GetRequiredService<MissionStore>(),sp.GetRequiredService<EngineOptions>().SamplingIntervalMs,
+                    requireFreshTelemetry:true,ensureRecordingCapacity:()=>sp.GetRequiredService<StorageManagement>().RequireFlightCapacity(),
+                    research:sp.GetRequiredService<ResearchOperations>(),utcNow:clock.GetUtcNow,assessPreflight:sp.GetRequiredService<PreflightReadinessService>().Assess,
+                    simulatorAccess:sp.GetRequiredService<SimulatorAccessPolicy>()));
+            }
+        });
     });
     private static HttpClient Client(WebApplicationFactory<Program> host)
     {var client=host.CreateClient(new(){BaseAddress=new("http://localhost:5080")});client.DefaultRequestHeaders.Add("Origin","http://localhost:5080");return client;}

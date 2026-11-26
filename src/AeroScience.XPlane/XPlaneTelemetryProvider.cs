@@ -175,10 +175,21 @@ public sealed class XPlaneTelemetryProvider : ITelemetryProvider
         }
         finally
         {
-            // Best effort unsubscribe on orderly enumerator disposal. Cancellation
-            // may already abort a socket; all cleanup has a separate bounded budget.
+            // Send unsubscribe and a graceful protocol close before aborting. A
+            // completed SendAsync alone does not prove that the peer received it;
+            // aborting immediately can discard queued bytes. Keep the sole receive
+            // loop alive for peer closure within the existing cleanup budget.
+            // Cancellation may already have aborted the socket; cleanup is bounded.
             using var cleanup = new CancellationTokenSource(options.ShutdownTimeout, time);
-            try { if (client.SocketOpen && ids.Length > 0) await client.UnsubscribeAsync(RequestId(), ids, cleanup.Token); }
+            try
+            {
+                if (client.SocketOpen && ids.Length > 0)
+                {
+                    await client.UnsubscribeAsync(RequestId(), ids, cleanup.Token);
+                    await client.CloseOutputAsync(cleanup.Token);
+                    if (receive is not null) await receive.WaitAsync(cleanup.Token);
+                }
+            }
             catch (Exception error) when (error is IOException or OperationCanceledException or WebSocketException) { }
             session.Cancel(); client.Abort();
             var tasks = new[] { receive, confirm, freshness }.Where(t => t is not null).Cast<Task>().ToArray();

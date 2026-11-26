@@ -17,6 +17,7 @@ internal interface IXPlaneSocket : IDisposable
     Task ConnectAsync(Uri endpoint, CancellationToken token);
     Task SendAsync(ReadOnlyMemory<byte> bytes, CancellationToken token);
     Task<byte[]?> ReceiveAsync(int maximumBytes, CancellationToken token);
+    Task CloseOutputAsync(CancellationToken token);
     void Abort();
 }
 
@@ -57,6 +58,8 @@ internal sealed class XPlaneSocket : IXPlaneSocket
         }
     }
     public void Abort() => socket.Abort();
+    public Task CloseOutputAsync(CancellationToken token) =>
+        socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "AeroScience shutdown", token);
     public void Dispose() { socket.Dispose(); handshake.Dispose(); }
 }
 
@@ -190,6 +193,7 @@ internal sealed class XPlaneWebApiClient : IDisposable
     }
     internal Task<byte[]?> ReceiveAsync(CancellationToken token) => socket.ReceiveAsync(options.MaximumMessageBytes, token);
     internal void Abort() => socket.Abort();
+    internal Task CloseOutputAsync(CancellationToken token) => socket.CloseOutputAsync(token);
     private void RequireVersion()
     {
         if (version is not ("v1" or "v2")) throw new XPlaneProtocolException("ProtocolNotNegotiated");

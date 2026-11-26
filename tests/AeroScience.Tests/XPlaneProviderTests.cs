@@ -169,6 +169,20 @@ public sealed class XPlaneProviderTests
     }
 
     [Fact]
+    public async Task ShutdownRemainsBoundedWhenThePeerNeverCompletesClose()
+    {
+        var f = new XPlaneFixture(); f.Socket.IgnoreClose = true;
+        using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+        var stream = f.Provider().ReadAsync(stop.Token).GetAsyncEnumerator();
+        await Until(stream, u => u.Frame is not null);
+        await stream.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(3));
+        Assert.Equal(1, f.Socket.CloseAttempts); Assert.False(f.Socket.IsOpen);
+        Assert.Equal(new[] { "dataref_subscribe_values", "dataref_unsubscribe_values" },
+            f.Socket.Sent.Select(message => message.GetProperty("type").GetString()).ToArray());
+        var count = f.Requests.Count; await Task.Delay(75); Assert.Equal(count, f.Requests.Count);
+    }
+
+    [Fact]
     public async Task CancellationInterruptsStalledDiscoveryAndStopsWithoutReconnect()
     {
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
