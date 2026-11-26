@@ -15,13 +15,19 @@ public sealed class PersonalResearchStarterTests : IDisposable
     static ResearchStarterRequest Request(ResearchEntryIntent intent=ResearchEntryIntent.FlyNow,ResearchCardReference? card=null)=>new(1,Guid.NewGuid(),"flight-regime",intent,card);
     [Fact]public void DefaultsCreateOneLocalCardAndPlanWithoutRecordingSelectionOrExternalWork()
     {
+        Assert.Equal(14,MissionStore.CurrentSchemaVersion);
+        using var database=new SqliteConnection($"Data Source={store.DatabasePath};Pooling=False");database.Open();
+        using var schema=database.CreateCommand();schema.CommandText="PRAGMA user_version";
+        Assert.Equal(14L,(long)schema.ExecuteScalar()!);
         var starter=Assert.Single(MissionStore.ResearchStarters(),s=>s.Id=="flight-regime");FlightRegimeEvaluation.Validate(starter.Example);
         var prepared=store.PrepareResearchStarter(Request());Assert.Equal(starter.Example,prepared.Card.FlightRegime);Assert.False(prepared.Reused);
         Assert.Equal(prepared.Card.Id,prepared.Plan.ResearchCard!.Id);Assert.Equal(new[]{prepared.Plan.ResearchCard},prepared.Plan.ResearchCards);
         Assert.DoesNotContain(prepared.Plan.Instruments!,i=>i.Enabled);Assert.Empty(prepared.Plan.Waypoints??[]);Assert.Empty(store.List());
         var coordinator=new MissionCoordinator(store,1000,requireFreshTelemetry:true);Assert.Null(coordinator.Snapshot().SelectedPlanId);Assert.Null(coordinator.Snapshot().ActiveMission);
         coordinator.SelectPlan(prepared.Plan.Id);Assert.Throws<InvalidOperationException>(()=>coordinator.Start(new(prepared.Plan.Name,PlanId:prepared.Plan.Id)));
-        Assert.Equal(prepared.Plan.Id,coordinator.Snapshot().SelectedPlanId);Assert.Empty(store.List());Assert.Equal(13,MissionStore.CurrentSchemaVersion);
+        Assert.Equal(prepared.Plan.Id,coordinator.Snapshot().SelectedPlanId);Assert.Empty(store.List());
+        Assert.Equal(14L,(long)schema.ExecuteScalar()!);
+        schema.CommandText="SELECT COUNT(*) FROM mission_simulator_origins";Assert.Equal(0L,(long)schema.ExecuteScalar()!);
     }
     [Fact]public async Task ConcurrentRetriesAndRestartReturnOnePreparedCopyWithoutDuplicateCardsOrPlans()
     {
