@@ -58,10 +58,12 @@ export async function simulatorControls(parent){
   }
   save.onclick=async()=>{
     if(busy||!host?.canWrite||!port.checkValidity()) {port.reportValidity();return;}
+    const restoreFocus=document.activeElement===save;
     busy=true;++generation;draw();
     try{host=await api('/api/settings/simulator',{expectedRevision:revision,id:select.value,xPlanePort:Number(port.value)});++generation;draft=false;error='';draw();setPresentationText(feedback,copy(host.restartRequired?'simulator.restart':'simulator.savedNotice'));}
     catch(e){setPresentationText(feedback,e.message);feedback.setAttribute('role','alert');}
-    finally{busy=false;select.disabled=port.disabled=save.disabled=!host?.canWrite||!!error;}
+    finally{busy=false;select.disabled=port.disabled=save.disabled=!host?.canWrite||!!error;
+      if(restoreFocus&&!save.disabled&&document.activeElement===document.body)save.focus({preventScroll:true});}
   };
   reload.onclick=async()=>{draft=false;await refresh();};
   subscribers.add(draw);await refresh();draw();

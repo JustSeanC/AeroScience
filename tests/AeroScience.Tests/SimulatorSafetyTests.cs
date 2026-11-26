@@ -65,5 +65,20 @@ public sealed class SimulatorSafetyTests : IDisposable
         Assert.Equal(plan.Id,selected.Snapshot().SelectedPlanId);Assert.Equal(before,JsonSerializer.Serialize(store.Detail(flight.Id),WireJson.Options));Assert.Equal(samples,JsonSerializer.Serialize(store.Samples(flight.Id,10,0),WireJson.Options));
         Assert.Null(selected.Snapshot().ActiveMission);Assert.Equal(TelemetrySource.Simulated,store.Detail(flight.Id)!.Mission.Source);
     }
-    public void Dispose(){if(Directory.Exists(directory))Directory.Delete(directory,true);}
+    [Fact] public void ForeignXPlanePacketCannotEnterAnAlreadyRecordingMsfsFlight()
+    {
+        var store=Store();var now=DateTimeOffset.UtcNow;var service=new MissionCoordinator(store,1000,utcNow:()=>now);
+        var initial=SimulatedTelemetryProvider.Generate(now,0) with{Source=TelemetrySource.Simulator,Aircraft="Explicit MSFS host fixture"};
+        service.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulator,"Synthetic MSFS fixture",now),initial));
+        var flight=service.Start("Preserve original MSFS evidence");now=now.AddSeconds(1);
+        service.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulator,"Synthetic MSFS fixture",now),initial with{TimestampUtc=now}));
+        // Compare durable rows, including original payloads/evidence, rather than
+        // the live DurationSeconds display which advances without any DB write.
+        var before=StorageManager.DatabaseFingerprint(store.DatabasePath);var original=store.Samples(flight.Id,10,0).ToArray();Assert.Single(original);
+        service.Apply(XPlane(now,approved:true));
+        Assert.Equal(flight.Id,service.Snapshot().ActiveMission!.Id);Assert.False(service.LiveOperationsAllowed);Assert.Null(service.Snapshot().Telemetry);
+        Assert.Equal(before,StorageManager.DatabaseFingerprint(store.DatabasePath));Assert.Equal(original,store.Samples(flight.Id,10,0));
+        Assert.Throws<InvalidOperationException>(()=>service.ControlScience(new(1,flight.Id,Guid.NewGuid(),0,CollectionAction.ResumeData,null)));
+    }
+    public void Dispose(){Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();if(Directory.Exists(directory))Directory.Delete(directory,true);}
 }

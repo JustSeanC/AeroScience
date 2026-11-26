@@ -16,6 +16,7 @@ test('Settings saves the simulator with an explicit restart and retains the effe
     await selector.selectOption('xplane12');await section.getByText('Advanced Settings',{exact:true}).click();
     await section.getByLabel('X-Plane local API port',{exact:true}).fill('9012');await section.getByRole('button',{name:'Save simulator',exact:true}).click();
     await expect(section).toContainText('Saved simulator: X-Plane 12.');await expect(section).toContainText('Restart AeroScience');
+    await expect(section.getByRole('button',{name:'Save simulator',exact:true})).toBeFocused();
     await expect(section).toContainText('Active simulator: Microsoft Flight Simulator 2024.');
     expect((await(await request.get('/api/settings')).json()).simulatorId).toBe('msfs2024');
     await page.reload();await expect(page.locator('.simulator-settings select')).toHaveValue('xplane12');
