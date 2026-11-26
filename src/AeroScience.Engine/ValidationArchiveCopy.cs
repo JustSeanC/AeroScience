@@ -31,7 +31,9 @@ public static class ValidationArchiveCopy
         if (Directory.Exists(destination)) throw new IOException("Keep previous test copies; choose a new destination.");
         if (Within(destination, missionFolder) || Within(missionFolder, destination) || Within(destination, scienceFolder) || Within(scienceFolder, destination))
             throw new IOException("Test copies must be separate from source archives.");
-        var sourceFiles = Files(scienceFolder).ToArray();
+        // Copies own their local content, never the original profile's external backup
+        // authority. New ownership is registered at the final destination below.
+        var sourceFiles = Files(scienceFolder).Where(path=>!Path.GetRelativePath(scienceFolder,path).Replace('\\','/').StartsWith("Metadata/ManagedCopies/",StringComparison.OrdinalIgnoreCase)).ToArray();
         var bytes = checked(sourceFiles.Sum(f=>new FileInfo(f).Length) + new FileInfo(originalDb).Length * 2);
         if (new LocalStorageCapacity().FreeBytes(destination) < bytes * 2 + StorageManager.MinimumFreeBytes)
             throw new IOException("Insufficient space for the verified disposable copy and reserve.");
@@ -41,7 +43,7 @@ public static class ValidationArchiveCopy
         var missions = Path.Combine(stage,"Missions"); var science=Path.Combine(stage,"ScienceLibrary");
         Directory.CreateDirectory(missions); Directory.CreateDirectory(science);
         // Existing WAL-aware backup/fingerprint logic, not raw database-file copies.
-        var missionBackup=DataBackup.Create(originalDb,missions,false); File.Move(missionBackup,Path.Combine(missions,"missions.db"));
+        var missionBackup=DataBackup.Create(originalDb,missions,false,Path.Combine(destination,"Missions","missions.db")); File.Move(missionBackup,Path.Combine(missions,"missions.db"));
         var relativeDatabase=ScienceStore.RelativeDatabasePath.Replace('/',Path.DirectorySeparatorChar);
         foreach (var source in sourceFiles)
         {
@@ -56,7 +58,7 @@ public static class ValidationArchiveCopy
         if(File.Exists(scienceDb))
         {
             var target=Path.Combine(science,relativeDatabase);Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            File.Move(DataBackup.Create(scienceDb,Path.GetDirectoryName(target)!,true),target);
+            File.Move(DataBackup.Create(scienceDb,Path.GetDirectoryName(target)!,true,Path.Combine(destination,"ScienceLibrary",relativeDatabase)),target);
         }
         Directory.Move(stage,destination);
         return new(Path.Combine(destination,"Missions"),Path.Combine(destination,"ScienceLibrary"),Initialized:true);

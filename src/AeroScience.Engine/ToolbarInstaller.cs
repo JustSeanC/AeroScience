@@ -72,14 +72,17 @@ public static class ToolbarInstaller
         Report("Checking MSFS installation", "Checking the simulator is closed and validating the selected package.");
         simulatorRunning ??= SimulatorRunning;
         if (simulatorRunning()) throw new IOException("Close MSFS before installing/updating the toolbar.");
-        if(ApplicationProfile.Current.Native080||ApplicationProfile.Current.Beta080)NativeValidationPaths.ValidateCommunity(community,input);
+        if(ApplicationProfile.Current.Native080||ApplicationProfile.Current.Native081||ApplicationProfile.Current.Beta080)NativeValidationPaths.ValidateCommunity(community,input);
         var package = Path.Combine(input, ApplicationProfile.Current.ToolbarPackage);
         if (!Directory.Exists(package)) throw new IOException("This developer build has no verified SDK-built toolbar. A complete alpha must include it; no source/placeholder package was installed.");
         using var receipt = JsonDocument.Parse(File.ReadAllText(Path.Combine(input, "sdk-build.json")));
-        if (receipt.RootElement.GetProperty("variant").GetString() != (ApplicationProfile.Current.Beta080 ? "toolbar-beta-080" : ApplicationProfile.Current.Native080 ? "toolbar-validation-080" : ApplicationProfile.Current.Validation ? "toolbar-validation" : "toolbar-full")) throw new IOException("Diagnostic toolbar packages cannot be installed as the full release.");
+        if (receipt.RootElement.GetProperty("variant").GetString() != (ApplicationProfile.Current.Native081 ? "toolbar-candidate-081" : ApplicationProfile.Current.Beta080 ? "toolbar-beta-080" : ApplicationProfile.Current.Native080 ? "toolbar-validation-080" : ApplicationProfile.Current.Validation ? "toolbar-validation" : "toolbar-full")) throw new IOException("Diagnostic toolbar packages cannot be installed as the full release.");
         if(ApplicationProfile.Current.Beta080 && (receipt.RootElement.GetProperty("source_commit").GetString()!=ApplicationProfile.SourceCommit
             ||receipt.RootElement.GetProperty("version").GetString()!=ApplicationProfile.BetaVersion
             ||receipt.RootElement.GetProperty("sdk_contract").GetString()!="passed"))throw new IOException("The Beta toolbar SDK receipt does not match this companion source/version.");
+        if(ApplicationProfile.Current.Native081 && (receipt.RootElement.GetProperty("source_commit").GetString()!=ApplicationProfile.SourceCommit
+            ||receipt.RootElement.GetProperty("instance").GetString()!=ApplicationProfile.Current.Instance
+            ||receipt.RootElement.GetProperty("sdk_contract").GetString()!="passed"))throw new IOException("The candidate SDK receipt differs from this compiled source/attempt.");
         var expected = receipt.RootElement.GetProperty("files").EnumerateObject().ToDictionary(p => p.Name, p => p.Value.GetString(), StringComparer.OrdinalIgnoreCase);
         var files = ValidatedFiles(package);
         Report("Checking the existing toolbar", "Validating bundled files against their genuine SDK build receipt.");

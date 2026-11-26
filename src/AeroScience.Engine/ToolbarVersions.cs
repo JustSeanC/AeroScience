@@ -73,7 +73,7 @@ public static class ToolbarVersions
             using var data=JsonDocument.Parse(File.ReadAllText(Path.Combine(folder,"html_ui","InGamePanels",profile.ToolbarFolder,"toolbar-compatibility.json")));
             if(profile.Beta080)return data.RootElement.GetProperty("profile").GetString()=="beta080"
                 &&data.RootElement.GetProperty("applicationVersion").GetString()==ApplicationProfile.BetaVersion?data.RootElement.GetProperty("sourceCommit").GetString():null;
-            if(profile.Native080&&(!data.RootElement.TryGetProperty("validationInstance",out var instance)||instance.GetString()!=profile.Instance))return null;
+            if((profile.Native080||profile.Native081)&&(!data.RootElement.TryGetProperty("validationInstance",out var instance)||instance.GetString()!=profile.Instance))return null;
             return data.RootElement.GetProperty("profile").GetString()=="validation"?data.RootElement.GetProperty("sourceCommit").GetString():null;
         }
         catch(Exception error)when(error is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException){return null;}

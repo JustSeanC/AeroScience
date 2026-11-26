@@ -176,6 +176,7 @@ jobs:
           - 55437:5432
         options: --health-cmd "pg_isready -U aeroscience_test -d aeroscience_org_tests" --health-interval 5s --health-timeout 5s --health-retries 12
     env:
+      AEROSCIENCE_P05_MEASUREMENTS: ${{ github.workspace }}/artifacts/p05-linux-storage.json
       AEROSCIENCE_ORG_TEST_DATABASE: Host=127.0.0.1;Port=55437;Database=aeroscience_org_tests;Username=aeroscience_test;Password=p13_disposable_loopback_only
     steps:
       - uses: actions/checkout@v7
@@ -213,6 +214,7 @@ jobs:
             artifacts/organization-update-fixture/fixture.json
             artifacts/organization-update-fixture/*-build.log
             artifacts/organization-update-fixture/prepare.log
+            artifacts/p05-linux-storage.json
           if-no-files-found: ignore
           retention-days: 7
       - run: npm ci --ignore-scripts
@@ -242,10 +244,38 @@ jobs:
           python3 scripts/build/smoke_library_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           python3 scripts/build/smoke_source_deletion.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           python3 scripts/build/smoke_aviation_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
+  compatibility081:
+    needs: validation-scope
+    if: needs.validation-scope.outputs.tier == 'full' && github.ref == 'refs/heads/develop/v0.8.1'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - run: dotnet restore AeroScience.sln --locked-mode
+      - run: dotnet build tests/AeroScience.TestHost -c Release --no-restore --output artifacts/p05-compatibility-host
+      - name: Exercise actual schema-13 engine against disposable source-qualified schema-14 data
+        run: python3 scripts/build/legacy_runtime_081.py --host artifacts/p05-compatibility-host/AeroScience.TestHost.dll --output artifacts/p05-prior-runtime
+      - name: Retain prior-runtime compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: p05-prior-runtime
+          path: |
+            artifacts/p05-prior-runtime/*.log
+            artifacts/p05-prior-runtime/receipt.json
+            artifacts/p05-prior-runtime/disposable-data/fixture.json
+          if-no-files-found: ignore
+          retention-days: 7
   windows-companion:
     needs: validation-scope
     if: needs.validation-scope.outputs.tier == 'full'
     runs-on: windows-latest
+    env:
+      AEROSCIENCE_P05_MEASUREMENTS: ${{ github.workspace }}/artifacts/p05-windows-storage.json
     steps:
       - uses: actions/checkout@v7
         with:
@@ -317,6 +347,27 @@ jobs:
         shell: pwsh
         run: |
           ./scripts/build/Publish-080BetaCompanion.ps1 -ExpectedSourceCommit $env:GITHUB_SHA -ArtifactsPath (Join-Path $PWD 'artifacts/beta080-structural/intermediate') -OutputDirectory (Join-Path $PWD 'artifacts/beta080-structural/app')
+      - name: Publish and exercise isolated v0.8.1 candidate without native SimConnect
+        if: github.ref == 'refs/heads/develop/v0.8.1'
+        shell: pwsh
+        run: |
+          $parent = Join-Path $env:USERPROFILE 'AeroScience-P05-Builds'
+          [IO.Directory]::CreateDirectory($parent) | Out-Null
+          $attempt = Join-Path $parent ('Candidate081-' + $env:GITHUB_RUN_ID + '-' + $env:GITHUB_RUN_ATTEMPT)
+          try {
+            ./scripts/build/Build-081Candidate.ps1 -ExpectedSourceCommit $env:GITHUB_SHA -OutputDirectory $attempt
+            if ($LASTEXITCODE -ne 0) { throw 'Candidate structural publication/startup failed.' }
+            python scripts/build/candidate_081.py verify --folder $attempt --source $env:GITHUB_SHA
+            if ($LASTEXITCODE -ne 0) { throw 'Candidate bytes failed post-build verification.' }
+          } finally {
+            $diagnostics = Join-Path $PWD 'artifacts/candidate081-diagnostics'
+            [IO.Directory]::CreateDirectory($diagnostics) | Out-Null
+            foreach ($name in @('CANDIDATE-081.json','application/compiled-profile.json','application/startup-no-simconnect.json','application/lidar-check.json','application/native-dependencies.json')) {
+              $file = Join-Path $attempt $name
+              if (Test-Path -LiteralPath $file) { Copy-Item -LiteralPath $file -Destination $diagnostics }
+            }
+            if (Test-Path -LiteralPath (Join-Path $attempt 'Logs')) { Copy-Item -LiteralPath (Join-Path $attempt 'Logs') -Destination $diagnostics -Recurse }
+          }
       - name: Verify dependency locks remain unchanged
         if: always()
         shell: pwsh
@@ -338,6 +389,8 @@ jobs:
             artifacts/native080-structural/app/lidar-check.json
             artifacts/native080-structural/app/LidarRuntime/build.json
             src/AeroScience.Missions/obj/native-lidar/**/build.json
+            artifacts/candidate081-diagnostics/**
+            artifacts/p05-windows-storage.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Check Windows-sensitive helpers and installer packaging

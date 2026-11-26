@@ -52,7 +52,14 @@ class DevelopmentValidationTests(unittest.TestCase):
         self.assertEqual('fast', ci.validation_tier('push', 'refs/heads/develop/v0.5.0', requested='windows-profile'))
         workflow = (ROOT/'.github/workflows/ci.yml').read_text(encoding='utf-8')
         self.assertIn("if: needs.validation-scope.outputs.tier == 'windows-profile'", workflow)
-        self.assertEqual(3, workflow.count("if: needs.validation-scope.outputs.tier == 'full'"))
+        self.assertEqual(3, workflow.splitlines().count("    if: needs.validation-scope.outputs.tier == 'full'"))
+        # P05 adds a separately bounded compatibility job; it must not replace or
+        # weaken any original required platform/deployment full condition.
+        for job in ('linux', 'windows-companion', 'organization-deployment'):
+            section=workflow.split('  '+job+':\n',1)[1].split('    steps:',1)[0]
+            self.assertIn("    if: needs.validation-scope.outputs.tier == 'full'\n",section)
+        compatibility=workflow.split('  compatibility081:\n',1)[1].split('    steps:',1)[0]
+        self.assertIn("if: needs.validation-scope.outputs.tier == 'full' && github.ref == 'refs/heads/develop/v0.8.1'",compatibility)
         self.assertIn("  organization-deployment:", workflow)
         self.assertIn("verify_organization_container.py", workflow)
         self.assertEqual(2, workflow.count('./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe'))

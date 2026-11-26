@@ -8,6 +8,10 @@ if(args is ["--organization-notification-fixture","--rate-limited"]){await AeroS
 if(args is ["--organization-notification-fixture"]){await AeroScience.TestHost.OrganizationNotificationFixture.Run();return;}
 if(args is ["--terrain-elevation-probe",var terrainOriginal,var terrainOutput]){await AeroScience.TestHost.TerrainElevationProbe.Run(terrainOriginal,terrainOutput);return;}
 if(args is ["--retained-raster-probe",var rasterSource,var rasterOutput]){AeroScience.TestHost.RetainedRasterProbe.Run(rasterSource,rasterOutput);return;}
+if(args is ["--candidate-startup-081",var candidateStartupReceipt]){await Candidate081Probe.Startup(candidateStartupReceipt);return;}
+if(args is ["--p05-persistence-fixture",var p05FixtureRoot]){Persistence081Probe.Create(p05FixtureRoot);return;}
+if(args is ["--p05-persistence-verify",var p05VerifyRoot]){Persistence081Probe.Verify(p05VerifyRoot);return;}
+if(args is ["--profile-probe-081",var candidateAssembly,var candidateSource,var candidateInstance]){Candidate081Probe.Inspect(candidateAssembly,candidateSource,candidateInstance);return;}
 if(args is ["--profile-probe-beta080",var betaAssembly,var betaSource]){Native080ProfileProbe.RunBeta(betaAssembly,betaSource);return;}
 if(args is ["--survey-view-probe",var surveyOriginal,var surveyTerrain,var surveyOutput]){await AeroScience.TestHost.SurveyViewProbe.Run(surveyOriginal,surveyTerrain,surveyOutput);return;}
 if(args is ["--lidar-probe",var lidarMode,var lidarOriginal,var lidarOutput]){await AeroScience.TestHost.LidarProbe.Run(lidarMode,lidarOriginal,lidarOutput);return;}

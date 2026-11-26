@@ -11,4 +11,5 @@
   </PropertyGroup>
   <!-- Explicit beta graph; legacy/private graphs retain their locked identity. -->
   <Import Project="build/Beta080.props" Condition="'$(AeroScienceBeta080)' == 'true'" />
+  <Import Project="build/Candidate081.props" Condition="'$(AeroScienceCandidate081)' == 'true'" />
 </Project>

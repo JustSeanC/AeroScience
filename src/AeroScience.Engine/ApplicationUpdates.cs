@@ -15,7 +15,7 @@ public static class ReleaseVersions
 }
 public sealed class ApplicationUpdates
 {
-    public static string CurrentVersion => ApplicationProfile.Current.Beta080 ? ApplicationProfile.BetaVersion : "0.7.0";
+    public static string CurrentVersion => ApplicationProfile.Current.Native081 ? "0.8.1-candidate" : ApplicationProfile.Current.Beta080 ? ApplicationProfile.BetaVersion : "0.7.0";
     private readonly ApplicationProfile profile;
     private readonly string currentVersion;
     private readonly string path;
@@ -25,12 +25,13 @@ public sealed class ApplicationUpdates
     private UpdateSnapshot state;
     public ApplicationUpdates(string directory, HttpClient? client = null, ApplicationProfile? profile = null)
     {
-        this.profile=profile??ApplicationProfile.Current;currentVersion=this.profile.Beta080?ApplicationProfile.BetaVersion:CurrentVersion;
+        this.profile=profile??ApplicationProfile.Current;currentVersion=this.profile.Native081?"0.8.1-candidate":this.profile.Beta080?ApplicationProfile.BetaVersion:CurrentVersion;
         path = Path.Combine(directory, "updates.json"); http = client ?? new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(8), MaxResponseContentBufferSize = 2097152 };
         state = new(currentVersion, this.profile.Beta080 ? new(false,true) : new());
         try { if (File.Exists(path)) state = (JsonSerializer.Deserialize<UpdateSnapshot>(File.ReadAllText(path)) ?? state) with { CurrentVersion = currentVersion }; }
         catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException) { state = state with { Message = "Update preferences unavailable; configure them in Settings. Offline work remains available.", Preferences = new(false) }; }
         if(state.Preferences is null)state=state with{Preferences=new(false),Available=null,Message="Update preferences are invalid; offline work remains available. Review Settings → Updates."};
+        if(this.profile.Native081)state=state with{Available=null,Preferences=new(false)};
         if (state.Available is { } cached && !ValidCachedRelease(cached)) state = state with { Available = null, LastCheckedUtc = null };
     }
     private bool ValidCachedRelease(AvailableRelease release)
@@ -54,7 +55,7 @@ public sealed class ApplicationUpdates
     {
         if (profile.Validation)
         {
-            lock (gate) return state = state with { Available=null, Preferences=new(false), Message="Private validation profile. Rebuild from develop/v0.7.0; public installers do not update this profile." };
+            lock (gate) return state = state with { Available=null, Preferences=new(false), Message=profile.Native081?"Private v0.8.1 candidate. Rebuild from develop/v0.8.1; public installers do not update this profile.":"Private validation profile. Rebuild from develop/v0.7.0; public installers do not update this profile." };
         }
         await check.WaitAsync(token);
         try

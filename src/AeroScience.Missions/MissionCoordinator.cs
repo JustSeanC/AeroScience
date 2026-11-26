@@ -19,7 +19,7 @@ public sealed partial class MissionCoordinator(MissionStore store, int samplingI
         lock(gate)
         {
             simulatorPolicy.RequireRecording();
-            if(simulatorPolicy.XPlane)throw new InvalidOperationException("X-Plane live sharing requires a source-aware live protocol. The current version 1 receiver cannot carry its simulator identity; no sharing was authorized. Compatibility work remains for P05.");
+            if(simulatorPolicy.XPlane)throw new InvalidOperationException("X-Plane live sharing requires a source-aware live protocol. The current version 1 receiver cannot carry its simulator identity; no sharing was authorized. Source-aware receiver negotiation remains required before this capability can be enabled.");
         }
     }
     public bool CanChangeSimulator { get { lock(gate) return active is null && !maintenance; } }

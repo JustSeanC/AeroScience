@@ -5,16 +5,17 @@ namespace AeroScience.Missions;
 public static class DataBackup
 {
     // Call under the application's maintenance/storage leases. SQLite backup includes committed WAL data.
-    public static string Create(string source, string destinationFolder, bool science)
+    public static string Create(string source, string destinationFolder, bool science, string? registeredDestination = null)
     {
         StorageManager.ValidateLocalPath(destinationFolder);
+        if(registeredDestination is not null)StorageManager.ValidateLocalPath(registeredDestination);
         if (!Directory.Exists(destinationFolder)) throw new IOException("Choose an existing backup folder.");
         if (new LocalStorageCapacity().FreeBytes(destinationFolder) < new FileInfo(source).Length * 2 + StorageManager.MinimumFreeBytes)
             throw new IOException("Insufficient backup capacity. No data was cleared.");
         var name = $"AeroScience-{(science ? "science" : "missions")}-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.sqlite";
         var target = Path.Combine(destinationFolder, name); var temporary = target + ".partial";
-            if(science){var library=Path.GetDirectoryName(Path.GetDirectoryName(Path.GetFullPath(source))!)!;var internalBackups=Path.Combine(library,"Metadata","Backups");if(StorageManager.LibraryId(library)!=Guid.Empty&&!Path.GetFullPath(destinationFolder).Equals(internalBackups,StringComparison.OrdinalIgnoreCase))ScienceStore.RegisterScientificCopy(library,target,"database");}
-        if(!science)MissionStore.RegisterScienceBearingBackup(source,target);
+            if(science){var library=Path.GetDirectoryName(Path.GetDirectoryName(Path.GetFullPath(source))!)!;var internalBackups=Path.Combine(library,"Metadata","Backups");if(StorageManager.LibraryId(library)!=Guid.Empty&&!Path.GetFullPath(destinationFolder).Equals(internalBackups,StringComparison.OrdinalIgnoreCase))ScienceStore.RegisterScientificCopy(library,registeredDestination??target,"database");}
+        if(!science)MissionStore.RegisterScienceBearingBackup(source,registeredDestination??target);
         try
         {
             using (var from = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = source, Mode = SqliteOpenMode.ReadOnly, Pooling = false }.ToString()))

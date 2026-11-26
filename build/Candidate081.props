@@ -1,0 +1,17 @@
+<Project>
+  <!-- Opt-in engineering graph. Preserve legacy NuGet identities/locks. -->
+  <PropertyGroup>
+    <Version>0.8.1-candidate</Version>
+    <PackageVersion>0.7.0</PackageVersion>
+    <AssemblyVersion>0.8.1.0</AssemblyVersion>
+    <FileVersion>0.8.1.0</FileVersion>
+    <InformationalVersion>0.8.1-candidate</InformationalVersion>
+    <ReleaseChannel>validation</ReleaseChannel>
+    <Product>AeroScience 0.8.1 Candidate</Product>
+    <AssemblyTitle>AeroScience 0.8.1 Candidate</AssemblyTitle>
+  </PropertyGroup>
+  <Target Name="ValidateCandidate081Identity" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(AeroScienceValidation)' == 'true' Or '$(AeroScienceBeta080)' == 'true'" Text="The candidate cannot be combined with protected legacy profiles." />
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(AeroScienceCandidateInstance)', '^[0-9a-f]{32}$')) Or '$(AeroScienceCandidateInstance)' == '00000000000000000000000000000000'" Text="A compiled nonempty v0.8.1 candidate attempt identity is required." />
+  </Target>
+</Project>

@@ -2,6 +2,9 @@
   <PropertyGroup><RuntimeIdentifiers>win-x64</RuntimeIdentifiers></PropertyGroup>
   <ItemGroup>
     <AssemblyMetadata Include="AeroScienceProfile" Value="validation" Condition="'$(AeroScienceValidation)' == 'true'" />
+    <AssemblyMetadata Include="AeroScienceProfile" Value="candidate081" Condition="'$(AeroScienceCandidate081)' == 'true'" />
+    <AssemblyMetadata Include="AeroScienceValidationVersion" Value="0.8.1" Condition="'$(AeroScienceCandidate081)' == 'true'" />
+    <AssemblyMetadata Include="AeroScienceValidationInstance" Value="$(AeroScienceCandidateInstance)" Condition="'$(AeroScienceCandidate081)' == 'true'" />
     <AssemblyMetadata Include="AeroScienceProfile" Value="beta080" Condition="'$(AeroScienceBeta080)' == 'true'" />
     <AssemblyMetadata Include="AeroScienceValidationVersion" Value="$(AeroScienceValidationVersion)" Condition="'$(AeroScienceValidation)' == 'true' and '$(AeroScienceValidationVersion)' != ''" />
     <AssemblyMetadata Include="AeroScienceValidationInstance" Value="$(AeroScienceValidationInstance)" Condition="'$(AeroScienceValidation)' == 'true' and '$(AeroScienceValidationVersion)' == '0.8.0'" />
