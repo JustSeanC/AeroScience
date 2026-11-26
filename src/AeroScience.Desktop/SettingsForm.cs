@@ -20,8 +20,10 @@ public sealed class SettingsForm : BrandedForm
         var tabs = new TabControl { Dock = DockStyle.Fill };
         var general = new TabPage(WindowsPresentation.Text("ui.settingsNavigation.messageGeneral")); var storageTab = new TabPage(WindowsPresentation.Text("ui.settingsNavigation.messageStorageData")); var toolbarTab = new TabPage(WindowsPresentation.Text("windows.settingsForm.toolbar"));
         var generalPanel = Panel(); general.Controls.Add(generalPanel); storageTab.Controls.Add(storagePanel);
-        tabs.TabPages.Add(general); tabs.TabPages.Add(storageTab); tabs.TabPages.Add(toolbarTab); var toolbarPanel = Panel(); toolbarTab.Controls.Add(toolbarPanel); tabs.SelectedIndex = storage ? 1 : toolbar ? 2 : 0; Controls.Add(tabs);
-        BuildGeneral(generalPanel); BuildToolbar(toolbarPanel); RefreshStorage();
+        tabs.TabPages.Add(general); tabs.TabPages.Add(storageTab);
+        if(app.UsesMsfs)tabs.TabPages.Add(toolbarTab);
+        var toolbarPanel = Panel(); toolbarTab.Controls.Add(toolbarPanel); tabs.SelectedIndex = storage ? 1 : toolbar && app.UsesMsfs ? 2 : 0; Controls.Add(tabs);
+        BuildGeneral(generalPanel); if(app.UsesMsfs)BuildToolbar(toolbarPanel); RefreshStorage();
         var mapsTab = new TabPage(WindowsPresentation.Text("ui.basemaps.messageMapsBasemaps")); var mapsPanel = Panel(); mapsTab.Controls.Add(mapsPanel); tabs.TabPages.Add(mapsTab);
         Label(mapsPanel, WindowsPresentation.Text("windows.settingsForm.newInstallationsSuggestOpenstreetmapStreetsAfterAPrivacyChoice"));
         Button(mapsPanel, WindowsPresentation.Text("windows.settingsForm.openMapsBasemapsSettings"), (_, _) => app.OpenDashboard(settings: true));
@@ -121,6 +123,7 @@ public sealed class SettingsForm : BrandedForm
     }
     private void BuildGeneral(Control panel)
     {
+        var simulator = new SimulatorPanel(app); panel.Controls.Add(simulator); pendingEdits.Add(() => simulator.HasChanges);
         var appearance = new PresentationPanel(app.Preferences, () => app.RefreshAppearance(true));
         panel.Controls.Add(appearance); pendingEdits.Add(() => appearance.HasChanges);
         var preferences = app.Preferences.Load();

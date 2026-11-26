@@ -5,9 +5,16 @@ namespace AeroScience.Missions;
 
 // All mutations pass through this gate, including telemetry and commands from every display.
 public sealed class MissionCoordinator(MissionStore store, int samplingIntervalMs, bool requireFreshTelemetry = false,
-    Action? ensureRecordingCapacity = null, ResearchOperations? research = null,Func<DateTimeOffset>? utcNow=null,Func<MissionPlan,ReadinessAssessment>? assessPreflight=null)
+    Action? ensureRecordingCapacity = null, ResearchOperations? research = null,Func<DateTimeOffset>? utcNow=null,Func<MissionPlan,ReadinessAssessment>? assessPreflight=null,
+    SimulatorAccessPolicy? simulatorAccess=null)
 {
     internal MissionStore Store => store;
+    private readonly SimulatorAccessPolicy simulatorPolicy = simulatorAccess ?? research?.SimulatorPolicy ?? new(SimulatorPreferences.Msfs2024);
+    public bool LiveOperationsAllowed => simulatorPolicy.RecordingAllowed && simulatorPolicy.ScienceAllowed;
+    private bool hadQualifiedTelemetry;
+    public bool HadQualifiedTelemetry { get {lock(gate)return hadQualifiedTelemetry;} }
+    public void RequireLiveOperations() { lock (gate) simulatorPolicy.RequireRecording(); }
+    public bool CanChangeSimulator { get { lock(gate) return active is null && !maintenance; } }
     private readonly object gate = new();
     private ScienceCollectionController? collection;
     private GeographicCollectionEngine? geographicCollection;
@@ -49,11 +56,13 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         {
             var count = active?.SampleCount ?? 0;
             var seconds = (lastRecordedUtc - firstRecordedUtc)?.TotalSeconds;
-            return new(connection, frame, active, samplingIntervalMs, Sampling: new(received, count, skipped, missing,
+            var staleReadOnly=simulatorPolicy.XPlane&&frame is not null&&(Now-frame.TimestampUtc).TotalSeconds is < 0 or > 2;
+            return new(staleReadOnly?connection with{State=ConnectionState.Initializing,Message="TelemetryStale"}:connection, staleReadOnly?null:frame, active, samplingIntervalMs, Sampling: new(received, count, skipped, missing,
                 count > 1 && seconds > 0 ? (count - 1) / seconds : null, firstRecordedUtc, lastRecordedUtc,
                 active is not null && active.DurationSeconds >= 1 ? count / active.DurationSeconds : null,
                 active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value - active.StartedUtc).TotalSeconds) : null),
-                Research: research?.Snapshot(connection, frame), RecordingStop: recordingStop, SelectedPlanId: SelectedPlan());
+                Research: research?.Snapshot(connection, frame), RecordingStop: recordingStop, SelectedPlanId: SelectedPlan())
+                { Simulator = LiveOperationsAllowed ? null : simulatorPolicy.Availability };
         }
     }
 
@@ -72,10 +81,26 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock(gate)
         {
+            simulatorPolicy.Observe(update);
+            if (!LiveOperationsAllowed)
+            {
+                // Diagnostic-only projection: do not run MSFS enrichment,
+                // recording, collection, card evaluation or scientific observers.
+                connection = update.Connection;
+                var matching = connection.Origin is null || connection.Origin.SimulatorId == simulatorPolicy.SimulatorId;
+                frame = simulatorPolicy.XPlane && matching && connection.State == ConnectionState.Connected
+                    && update.Frame is {IsValid:true} candidate && (Now-candidate.TimestampUtc).TotalSeconds is >= 0 and <= 2
+                    ? candidate with { Guidance=null, Environment=null, Atmosphere=null } : null;
+                if(frame is not null)hadQualifiedTelemetry=true;
+                if (!matching || connection.State == ConnectionState.Connected && frame is null)
+                    connection = connection with { State=ConnectionState.Initializing, Message=matching?"CoreMeasurementUnavailable":"SimulatorSourceMismatch" };
+                return;
+            }
             if(active is not null&&connection.State!=update.Connection.State)store.AddEvent(active.Id,Now,"connection",update.Connection.Message);
             connection=update.Connection;environment.Apply(update);
             if(update.Frame is {IsValid:true} incoming)update=update with{Frame=environment.Enrich(incoming)};
             frame=connection.State!=ConnectionState.Connected?null:update.Frame is {IsValid:true}?update.Frame:update.Frame is not null?null:frame;
+            if(frame is not null)hadQualifiedTelemetry=true;
             if(active is null){research?.Observe(update,frame);return;}
             var pauseTransition = update.Frame is { IsValid: true } pauseFrame && pauseFrame.IsPaused != simulatorPaused ? pauseFrame : null;
             TelemetryFrame? sample=null;long slot=-1;var capacityOkay=true;
@@ -162,6 +187,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             throw new ArgumentException("Use a mission name of 1–100 characters without control characters.");
         lock (gate)
         {
+            simulatorPolicy.RequireRecording();
             if (maintenance) throw new InvalidOperationException("Storage/settings maintenance is in progress. Try again after it completes.");
             if (active is not null) throw new InvalidOperationException("A mission is already recording.");
             if(request.CheckSelectedPlan&&SelectedPlan()!=request.PlanId)throw new InvalidOperationException("The selected mission plan changed. Review the current selection before starting.");
@@ -245,6 +271,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock(gate)
         {
+            simulatorPolicy.RequireScience();
             var state=collection?.State??throw new InvalidOperationException("No active collection controller.");
             if((state.Phase==CollectionPhase.Paused)==paused)return false;
             var result=collection!.Control(new(1,state.MissionId,Guid.NewGuid(),state.Revision,paused?CollectionAction.PauseData:CollectionAction.ResumeData,state.CurrentSessionId),timestamp??ControlTime);
@@ -256,6 +283,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock (gate)
         {
+            simulatorPolicy.RequireScience();
             if (maintenance || active?.Id != id) throw new InvalidOperationException("This mission is not currently recording.");
             if (research is null) throw new InvalidOperationException("Science Collection is unavailable in this host.");
             var state=collection?.State??throw new InvalidOperationException("No collection controller.");
@@ -267,7 +295,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock(gate)
         {
-            var state=store.CollectionCheckpoint(id);var recording=active?.Id==id&&!maintenance;
+            var state=store.CollectionCheckpoint(id);var recording=active?.Id==id&&!maintenance&&LiveOperationsAllowed;
             var current=state?.CurrentSessionId is {} sid?store.CollectionSession(id,sid):null;
             var actions=Enum.GetValues<CollectionAction>().Where(a=>a!=CollectionAction.Unknown).Select(a=>
             {
@@ -290,6 +318,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock(gate)
         {
+            simulatorPolicy.RequireScience();
             if(store.CollectionControlReceipt(request) is {} previous)return previous;
             if(maintenance||active?.Id!=request.MissionId||collection is null)throw new InvalidOperationException("This flight is not recording.");
             if(request.Action==CollectionAction.StartData)research?.EnsureCanStart(research.Configurations);
@@ -305,6 +334,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         Monitor.Enter(gate);
         try
         {
+            simulatorPolicy.RequireScience();
             if(request.SessionId is {} session&&request.IntentId is {} intent)
             {
                 var state=collection?.State;
@@ -322,6 +352,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock (gate)
         {
+            simulatorPolicy.RequireRecording();
             if(maintenance)throw new InvalidOperationException("Data maintenance is in progress.");
             if(store.MarkerReceipt(id,request) is {} receipt)return receipt;
             if(active?.Id!=id)throw new InvalidOperationException("Observation markers require an active mission.");
@@ -373,7 +404,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock(gate){
             var state=store.ResearchOperations(id);
-            var canBegin=active?.Id==id&&connection.State==ConnectionState.Connected&&frame is {IsValid:true,IsPaused:false}
+            var canBegin=LiveOperationsAllowed&&active?.Id==id&&connection.State==ConnectionState.Connected&&frame is {IsValid:true,IsPaused:false}
                 && Now-frame.TimestampUtc>=TimeSpan.FromSeconds(-2)&&Now-frame.TimestampUtc<=TimeSpan.FromSeconds(6);
             return state with{GeneratedUtc=Now,CanBeginAttempt=canBegin};
         }
@@ -381,6 +412,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     public ResearchCardResult ControlPersonalResearch(ResearchCardControl request)
     {
         lock(gate){
+            simulatorPolicy.RequireScience();
             // Durable receipts may be replayed after End Flight; a new command cannot
             // mutate an old flight. Store rechecks recording/revision transactionally.
             if(maintenance)throw new InvalidOperationException("Storage maintenance is in progress.");

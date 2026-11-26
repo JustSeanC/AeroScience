@@ -8,7 +8,8 @@ namespace AeroScience.Missions;
 public enum StorageKind { Missions, ScienceLibrary }
 public sealed record AppPreferences(string MissionDirectory, string ScienceLibraryDirectory,
     bool Initialized = false, bool EnableLan = false, string? LanAddress = null, int SamplingIntervalMs = 1000,
-    string? CommunityDirectory = null, bool SetupCompleted = false, PresentationPreferences? Presentation = null);
+    string? CommunityDirectory = null, bool SetupCompleted = false, PresentationPreferences? Presentation = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] SimulatorPreferences? Simulator = null);
 public sealed record StorageStatus(string Directory, bool Available, long? UsedBytes, long? FreeBytes, string? Error);
 public sealed record MigrationJournal(StorageKind Kind, string Source, string Destination, string Phase,
     string? Fingerprint = null);

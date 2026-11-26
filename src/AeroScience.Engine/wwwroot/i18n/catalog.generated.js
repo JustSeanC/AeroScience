@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 25,
+    "catalogVersion": 26,
     "fallback": "en-US",
     "locales": [
       {
@@ -37,8 +37,8 @@ export const localeData = {
       }
     ],
     "qualityContract": 1,
-    "catalogIdentity": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
-    "bundleIdentity": "16a732d4a2426b4faccd8cc89083da5880eb5d9c11d723a9dd60227d24ad6ffa"
+    "catalogIdentity": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
+    "bundleIdentity": "ef48f415967ba821fef1efbcc51fdd9da0b1507ff53eced346fb12864ad2481b"
   },
   "schema": {
     "version": 1,
@@ -24939,14 +24939,144 @@ export const localeData = {
           "count"
         ],
         "plural": "count"
+      },
+      "simulator.title": {
+        "parameters": []
+      },
+      "simulator.msfs2024": {
+        "parameters": []
+      },
+      "simulator.xplane12": {
+        "parameters": []
+      },
+      "simulator.active": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "simulator.saved": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "simulator.restart": {
+        "parameters": []
+      },
+      "simulator.recordingDisabled": {
+        "parameters": []
+      },
+      "simulator.readOnlyConnected": {
+        "parameters": []
+      },
+      "simulator.sourceMismatch": {
+        "parameters": []
+      },
+      "simulator.invalidSaved": {
+        "parameters": []
+      },
+      "simulator.invalidChoice": {
+        "parameters": []
+      },
+      "simulator.changed": {
+        "parameters": []
+      },
+      "simulator.maintenance": {
+        "parameters": []
+      },
+      "simulator.toolbarUnavailable": {
+        "parameters": []
+      },
+      "simulator.advanced": {
+        "parameters": []
+      },
+      "simulator.port": {
+        "parameters": []
+      },
+      "simulator.localOnly": {
+        "parameters": []
+      },
+      "simulator.save": {
+        "parameters": []
+      },
+      "simulator.reload": {
+        "parameters": []
+      },
+      "simulator.savedNotice": {
+        "parameters": []
+      },
+      "simulator.localOwner": {
+        "parameters": []
+      },
+      "simulator.details": {
+        "parameters": []
+      },
+      "simulator.connecting": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "simulator.connected": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "simulator.waiting": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "simulator.reconnecting": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "simulator.accessDenied": {
+        "parameters": []
+      },
+      "simulator.unsupportedApi": {
+        "parameters": []
+      },
+      "simulator.invalidApi": {
+        "parameters": []
+      },
+      "simulator.waitingData": {
+        "parameters": []
+      },
+      "simulator.stale": {
+        "parameters": []
+      },
+      "simulator.checkPort": {
+        "parameters": []
+      },
+      "simulator.setup": {
+        "parameters": []
+      },
+      "simulator.offline": {
+        "parameters": []
+      },
+      "simulator.setupSummary": {
+        "parameters": []
+      },
+      "simulator.engineStopped": {
+        "parameters": []
+      },
+      "simulator.nativeStatus": {
+        "parameters": [
+          "name",
+          "status",
+          "recording"
+        ]
+      },
+      "simulator.noRecording": {
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "de-DE": {
-      "version": 25,
+      "version": 26,
       "locale": "de-DE",
-      "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
+      "sourceHash": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
       "pendingEnglishFallbackKeys": [
         "contextHelp.terrain.title",
         "flight.elapsed",
@@ -24968,6 +25098,44 @@ export const localeData = {
         "native.static.iasKts",
         "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack",
         "native.static.vsFtMin",
+        "simulator.accessDenied",
+        "simulator.active",
+        "simulator.advanced",
+        "simulator.changed",
+        "simulator.checkPort",
+        "simulator.connected",
+        "simulator.connecting",
+        "simulator.details",
+        "simulator.engineStopped",
+        "simulator.invalidApi",
+        "simulator.invalidChoice",
+        "simulator.invalidSaved",
+        "simulator.localOnly",
+        "simulator.localOwner",
+        "simulator.maintenance",
+        "simulator.msfs2024",
+        "simulator.nativeStatus",
+        "simulator.noRecording",
+        "simulator.offline",
+        "simulator.port",
+        "simulator.readOnlyConnected",
+        "simulator.reconnecting",
+        "simulator.recordingDisabled",
+        "simulator.reload",
+        "simulator.restart",
+        "simulator.save",
+        "simulator.saved",
+        "simulator.savedNotice",
+        "simulator.setup",
+        "simulator.setupSummary",
+        "simulator.sourceMismatch",
+        "simulator.stale",
+        "simulator.title",
+        "simulator.toolbarUnavailable",
+        "simulator.unsupportedApi",
+        "simulator.waiting",
+        "simulator.waitingData",
+        "simulator.xplane12",
         "submissions.noSupportingProducts",
         "terrain.definitionRequired",
         "terrain.gridWarning",
@@ -32305,11 +32473,49 @@ export const localeData = {
         "network.activeTransfers": {
           "one": "{count} aktive Netzwerkübertragung",
           "other": "{count} aktive Netzwerkübertragungen"
-        }
+        },
+        "simulator.title": "Simulator",
+        "simulator.msfs2024": "Microsoft Flight Simulator 2024",
+        "simulator.xplane12": "X-Plane 12",
+        "simulator.active": "Active simulator: {name}.",
+        "simulator.saved": "Saved simulator: {name}.",
+        "simulator.restart": "Restart AeroScience to apply the saved simulator and local port.",
+        "simulator.recordingDisabled": "Flight recording and science collection are not yet enabled for X-Plane in this development build.",
+        "simulator.readOnlyConnected": "X-Plane connected. Flight recording and science collection are not yet enabled in this development build.",
+        "simulator.sourceMismatch": "Telemetry does not match the selected simulator or its recording permissions. Recording and science are unavailable.",
+        "simulator.invalidSaved": "Saved simulator settings are unsupported or invalid. Restore a settings backup or correct the Simulator section before restarting. Saved research has not been changed.",
+        "simulator.invalidChoice": "Choose a supported simulator and a local API port from 1 to 65535, using the current settings revision.",
+        "simulator.changed": "Simulator settings changed. Reload them before saving your choice.",
+        "simulator.maintenance": "Finish recording or protected maintenance before changing the simulator.",
+        "simulator.toolbarUnavailable": "The MSFS toolbar is unavailable while X-Plane is the active simulator. Existing toolbar files are retained.",
+        "simulator.advanced": "Advanced Settings",
+        "simulator.port": "X-Plane local API port",
+        "simulator.localOnly": "Connects only to X-Plane on this computer. Default port: 8086.",
+        "simulator.save": "Save simulator",
+        "simulator.reload": "Reload saved simulator",
+        "simulator.savedNotice": "Simulator preference saved. The current connection has not changed.",
+        "simulator.localOwner": "Change the simulator in Settings on the companion computer.",
+        "simulator.details": "Connection details",
+        "simulator.connecting": "Connecting to {name}…",
+        "simulator.connected": "Connected to {name}.",
+        "simulator.waiting": "Waiting for {name}. Start the selected simulator.",
+        "simulator.reconnecting": "Reconnecting to {name}…",
+        "simulator.accessDenied": "X-Plane API access denied. Check X-Plane's network security settings.",
+        "simulator.unsupportedApi": "This X-Plane API version is not currently supported.",
+        "simulator.invalidApi": "The selected simulator API is unavailable or returned an unsupported response. Review connection details.",
+        "simulator.waitingData": "Connected to the local API, waiting for valid aircraft data.",
+        "simulator.stale": "X-Plane telemetry is incomplete or stale. Waiting for confirmed aircraft data.",
+        "simulator.checkPort": "If X-Plane is running, confirm its local API port in Advanced Settings.",
+        "simulator.setup": "Set up local storage. X-Plane connects through its local API; no MSFS toolbar is needed.",
+        "simulator.offline": "Planning, the Scientific Library and saved Results remain available with either simulator disconnected.",
+        "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
+        "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
+        "simulator.nativeStatus": "{name} · {status} · {recording}",
+        "simulator.noRecording": "Recording and science unavailable in this development build."
       }
     },
     "en-US": {
-      "version": 25,
+      "version": 26,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -39385,13 +39591,51 @@ export const localeData = {
         "network.activeTransfers": {
           "one": "{count} active network transfer",
           "other": "{count} active network transfers"
-        }
+        },
+        "simulator.title": "Simulator",
+        "simulator.msfs2024": "Microsoft Flight Simulator 2024",
+        "simulator.xplane12": "X-Plane 12",
+        "simulator.active": "Active simulator: {name}.",
+        "simulator.saved": "Saved simulator: {name}.",
+        "simulator.restart": "Restart AeroScience to apply the saved simulator and local port.",
+        "simulator.recordingDisabled": "Flight recording and science collection are not yet enabled for X-Plane in this development build.",
+        "simulator.readOnlyConnected": "X-Plane connected. Flight recording and science collection are not yet enabled in this development build.",
+        "simulator.sourceMismatch": "Telemetry does not match the selected simulator or its recording permissions. Recording and science are unavailable.",
+        "simulator.invalidSaved": "Saved simulator settings are unsupported or invalid. Restore a settings backup or correct the Simulator section before restarting. Saved research has not been changed.",
+        "simulator.invalidChoice": "Choose a supported simulator and a local API port from 1 to 65535, using the current settings revision.",
+        "simulator.changed": "Simulator settings changed. Reload them before saving your choice.",
+        "simulator.maintenance": "Finish recording or protected maintenance before changing the simulator.",
+        "simulator.toolbarUnavailable": "The MSFS toolbar is unavailable while X-Plane is the active simulator. Existing toolbar files are retained.",
+        "simulator.advanced": "Advanced Settings",
+        "simulator.port": "X-Plane local API port",
+        "simulator.localOnly": "Connects only to X-Plane on this computer. Default port: 8086.",
+        "simulator.save": "Save simulator",
+        "simulator.reload": "Reload saved simulator",
+        "simulator.savedNotice": "Simulator preference saved. The current connection has not changed.",
+        "simulator.localOwner": "Change the simulator in Settings on the companion computer.",
+        "simulator.details": "Connection details",
+        "simulator.connecting": "Connecting to {name}…",
+        "simulator.connected": "Connected to {name}.",
+        "simulator.waiting": "Waiting for {name}. Start the selected simulator.",
+        "simulator.reconnecting": "Reconnecting to {name}…",
+        "simulator.accessDenied": "X-Plane API access denied. Check X-Plane's network security settings.",
+        "simulator.unsupportedApi": "This X-Plane API version is not currently supported.",
+        "simulator.invalidApi": "The selected simulator API is unavailable or returned an unsupported response. Review connection details.",
+        "simulator.waitingData": "Connected to the local API, waiting for valid aircraft data.",
+        "simulator.stale": "X-Plane telemetry is incomplete or stale. Waiting for confirmed aircraft data.",
+        "simulator.checkPort": "If X-Plane is running, confirm its local API port in Advanced Settings.",
+        "simulator.setup": "Set up local storage. X-Plane connects through its local API; no MSFS toolbar is needed.",
+        "simulator.offline": "Planning, the Scientific Library and saved Results remain available with either simulator disconnected.",
+        "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
+        "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
+        "simulator.nativeStatus": "{name} · {status} · {recording}",
+        "simulator.noRecording": "Recording and science unavailable in this development build."
       }
     },
     "es-ES": {
-      "version": 25,
+      "version": 26,
       "locale": "es-ES",
-      "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
+      "sourceHash": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -39421,6 +39665,44 @@ export const localeData = {
         "native.static.vsFtMin",
         "native.theSdkCommbusHelperListenerDidNotBecomeAvailable",
         "results.libraryMeaning",
+        "simulator.accessDenied",
+        "simulator.active",
+        "simulator.advanced",
+        "simulator.changed",
+        "simulator.checkPort",
+        "simulator.connected",
+        "simulator.connecting",
+        "simulator.details",
+        "simulator.engineStopped",
+        "simulator.invalidApi",
+        "simulator.invalidChoice",
+        "simulator.invalidSaved",
+        "simulator.localOnly",
+        "simulator.localOwner",
+        "simulator.maintenance",
+        "simulator.msfs2024",
+        "simulator.nativeStatus",
+        "simulator.noRecording",
+        "simulator.offline",
+        "simulator.port",
+        "simulator.readOnlyConnected",
+        "simulator.reconnecting",
+        "simulator.recordingDisabled",
+        "simulator.reload",
+        "simulator.restart",
+        "simulator.save",
+        "simulator.saved",
+        "simulator.savedNotice",
+        "simulator.setup",
+        "simulator.setupSummary",
+        "simulator.sourceMismatch",
+        "simulator.stale",
+        "simulator.title",
+        "simulator.toolbarUnavailable",
+        "simulator.unsupportedApi",
+        "simulator.waiting",
+        "simulator.waitingData",
+        "simulator.xplane12",
         "ui.analysis.messageSegmentPositions",
         "ui.app.messageAboveGroundFt",
         "ui.app.messageFt",
@@ -46622,13 +46904,51 @@ export const localeData = {
           "one": "{count} transferencia de red activa",
           "other": "{count} transferencias de red activas",
           "many": "{count} transferencias de red activas"
-        }
+        },
+        "simulator.title": "Simulator",
+        "simulator.msfs2024": "Microsoft Flight Simulator 2024",
+        "simulator.xplane12": "X-Plane 12",
+        "simulator.active": "Active simulator: {name}.",
+        "simulator.saved": "Saved simulator: {name}.",
+        "simulator.restart": "Restart AeroScience to apply the saved simulator and local port.",
+        "simulator.recordingDisabled": "Flight recording and science collection are not yet enabled for X-Plane in this development build.",
+        "simulator.readOnlyConnected": "X-Plane connected. Flight recording and science collection are not yet enabled in this development build.",
+        "simulator.sourceMismatch": "Telemetry does not match the selected simulator or its recording permissions. Recording and science are unavailable.",
+        "simulator.invalidSaved": "Saved simulator settings are unsupported or invalid. Restore a settings backup or correct the Simulator section before restarting. Saved research has not been changed.",
+        "simulator.invalidChoice": "Choose a supported simulator and a local API port from 1 to 65535, using the current settings revision.",
+        "simulator.changed": "Simulator settings changed. Reload them before saving your choice.",
+        "simulator.maintenance": "Finish recording or protected maintenance before changing the simulator.",
+        "simulator.toolbarUnavailable": "The MSFS toolbar is unavailable while X-Plane is the active simulator. Existing toolbar files are retained.",
+        "simulator.advanced": "Advanced Settings",
+        "simulator.port": "X-Plane local API port",
+        "simulator.localOnly": "Connects only to X-Plane on this computer. Default port: 8086.",
+        "simulator.save": "Save simulator",
+        "simulator.reload": "Reload saved simulator",
+        "simulator.savedNotice": "Simulator preference saved. The current connection has not changed.",
+        "simulator.localOwner": "Change the simulator in Settings on the companion computer.",
+        "simulator.details": "Connection details",
+        "simulator.connecting": "Connecting to {name}…",
+        "simulator.connected": "Connected to {name}.",
+        "simulator.waiting": "Waiting for {name}. Start the selected simulator.",
+        "simulator.reconnecting": "Reconnecting to {name}…",
+        "simulator.accessDenied": "X-Plane API access denied. Check X-Plane's network security settings.",
+        "simulator.unsupportedApi": "This X-Plane API version is not currently supported.",
+        "simulator.invalidApi": "The selected simulator API is unavailable or returned an unsupported response. Review connection details.",
+        "simulator.waitingData": "Connected to the local API, waiting for valid aircraft data.",
+        "simulator.stale": "X-Plane telemetry is incomplete or stale. Waiting for confirmed aircraft data.",
+        "simulator.checkPort": "If X-Plane is running, confirm its local API port in Advanced Settings.",
+        "simulator.setup": "Set up local storage. X-Plane connects through its local API; no MSFS toolbar is needed.",
+        "simulator.offline": "Planning, the Scientific Library and saved Results remain available with either simulator disconnected.",
+        "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
+        "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
+        "simulator.nativeStatus": "{name} · {status} · {recording}",
+        "simulator.noRecording": "Recording and science unavailable in this development build."
       }
     },
     "fr-FR": {
-      "version": 25,
+      "version": 26,
       "locale": "fr-FR",
-      "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
+      "sourceHash": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -46665,6 +46985,44 @@ export const localeData = {
         "nav.missions",
         "nav.sections",
         "results.exportBound",
+        "simulator.accessDenied",
+        "simulator.active",
+        "simulator.advanced",
+        "simulator.changed",
+        "simulator.checkPort",
+        "simulator.connected",
+        "simulator.connecting",
+        "simulator.details",
+        "simulator.engineStopped",
+        "simulator.invalidApi",
+        "simulator.invalidChoice",
+        "simulator.invalidSaved",
+        "simulator.localOnly",
+        "simulator.localOwner",
+        "simulator.maintenance",
+        "simulator.msfs2024",
+        "simulator.nativeStatus",
+        "simulator.noRecording",
+        "simulator.offline",
+        "simulator.port",
+        "simulator.readOnlyConnected",
+        "simulator.reconnecting",
+        "simulator.recordingDisabled",
+        "simulator.reload",
+        "simulator.restart",
+        "simulator.save",
+        "simulator.saved",
+        "simulator.savedNotice",
+        "simulator.setup",
+        "simulator.setupSummary",
+        "simulator.sourceMismatch",
+        "simulator.stale",
+        "simulator.title",
+        "simulator.toolbarUnavailable",
+        "simulator.unsupportedApi",
+        "simulator.waiting",
+        "simulator.waitingData",
+        "simulator.xplane12",
         "submissions.permissionGranted",
         "terrain.definitionRequired",
         "terrain.gridMasks",
@@ -53991,13 +54349,51 @@ export const localeData = {
           "one": "{count} transfert réseau actif",
           "other": "{count} transferts réseau actifs",
           "many": "{count} transferts réseau actifs"
-        }
+        },
+        "simulator.title": "Simulator",
+        "simulator.msfs2024": "Microsoft Flight Simulator 2024",
+        "simulator.xplane12": "X-Plane 12",
+        "simulator.active": "Active simulator: {name}.",
+        "simulator.saved": "Saved simulator: {name}.",
+        "simulator.restart": "Restart AeroScience to apply the saved simulator and local port.",
+        "simulator.recordingDisabled": "Flight recording and science collection are not yet enabled for X-Plane in this development build.",
+        "simulator.readOnlyConnected": "X-Plane connected. Flight recording and science collection are not yet enabled in this development build.",
+        "simulator.sourceMismatch": "Telemetry does not match the selected simulator or its recording permissions. Recording and science are unavailable.",
+        "simulator.invalidSaved": "Saved simulator settings are unsupported or invalid. Restore a settings backup or correct the Simulator section before restarting. Saved research has not been changed.",
+        "simulator.invalidChoice": "Choose a supported simulator and a local API port from 1 to 65535, using the current settings revision.",
+        "simulator.changed": "Simulator settings changed. Reload them before saving your choice.",
+        "simulator.maintenance": "Finish recording or protected maintenance before changing the simulator.",
+        "simulator.toolbarUnavailable": "The MSFS toolbar is unavailable while X-Plane is the active simulator. Existing toolbar files are retained.",
+        "simulator.advanced": "Advanced Settings",
+        "simulator.port": "X-Plane local API port",
+        "simulator.localOnly": "Connects only to X-Plane on this computer. Default port: 8086.",
+        "simulator.save": "Save simulator",
+        "simulator.reload": "Reload saved simulator",
+        "simulator.savedNotice": "Simulator preference saved. The current connection has not changed.",
+        "simulator.localOwner": "Change the simulator in Settings on the companion computer.",
+        "simulator.details": "Connection details",
+        "simulator.connecting": "Connecting to {name}…",
+        "simulator.connected": "Connected to {name}.",
+        "simulator.waiting": "Waiting for {name}. Start the selected simulator.",
+        "simulator.reconnecting": "Reconnecting to {name}…",
+        "simulator.accessDenied": "X-Plane API access denied. Check X-Plane's network security settings.",
+        "simulator.unsupportedApi": "This X-Plane API version is not currently supported.",
+        "simulator.invalidApi": "The selected simulator API is unavailable or returned an unsupported response. Review connection details.",
+        "simulator.waitingData": "Connected to the local API, waiting for valid aircraft data.",
+        "simulator.stale": "X-Plane telemetry is incomplete or stale. Waiting for confirmed aircraft data.",
+        "simulator.checkPort": "If X-Plane is running, confirm its local API port in Advanced Settings.",
+        "simulator.setup": "Set up local storage. X-Plane connects through its local API; no MSFS toolbar is needed.",
+        "simulator.offline": "Planning, the Scientific Library and saved Results remain available with either simulator disconnected.",
+        "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
+        "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
+        "simulator.nativeStatus": "{name} · {status} · {recording}",
+        "simulator.noRecording": "Recording and science unavailable in this development build."
       }
     },
     "pt-BR": {
-      "version": 25,
+      "version": 26,
       "locale": "pt-BR",
-      "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
+      "sourceHash": "42a8297fdb0e4838362eb3e9c3f8a12e7224c0be18e2b2bca9be4acc8e9fceb6",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -54016,6 +54412,44 @@ export const localeData = {
         "native.static.iasKts",
         "native.static.mslFt",
         "results.libraryMeaning",
+        "simulator.accessDenied",
+        "simulator.active",
+        "simulator.advanced",
+        "simulator.changed",
+        "simulator.checkPort",
+        "simulator.connected",
+        "simulator.connecting",
+        "simulator.details",
+        "simulator.engineStopped",
+        "simulator.invalidApi",
+        "simulator.invalidChoice",
+        "simulator.invalidSaved",
+        "simulator.localOnly",
+        "simulator.localOwner",
+        "simulator.maintenance",
+        "simulator.msfs2024",
+        "simulator.nativeStatus",
+        "simulator.noRecording",
+        "simulator.offline",
+        "simulator.port",
+        "simulator.readOnlyConnected",
+        "simulator.reconnecting",
+        "simulator.recordingDisabled",
+        "simulator.reload",
+        "simulator.restart",
+        "simulator.save",
+        "simulator.saved",
+        "simulator.savedNotice",
+        "simulator.setup",
+        "simulator.setupSummary",
+        "simulator.sourceMismatch",
+        "simulator.stale",
+        "simulator.title",
+        "simulator.toolbarUnavailable",
+        "simulator.unsupportedApi",
+        "simulator.waiting",
+        "simulator.waitingData",
+        "simulator.xplane12",
         "submissions.permissionGranted",
         "ui.analysis.messageSegmentPositions",
         "ui.app.messageFt",
@@ -61208,7 +61642,45 @@ export const localeData = {
           "one": "{count} transferência de rede ativa",
           "other": "{count} transferências de rede ativas",
           "many": "{count} transferências de rede ativas"
-        }
+        },
+        "simulator.title": "Simulator",
+        "simulator.msfs2024": "Microsoft Flight Simulator 2024",
+        "simulator.xplane12": "X-Plane 12",
+        "simulator.active": "Active simulator: {name}.",
+        "simulator.saved": "Saved simulator: {name}.",
+        "simulator.restart": "Restart AeroScience to apply the saved simulator and local port.",
+        "simulator.recordingDisabled": "Flight recording and science collection are not yet enabled for X-Plane in this development build.",
+        "simulator.readOnlyConnected": "X-Plane connected. Flight recording and science collection are not yet enabled in this development build.",
+        "simulator.sourceMismatch": "Telemetry does not match the selected simulator or its recording permissions. Recording and science are unavailable.",
+        "simulator.invalidSaved": "Saved simulator settings are unsupported or invalid. Restore a settings backup or correct the Simulator section before restarting. Saved research has not been changed.",
+        "simulator.invalidChoice": "Choose a supported simulator and a local API port from 1 to 65535, using the current settings revision.",
+        "simulator.changed": "Simulator settings changed. Reload them before saving your choice.",
+        "simulator.maintenance": "Finish recording or protected maintenance before changing the simulator.",
+        "simulator.toolbarUnavailable": "The MSFS toolbar is unavailable while X-Plane is the active simulator. Existing toolbar files are retained.",
+        "simulator.advanced": "Advanced Settings",
+        "simulator.port": "X-Plane local API port",
+        "simulator.localOnly": "Connects only to X-Plane on this computer. Default port: 8086.",
+        "simulator.save": "Save simulator",
+        "simulator.reload": "Reload saved simulator",
+        "simulator.savedNotice": "Simulator preference saved. The current connection has not changed.",
+        "simulator.localOwner": "Change the simulator in Settings on the companion computer.",
+        "simulator.details": "Connection details",
+        "simulator.connecting": "Connecting to {name}…",
+        "simulator.connected": "Connected to {name}.",
+        "simulator.waiting": "Waiting for {name}. Start the selected simulator.",
+        "simulator.reconnecting": "Reconnecting to {name}…",
+        "simulator.accessDenied": "X-Plane API access denied. Check X-Plane's network security settings.",
+        "simulator.unsupportedApi": "This X-Plane API version is not currently supported.",
+        "simulator.invalidApi": "The selected simulator API is unavailable or returned an unsupported response. Review connection details.",
+        "simulator.waitingData": "Connected to the local API, waiting for valid aircraft data.",
+        "simulator.stale": "X-Plane telemetry is incomplete or stale. Waiting for confirmed aircraft data.",
+        "simulator.checkPort": "If X-Plane is running, confirm its local API port in Advanced Settings.",
+        "simulator.setup": "Set up local storage. X-Plane connects through its local API; no MSFS toolbar is needed.",
+        "simulator.offline": "Planning, the Scientific Library and saved Results remain available with either simulator disconnected.",
+        "simulator.setupSummary": "X-Plane 12 local API connection. No MSFS toolbar will be installed.",
+        "simulator.engineStopped": "The engine is stopped. Resolve its startup or storage error before saving a simulator change.",
+        "simulator.nativeStatus": "{name} · {status} · {recording}",
+        "simulator.noRecording": "Recording and science unavailable in this development build."
       }
     }
   }

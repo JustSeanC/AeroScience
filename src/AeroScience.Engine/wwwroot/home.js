@@ -1,6 +1,7 @@
 import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {node,link,button,status} from './workstation-ui.js';
 import {homePresentation} from './home-state.js';
+import {connectionStatus} from './simulator-settings.js';
 import {t as textForUI,t} from './i18n.js';
 
 // Owns only bounded GETs while visible. Recording/science/selection controllers
@@ -43,7 +44,10 @@ export function homeDashboard(root,api,{snapshot,draft}) {
     setPresentationText(primary,localizedCopy('home.action.'+model.next));
     primary.href={active:'#flight',draft:'#planner',plan:'#operations',idle:'#missions',connect:'#help?guide=v0.4.1-windows-testing.md',unavailable:'#help?guide=v0.4.1-windows-testing.md'}[model.next];
     if(model.next==='plan')primary.href='#missions/prepare?researchPlan='+encodeURIComponent(model.selectionId);
-    setPresentationText(connection,localizedCopy('home.connection.'+model.connection));
+    if(data.intelligence?.flight?.simulator?.id==='xplane12'&&['connect','unavailable'].includes(model.next)){
+      setPresentationText(detail,localizedCopy('simulator.checkPort'));setPresentationText(primary,localizedCopy('nav.settings'));primary.href='#settings/general';
+    }
+    setPresentationText(connection,data.intelligence?.flight?.simulator?connectionStatus(data.intelligence.flight):localizedCopy('home.connection.'+model.connection));
     setPresentationText(source,localizedCopy(model.source==='simulated' ? 'home.synthetic' : model.source==='simulator' ? 'home.simulator' : 'home.sourceUnknown'));
     setPresentationText(identity,model.activeFlight ? localizedCopy('home.activeName',{name:model.activeFlight.name}) : model.aircraft || '');
     setPresentationText(recording,localizedCopy('recording.'+model.recording));

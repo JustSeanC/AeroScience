@@ -2,6 +2,7 @@ import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 import {readableName} from './workstation-ui.js';
 import {initializePresentation,presentationControls,connectPresentationHost} from './presentation-settings.js';
+import {connectSimulatorHost,simulatorControls,recordingAllowed,connectionStatus} from './simulator-settings.js';
 import {resolveRoute,viewPages} from './navigation-routes.js';
 import {t as textForUI,localizeTree} from './i18n.js';
 import {homeDashboard} from './home.js';
@@ -135,6 +136,7 @@ async function connect(code = null) {
   csrf = session.csrf;
   authorized = true;
   await connectPresentationHost(api);
+  await connectSimulatorHost(api);
   api('/api/organizations').then(value=>organizationNavigation(value.connections)).catch(()=>organizationNavigation([]));
   const build=await api("/api/build");
   if(build.profile==="validation"){
@@ -218,9 +220,14 @@ function clearTelemetry() {
 }
 function updateStartButton(state) {
   const t=state.telemetry,fresh=t&&Date.now()-Date.parse(t.timestampUtc)<6000;
-  $("start-button").disabled=starting||!fresh||state.connection.state!=="connected"||!!t?.isPaused||!selection.canStart(state);
+  $("start-button").disabled=starting||!recordingAllowed(state)||!fresh||state.connection.state!=="connected"||!!t?.isPaused||!selection.canStart(state);
 }
 function render(state) {
+  let sourceNotice=document.getElementById('simulator-read-only');
+  if(!recordingAllowed(state)){
+    if(!sourceNotice){sourceNotice=el('aside',undefined,'notice');sourceNotice.id='simulator-read-only';sourceNotice.setAttribute('role','status');$('workspace').prepend(sourceNotice);}
+    setPresentationText(sourceNotice,localizedCopy(state.simulator.reasonKey));
+  }else sourceNotice?.remove();
   let stopped = document.getElementById("recording-storage-stop");
   if (state.recordingStop) {
     if (!stopped) {
@@ -252,7 +259,7 @@ function render(state) {
   setPresentationText($("source-note"),simulated
     ? localizedCopy("ui.app.messageTestFixtureData")
     : localizedCopy("ui.app.messageHeadingAndGroundTrackUseTrueNorth"));
-  setPresentationText($("connection-text"),state.connection.message);
+  setPresentationText($("connection-text"),connectionStatus(state));
   setPresentationText($("aircraft"),fresh
     ? t.aircraft
     : localizedCopy("ui.app.messageAwaitingFreshAircraftData"));
@@ -566,6 +573,7 @@ async function loadSettings() {
   const s=await api("/api/settings");container.replaceChildren();
   const view=settingsNavigation(container),panels=view.panels;settingsView=view;view.show();
   presentationControls(panels.get('general'));
+  await simulatorControls(panels.get('general'));
   function paragraph(category,value){panels.get(category).append(el("p",value));}
   function desktop(category,label,action){const b=el("button",label,"secondary");b.disabled=!s.desktopAvailable;b.onclick=()=>command(b,()=>api(`/api/desktop/${action}`,{}));panels.get(category).append(b);}
   paragraph("general",`AeroScience ${s.version}`);
@@ -577,12 +585,14 @@ async function loadSettings() {
   if(settingsLocation().category==="storage")await attachStorage();
   await updateSettings(panels.get("updates"),api);
   try{await sourceSettings(panels.get("science"),api);}catch(error){paragraph("science",textForUI("ui.app.messageScientificSourcesUnavailable",{value1:(String(error.message))}));}
+  if(s.simulatorId!=='xplane12'){
   if(s.toolbarStatus){paragraph("toolbar",textForUI("ui.app.messageInstalledBundled",{value1:(String(s.toolbarStatus.installedVersion||textForUI("ui.app.messageMissingUnknown"))),value2:(String(s.toolbarStatus.bundledVersion||textForUI("localization.unknownValue"))),value3:(String(s.toolbarStatus.status))}));paragraph("toolbar",s.toolbarStatus.message);}
   const bridgeStatus=el("p");panels.get("toolbar").append(bridgeStatus);
   async function refreshBridge(){const status=await api("/api/toolbar/bridge");setPresentationText(bridgeStatus,localizedCopy("ui.app.messageCommBusEngineProtocolRequests",{value1:(String(status.state)),value2:(String(status.engineVersion)),value3:(String(status.protocol)),value4:(String(status.requests)),value5:(String(status.replies)),value6:(String(status.lastOperation||"none")),value7:(String(status.message))}));}
   const refreshBridgeButton=el("button",localizedCopy("ui.app.messageRefreshBridgeDiagnostics"),"secondary");refreshBridgeButton.onclick=()=>command(refreshBridgeButton,refreshBridge);panels.get("toolbar").append(refreshBridgeButton);await refreshBridge();
   desktop("toolbar",localizedCopy("ui.app.messageInstallUpdateRepairToolbar"),"toolbar");
-  for(const [name,value] of [[textForUI("ui.app.messageTelemetry"),s.telemetry],[textForUI("ui.app.messageSamplingInterval"),textForUI("ui.app.messageMs",{value1:(String(s.samplingIntervalMs))})],["SimConnect",s.simConnect],[textForUI("ui.app.messageLANAccess"),s.enableLan?s.lanUrl:textForUI("ui.app.messageDisabledLocalhostOnly")],[textForUI("ui.app.messageDataDirectory"),s.dataDirectory||textForUI("ui.app.messageManagedByCompanion")],...(s.pairingCode?[[textForUI("ui.app.messagePairingCode"),s.pairingCode]]:[])])paragraph("advanced",`${name}: ${value}`);
+  }else{paragraph('toolbar',localizedCopy('simulator.toolbarUnavailable'));const toolbarLink=container.querySelector('a[href="#settings/toolbar"]');if(toolbarLink)toolbarLink.hidden=true;}
+  for(const [name,value] of [[textForUI("ui.app.messageTelemetry"),s.telemetry],[textForUI("ui.app.messageSamplingInterval"),textForUI("ui.app.messageMs",{value1:(String(s.samplingIntervalMs))})],...(s.simConnect?[["SimConnect",s.simConnect]]:[]),[textForUI("ui.app.messageLANAccess"),s.enableLan?s.lanUrl:textForUI("ui.app.messageDisabledLocalhostOnly")],[textForUI("ui.app.messageDataDirectory"),s.dataDirectory||textForUI("ui.app.messageManagedByCompanion")],...(s.pairingCode?[[textForUI("ui.app.messagePairingCode"),s.pairingCode]]:[])])paragraph("advanced",`${name}: ${value}`);
   desktop("advanced",localizedCopy("ui.app.messageLANAndDesktopConfiguration"),"settings");desktop("advanced",localizedCopy("ui.helpCenter.messageCollectFeedbackLogs"),"feedback");
   paragraph("advanced",textForUI("ui.app.messageLANAndNativeRuntimeConfigurationMayRequire"));
   const support=panels.get("support");

@@ -81438,6 +81438,326 @@
       "critical": false,
       "surface": "Library & Downloads",
       "preservedTokens": []
+    },
+    "simulator.title": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.title",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.msfs2024": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.msfs2024",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.xplane12": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.xplane12",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.active": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.active",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.saved": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.saved",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.restart": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.restart",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.recordingDisabled": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.recordingDisabled",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.readOnlyConnected": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.readOnlyConnected",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.sourceMismatch": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.sourceMismatch",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.invalidSaved": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.invalidSaved",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.invalidChoice": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.invalidChoice",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.changed": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.changed",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.maintenance": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.maintenance",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.toolbarUnavailable": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.toolbarUnavailable",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.advanced": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.advanced",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.port": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.port",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.localOnly": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.localOnly",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.save": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.save",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.reload": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.reload",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.savedNotice": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.savedNotice",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.localOwner": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.localOwner",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.details": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.details",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.connecting": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.connecting",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.connected": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.connected",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.waiting": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.waiting",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.reconnecting": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.reconnecting",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.accessDenied": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.accessDenied",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.unsupportedApi": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.unsupportedApi",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.invalidApi": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.invalidApi",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": true,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.waitingData": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.waitingData",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.stale": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.stale",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.checkPort": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.checkPort",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.setup": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.setup",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.offline": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.offline",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.setupSummary": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.setupSummary",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.engineStopped": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.engineStopped",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.nativeStatus": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.nativeStatus",
+      "parameters": [
+        "name",
+        "status",
+        "recording"
+      ],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
+    },
+    "simulator.noRecording": {
+      "context": "P03 simulator selection/connection presentation. Source selection never authorizes recording, science, downloads or sharing; X-Plane is read-only until P04. simulator.noRecording",
+      "parameters": [],
+      "maximumLength": 4096,
+      "critical": false,
+      "surface": "simulator",
+      "preservedTokens": []
     }
   }
 }

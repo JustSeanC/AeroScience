@@ -13,7 +13,7 @@ export function homePresentation({intelligence, failed=false, snapshot, draft, p
   const bound=fresh && !!flight && data.collection?.state?.missionId===flight.id;
   const collectionIssue=bound && !!(data.collection.fault || data.flight.research?.scienceStorageError
     || data.collection.state.continuityHold || data.collection.state.holds?.length);
-  const science=!fresh ? 'unknown' : !flight ? 'notStarted'
+  const science=data?.flight?.simulator?.scienceIntegrationReady===false?'unavailable':!fresh ? 'unknown' : !flight ? 'notStarted'
     : connection!=='connected' || collectionIssue ? 'unavailable' : projected.science;
   const selectionId=snapshot ? snapshot.selectedPlanId : data?.flight?.selectedPlanId;
   const selected=selectionId && plan?.id===selectionId ? plan : null;

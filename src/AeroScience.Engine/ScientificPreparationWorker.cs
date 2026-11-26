@@ -231,7 +231,8 @@ public sealed class ScientificPreparationWorker(ScientificFlightPrediction predi
             {
                 var state=missions.Snapshot();var plan=state.ActiveMission is {} mission?store.Research(mission.Id).PlanSnapshot:null;
                 var memory=GC.GetGCMemoryInfo();var pressure=state.ActiveMission is null?null:plan is not null&&!plans.AutomaticFlightAllowed(plan.Id)?"Paused by User — this mission’s scientific preparation is paused/cancelled.":research.BackgroundDownloadHold??(state.Telemetry is not {IsValid:true,IsPaused:false} fresh||DateTimeOffset.UtcNow-fresh.TimestampUtc>TimeSpan.FromSeconds(6)?"Waiting for fresh active-flight telemetry.":memory.TotalAvailableMemoryBytes>0&&memory.MemoryLoadBytes>memory.TotalAvailableMemoryBytes*.85?"Host memory pressure; background scientific preparation is temporarily throttled.":null);
-                plans.Tick(state.ActiveMission is not null,plan?.Id,state.Telemetry,pressure,plan);
+                plans.Tick(state.ActiveMission is not null,plan?.Id,missions.LiveOperationsAllowed?state.Telemetry:null,pressure,plan);
+                if(!missions.LiveOperationsAllowed){prediction.Reset();continue;}
                 if(state.Connection.State!=ConnectionState.Connected||state.Research?.IntentionallyPaused==true||state.Telemetry is not{IsValid:true,IsPaused:false} frame||DateTimeOffset.UtcNow-frame.TimestampUtc>TimeSpan.FromSeconds(6)){prediction.Reset();continue;}
                 var kinds=state.Research?.Instruments.Where(c=>c.Enabled&&RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)).Select(c=>RemoteAcquisition.Instruments[c.InstrumentId]).ToArray()??[];
                 if(state.ActiveMission is null||pressure is not null||plan is not null&&!plans.AutomaticFlightAllowed(plan.Id)){prediction.Reset();continue;}

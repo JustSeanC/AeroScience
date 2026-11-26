@@ -18,7 +18,7 @@ export function currentFlightPresentation(data, snapshot=data?.flight, {now=Date
   // coordinator's explicit recovery/end actions with fresh, matching identities.
   const state=data?.collection?.state,sessionMatches=state?.currentSessionId?session?.id===state.currentSessionId:!session;
   const commandBound=bound&&sessionMatches&&['armed','collecting','paused','betweenSessions','stopped','ended'].includes(state?.phase)&&(!['collecting','paused'].includes(state.phase)||!!state.currentSessionId);
-  const actions=commandBound?(Array.isArray(data.collection.actions)?data.collection.actions:[]).filter(a=>a?.available===true&&typeof a.action==='string').map(a=>a.action):[];
+  const actions=commandBound&&snapshot?.simulator?.scienceIntegrationReady!==false?(Array.isArray(data.collection.actions)?data.collection.actions:[]).filter(a=>a?.available===true&&typeof a.action==='string').map(a=>a.action):[];
   const started=Date.parse(flight?.startedUtc),elapsed=fresh&&Number.isFinite(started)&&now>=started?Math.floor((now-started)/1000):null;
   return Object.freeze({fresh,connection,position,flightId:fresh?flight?.id||null:null,
     recording:fresh?model.recording:'unknown',science,elapsedSeconds:elapsed,

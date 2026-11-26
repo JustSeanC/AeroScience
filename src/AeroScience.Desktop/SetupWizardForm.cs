@@ -32,8 +32,12 @@ public sealed class SetupWizardForm : BrandedForm
         presentation = new(app.Preferences, () => app.RefreshAppearance(true), showSave: false);
         scientificOnline.Checked = new ScientificAccessSettings(app.Preferences.DirectoryPath).Get().Preferences.OnlineEnabled;
         mission.Text = Path.Combine(settings.MissionDirectory, "missions.db"); library.Text = settings.ScienceLibraryDirectory;
-        community.Items.AddRange(ToolbarInstaller.DiscoverCommunityFolders().Select(p => (object)p).ToArray());
-        community.Text = settings.CommunityDirectory ?? (community.Items.Count > 0 ? community.Items[0]?.ToString() ?? "" : "");
+        install.Checked = app.UsesMsfs;
+        if(app.UsesMsfs)
+        {
+            community.Items.AddRange(ToolbarInstaller.DiscoverCommunityFolders().Select(p => (object)p).ToArray());
+            community.Text = settings.CommunityDirectory ?? (community.Items.Count > 0 ? community.Items[0]?.ToString() ?? "" : "");
+        }
         var footer = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 64, Padding = new(18), FlowDirection = FlowDirection.RightToLeft };
         footer.Controls.AddRange([cancel, next, back, skip]); Controls.Add(content); Controls.Add(footer);
         cancel.Click += (_, _) => { DialogResult = DialogResult.Cancel; Close(); };
@@ -80,9 +84,9 @@ public sealed class SetupWizardForm : BrandedForm
         if (page == 0)
         {
             panel.Controls.Add(presentation);
-            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024")));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text(app.UsesMsfs?"windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024":"simulator.setup")));
             panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.existingLocationsAndSettingsArePreselectedUpdatesKeepThem")));
-            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording")));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text(app.UsesMsfs?"windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording":"simulator.offline")));
         }
         else if (page == 1)
         {
@@ -96,6 +100,13 @@ public sealed class SetupWizardForm : BrandedForm
         }
         else if (page == 2)
         {
+            if(!app.UsesMsfs)
+            {
+                panel.Controls.Add(TextLabel(WindowsPresentation.Text("simulator.setup")));
+                panel.Controls.Add(TextLabel(WindowsPresentation.Text("simulator.localOnly")));
+                panel.Controls.Add(TextLabel(WindowsPresentation.Text("simulator.recordingDisabled")));
+                return;
+            }
             panel.Controls.Add(install); panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.confirmTheMsfs2024CommunityFolderDetectionReadsSteam")));
             panel.Controls.Add(community);
             var browse = new Button { Text = WindowsPresentation.Text("windows.setupWizardForm.browseCommunityFolder"), AutoSize = true };
@@ -105,7 +116,7 @@ public sealed class SetupWizardForm : BrandedForm
         }
         else
         {
-            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{mission.Text}"), ["value2"] = WindowsPresentation.Format($"{library.Text}"), ["value3"] = WindowsPresentation.Format($"{(install.Checked ? "Install/update in " + community.Text : "Skipped — configure later in Settings")}") })));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{mission.Text}"), ["value2"] = WindowsPresentation.Format($"{library.Text}"), ["value3"] = app.UsesMsfs ? WindowsPresentation.Format($"{(install.Checked ? "Install/update in " + community.Text : "Skipped — configure later in Settings")}") : WindowsPresentation.Text("simulator.setupSummary") })));
             panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.finishSetupConfirmsTheseChoicesChangedStorageLocationsUse")));
             panel.Controls.Add(TextLabel(ScientificAccessSettings.Privacy));
             panel.Controls.Add(scientificOnline);
@@ -131,7 +142,7 @@ public sealed class SetupWizardForm : BrandedForm
                 if (!(settings.Initialized && SamePath(library.Text, settings.ScienceLibraryDirectory)) && new LocalStorageCapacity().FreeBytes(library.Text) < StorageManager.LibraryLowSpaceWarningBytes
                     && MessageBox.Show(this, WindowsPresentation.Text("windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture"), WindowsPresentation.Text("windows.setupWizardForm.storageCapacity"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             }
-            if (page == 2 && install.Checked)
+            if (page == 2 && app.UsesMsfs && install.Checked)
             {
                 if (ToolbarInstaller.SimulatorRunning()) throw new IOException(WindowsPresentation.Text("windows.error.closeSimulator"));
                 if (!Directory.Exists(community.Text)) throw new IOException(WindowsPresentation.Text("windows.error.communityFolder"));
@@ -139,7 +150,7 @@ public sealed class SetupWizardForm : BrandedForm
             if (page < 3) { page++; Render(); return; }
             working = true; back.Enabled = next.Enabled = cancel.Enabled = false;
             var missionFolder = Path.GetDirectoryName(Path.GetFullPath(mission.Text))!;
-            var libraryFolder = Path.GetFullPath(library.Text); var selectedCommunity = community.Text; var installToolbar = install.Checked;
+            var libraryFolder = Path.GetFullPath(library.Text); var selectedCommunity = community.Text; var installToolbar = app.UsesMsfs && install.Checked;
             IProgress<string> reporter = new Progress<string>(message => progress.Text = message);
             await app.RunStoppedAsync(() => Task.Run(() =>
             {

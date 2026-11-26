@@ -7,11 +7,29 @@ using AeroScience.Missions;
 using AeroScience.Shared;
 using AeroScience.SimConnect;
 using AeroScience.Telemetry;
+using AeroScience.XPlane;
 
 namespace AeroScience.Engine;
 
 public static class EngineApplication
 {
+    private static EngineOptions ReadOptions(IConfiguration configuration)
+    {
+        var options=configuration.GetSection("AeroScience").Get<EngineOptions>()??new();
+        // Desktop supplies its frozen effective choice explicitly. A standalone
+        // host without an override consumes the same durable profile preference.
+        if(configuration["AeroScience:Telemetry"] is null)
+        {
+            var preferences=new PreferenceStore(options.ConfigurationDirectory??options.DataDirectory);
+            if(File.Exists(preferences.SettingsPath))
+            {
+                var simulator=preferences.Simulator();
+                options.Telemetry=simulator.Id==SimulatorPreferences.XPlane12?"XPlane":"SimConnect";
+                if(configuration["AeroScience:XPlanePort"] is null)options.XPlanePort=simulator.XPlanePort;
+            }
+        }
+        options.Validate();return options;
+    }
     public static WebApplication Create(string[] args, Action<IServiceCollection>? configureServices = null)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -22,8 +40,7 @@ public static class EngineApplication
         });
         builder.WebHost.ConfigureKestrel((context, server) =>
         {
-            var options = context.Configuration.GetSection("AeroScience").Get<EngineOptions>() ?? new();
-            options.Validate();
+            var options = ReadOptions(context.Configuration);
             server.Limits.MaxRequestBodySize = 1048576;
             server.Listen(IPAddress.Loopback, options.Port);
             if (options.EnableLan) server.Listen(IPAddress.Parse(options.LanAddress!), options.Port);
@@ -35,10 +52,10 @@ public static class EngineApplication
         builder.Services.ConfigureHttpJsonOptions(json => json.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
         builder.Services.AddSingleton(sp =>
         {
-            var options = sp.GetRequiredService<IConfiguration>().GetSection("AeroScience").Get<EngineOptions>() ?? new();
-            options.Validate();
-            return options;
+            return ReadOptions(sp.GetRequiredService<IConfiguration>());
         });
+        builder.Services.AddSingleton(sp=>new SimulatorAccessPolicy(sp.GetRequiredService<EngineOptions>().SimulatorId));
+        builder.Services.AddSingleton<SimulatorSettings>();
         builder.Services.AddSingleton<AccessControl>();
         builder.Services.AddSingleton(sp => {
             var value = sp.GetRequiredService<EngineOptions>();
@@ -112,23 +129,30 @@ public static class EngineApplication
         });
         builder.Services.AddSingleton<ScientificLibraryFolders>();
         builder.Services.AddSingleton(sp=>new ScientificCache(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<MissionStore>(),sp.GetRequiredService<StorageManagement>(),log:message=>sp.GetRequiredService<ILogger<ScientificCache>>().LogInformation("{CleanupResult}",message)));
-        builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new ResearchOperations(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<ScienceStore>(), sp.GetRequiredService<ScienceUnitSettings>().Get,()=>sp.GetRequiredService<ScientificAccessSettings>().Get().Preferences); });
+        builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new ResearchOperations(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<ScienceStore>(), sp.GetRequiredService<ScienceUnitSettings>().Get,()=>sp.GetRequiredService<ScientificAccessSettings>().Get().Preferences,sp.GetRequiredService<SimulatorAccessPolicy>()); });
         builder.Services.AddSingleton(sp => new MissionCoordinator(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<EngineOptions>().SamplingIntervalMs,
             requireFreshTelemetry: true, ensureRecordingCapacity: () =>
             {
                 sp.GetRequiredService<StorageManagement>().RequireFlightCapacity();
-            }, research: sp.GetRequiredService<ResearchOperations>(),assessPreflight:sp.GetRequiredService<PreflightReadinessService>().Assess));
-        builder.Services.AddSingleton<ITelemetryProvider, SimConnectTelemetryProvider>();
+            }, research: sp.GetRequiredService<ResearchOperations>(),assessPreflight:sp.GetRequiredService<PreflightReadinessService>().Assess,
+            simulatorAccess:sp.GetRequiredService<SimulatorAccessPolicy>()));
+        builder.Services.AddSingleton<ITelemetryProvider>(sp=>sp.GetRequiredService<EngineOptions>().SimulatorId==SimulatorPreferences.XPlane12
+            ?new XPlaneTelemetryProvider(new(){Port=sp.GetRequiredService<EngineOptions>().XPlanePort})
+            :new SimConnectTelemetryProvider());
         configureServices?.Invoke(builder.Services);
         builder.Services.AddHostedService<TelemetryWorker>();
         builder.Services.AddHostedService<ResearchAttemptWorker>();
         builder.Services.AddSingleton(sp=>new ToolbarCommandHandler(sp.GetRequiredService<MissionCoordinator>(),sp.GetRequiredService<RouteMapService>(),
-            (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection), ApplicationProfile.Current.AuthorizeToolbar,
+            (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection),
+            command=>sp.GetRequiredService<EngineOptions>().SimulatorId==SimulatorPreferences.Msfs2024
+                ?ApplicationProfile.Current.AuthorizeToolbar(command):PresentationText.Text("simulator.toolbarUnavailable"),
             ()=>{var saved=sp.GetRequiredService<PreferenceStore>().Load().Presentation;if(saved is {Version:not 1})return null;
                 var value=PresentationPreferences.Effective(saved);return new ToolbarPresentation(1, PresentationText.CatalogVersion, value.Locale,value.Revision,PresentationText.CatalogIdentity);}));
         builder.Services.AddSingleton<RouteMapService>();
         builder.Services.AddSingleton<ToolbarBridgeStatus>();
-        builder.Services.AddHostedService<ToolbarWorker>();
+        builder.Services.AddSingleton<ToolbarWorker>();
+        builder.Services.AddSingleton<IHostedService>(sp=>sp.GetRequiredService<EngineOptions>().SimulatorId==SimulatorPreferences.Msfs2024
+            ?sp.GetRequiredService<ToolbarWorker>():new UnselectedToolbar(sp.GetRequiredService<ToolbarBridgeStatus>()));
         builder.Services.AddHostedService<StorageManagementWorker>();
         builder.Services.AddSingleton<ScientificAnalysisJobs>();
         builder.Services.AddSingleton<PreflightReadinessService>();
@@ -250,26 +274,30 @@ public static class EngineApplication
         });
         app.MapResearchEndpoints();
         app.MapPresentationSettings();
+        app.MapSimulatorSettings();
         app.MapOrganizationConnections();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
             version = ApplicationUpdates.CurrentVersion,
             telemetry = options.Telemetry,
+            simulatorId = options.SimulatorId,
             options.SamplingIntervalMs,
             options.EnableLan,
-            options.EnableToolbarBridge,
+            enableToolbarBridge = options.SimulatorId == SimulatorPreferences.Msfs2024 && options.EnableToolbarBridge,
             lanUrl = options.EnableLan ? $"http://{options.LanAddress}:{options.Port}" : null,
             pairingCode = options.EnableLan && AccessControl.IsLoopback(c) ? access.PairingCode : null,
             dataDirectory = AccessControl.IsLoopback(c) ? options.DataDirectory : null,
             desktopAvailable = AccessControl.IsLoopback(c) && c.RequestServices.GetService<IDesktopActions>() is not null,
             missionStorage = AccessControl.IsLoopback(c) ? c.RequestServices.GetService<IDesktopActions>()?.MissionStorage : null,
             scienceStorage = AccessControl.IsLoopback(c) ? c.RequestServices.GetService<IDesktopActions>()?.ScienceStorage : null,
-            toolbarStatus = AccessControl.IsLoopback(c) ? c.RequestServices.GetService<IDesktopActions>()?.Toolbar : null,
-            simConnect = OperatingSystem.IsWindows() ? "Windows x64 native SDK runtime required in SimConnect mode" : "Live telemetry requires Windows x64; offline history remains available",
+            toolbarStatus = options.SimulatorId == SimulatorPreferences.Msfs2024 && AccessControl.IsLoopback(c) ? c.RequestServices.GetService<IDesktopActions>()?.Toolbar : null,
+            simConnect = options.SimulatorId == SimulatorPreferences.Msfs2024 ? OperatingSystem.IsWindows() ? "Windows x64 native SDK runtime required in SimConnect mode" : "Live telemetry requires Windows x64; offline history remains available" : null,
         });
         app.MapPost("/api/desktop/{action}", (string action, HttpContext context) =>
         {
             if (!AccessControl.IsLoopback(context)) return Results.StatusCode(403);
+            if(action=="toolbar"&&options.SimulatorId!=SimulatorPreferences.Msfs2024)
+                return Results.Conflict(new{error=PresentationText.Text("simulator.toolbarUnavailable")});
             var desktop = context.RequestServices.GetService<IDesktopActions>();
             if (desktop is null) return Results.Conflict(new { error = "Open the AeroScience Windows application to manage native settings." });
             switch (action)
@@ -316,5 +344,12 @@ public static class EngineApplication
         });
         app.Logger.LogInformation("AeroScience {Version} — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", ApplicationUpdates.CurrentVersion, options.Telemetry, options.Port, options.DataDirectory);
         return app;
+    }
+
+    private sealed class UnselectedToolbar(ToolbarBridgeStatus status):IHostedService
+    {
+        public Task StartAsync(CancellationToken cancellationToken)
+        {status.Connection("Disabled",PresentationText.Text("simulator.toolbarUnavailable"));return Task.CompletedTask;}
+        public Task StopAsync(CancellationToken cancellationToken)=>Task.CompletedTask;
     }
 }

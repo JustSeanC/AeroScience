@@ -32,6 +32,13 @@ internal static class Program
             }
             catch (Exception error) { MessageBox.Show(WindowsPresentation.Text("windows.program.toolbarRemovalDidNotCompleteExistingFilesWerePreserved", new Dictionary<string, object> { ["value1"] = Convert.ToString((error.Message), System.Globalization.CultureInfo.InvariantCulture) ?? "" }), WindowsPresentation.Text("windows.program.aeroscienceUninstall")); return 1; }
         }
+        try { _ = profile.Preferences().Simulator(); }
+        catch(Exception error) when(error is InvalidOperationException or System.Text.Json.JsonException or IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show(WindowsPresentation.Text("simulator.invalidSaved")+Environment.NewLine+Path.Combine(directory,"settings.json"),
+                ApplicationProfile.Current.Name,MessageBoxButtons.OK,MessageBoxIcon.Error);
+            return 1;
+        }
         Application.Run(new MainForm(directory, args.Contains("--setup")));
         return 0;
     }

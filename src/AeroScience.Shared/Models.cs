@@ -52,7 +52,11 @@ public sealed record SamplingDiagnostics(long ReceivedUpdates, long CommittedSam
     double? MissionAverageHz = null, double? FirstSampleDelaySeconds = null);
 public sealed record EngineSnapshot(ConnectionInfo Connection, TelemetryFrame? Telemetry,
     Mission? ActiveMission, int SamplingIntervalMs, string Version = "0.7.0", SamplingDiagnostics? Sampling = null,
-    ResearchState? Research = null, MapLayerState? Maps = null, RecordingStopInfo? RecordingStop = null, Guid? SelectedPlanId = null);
+    ResearchState? Research = null, MapLayerState? Maps = null, RecordingStopInfo? RecordingStop = null, Guid? SelectedPlanId = null)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SimulatorAvailability? Simulator { get; init; }
+}
 public sealed record RecordingStopInfo(string Code, string Message, Guid MissionId, DateTimeOffset TimestampUtc);
 public sealed record MapLayerState(string Revision, bool OnlineEnabled, string Layer);
 public sealed record StartMissionRequest(string Name, ScienceMode Mode = ScienceMode.Universal,

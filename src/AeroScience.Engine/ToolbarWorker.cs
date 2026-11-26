@@ -8,6 +8,8 @@ public sealed class ToolbarWorker(ToolbarCommandHandler handler, EngineOptions o
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        if(options.SimulatorId!=SimulatorPreferences.Msfs2024)
+        {status.Connection("Disabled",AeroScience.Shared.PresentationText.Text("simulator.toolbarUnavailable"));return;}
         if (!options.EnableToolbarBridge || !OperatingSystem.IsWindows())
         {
             status.Connection(options.EnableToolbarBridge?"Windows required":"Disabled","Enable the native toolbar bridge on Windows with the official x64 runtime. Telemetry connection alone does not verify CommBus.");

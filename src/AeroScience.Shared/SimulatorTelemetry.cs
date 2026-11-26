@@ -1,5 +1,9 @@
 namespace AeroScience.Shared;
 
+// Live host availability only. Never assigns identity to historical evidence.
+public sealed record SimulatorAvailability(int Version, string Id, bool ProductionRecordingReady,
+    bool ScienceIntegrationReady, string ReasonKey);
+
 // Additive transport context, not persisted identity or an installed-simulator attestation.
 public sealed record SimulatorOrigin(int Version, string SimulatorId, string? ReportedVersion,
     string AdapterId, string AdapterVersion, string? ApiVersion, Guid ConnectionEpoch,

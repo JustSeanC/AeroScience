@@ -11,11 +11,14 @@ public sealed class ResearchOperations : IDisposable
     private readonly ScienceStore science;
     private readonly Func<ScienceUnitPreferences>? displayUnits;
     private readonly RemoteAcquisition remote;
+    internal SimulatorAccessPolicy SimulatorPolicy { get; }
     public Func<RemoteAcquisitionRequest,IDisposable>? PublicationLease { get; set; }
     public Func<bool,DateTimeOffset?,bool>? ManagedPause {get;set;}
-    public ResearchOperations(MissionStore missions,ScienceStore science,Func<ScienceUnitPreferences>? displayUnits=null,Func<ScientificAccessPreferences>? sourcePreferences=null)
+    public ResearchOperations(MissionStore missions,ScienceStore science,Func<ScienceUnitPreferences>? displayUnits=null,Func<ScientificAccessPreferences>? sourcePreferences=null,
+        SimulatorAccessPolicy? simulatorAccess=null)
     {
         this.missions=missions;this.science=science;this.displayUnits=displayUnits;
+        SimulatorPolicy=simulatorAccess??new(SimulatorPreferences.Msfs2024);
         remote=new(missions,science,sourcePreferences,request=>PublicationLease?.Invoke(request)??throw new InvalidOperationException("Session publication needs its coordinator lease."));
     }
     private bool collectionManaged;
@@ -24,6 +27,7 @@ public sealed class ResearchOperations : IDisposable
     public void HoldCollection(){collectionManaged=true;collectionPhase=CollectionPhase.Paused;remote.Reset(true);}
     public void ApplyCollection(CollectionState state,ScienceCollectionSession? session,ScienceAcquisitionIntent[] intents,DateTimeOffset? at=null)
     {
+        SimulatorPolicy.RequireScience();
         if(collectionPhase!=state.Phase||CollectionSessionId!=state.CurrentSessionId)OperatingContextUtc=at??DateTimeOffset.UtcNow;
         collectionManaged=true;ingressIntents=intents;
         if(session is not null)foreach(var config in session.Configurations.GroupBy(c=>c.Settings.InstrumentId).Select(g=>g.OrderByDescending(c=>c.Revision).First()))effective[config.Settings.InstrumentId]=config;
@@ -80,6 +84,7 @@ public sealed class ResearchOperations : IDisposable
     }
     public void Begin(Mission active, MissionResearch research)
     {
+        SimulatorPolicy.RequireScience();
         mission = active; context = research; configurations = ScienceCatalog.Normalize(research.Instruments);
         acquisitions.Clear(); baseline = null; intentionallyPaused = false; pauseStarted = null; pauseSeconds = 0;
         effective.Clear(); lastAssessment=null; operating=[];CollectionSessionId=null;
@@ -121,6 +126,7 @@ public sealed class ResearchOperations : IDisposable
     }
     public bool SetPaused(bool paused, DateTimeOffset? timestamp = null)
     {
+        SimulatorPolicy.RequireScience();
         if(collectionManaged&&ManagedPause is not null)return ManagedPause(paused,timestamp);
         if (mission is null) throw new InvalidOperationException("Science Collection controls require an active mission.");
         if (intentionallyPaused == paused) return false;
@@ -135,6 +141,8 @@ public sealed class ResearchOperations : IDisposable
     }
     public void Observe(TelemetryUpdate update, TelemetryFrame? position)
     {
+        SimulatorPolicy.Observe(update);
+        if(!SimulatorPolicy.ScienceAllowed)return;
         if(mission is not null && update.Frame is {} assessed && (lastAssessment is null || assessed.TimestampUtc-lastAssessment>=TimeSpan.FromSeconds(1)))
         {
             
@@ -264,6 +272,11 @@ public sealed class ResearchOperations : IDisposable
                 run is { IntervalCount: > 0 } ? run.IntervalSeconds / run.IntervalCount : null,
                 readings.Select(r => ScienceUnits.Display(r, (displayUnits?.Invoke() ?? ScienceUnits.Aviation))).ToArray(), run?.Error, run?.Acquisitions ?? 0);
         }).ToArray();
+        if(!SimulatorPolicy.ScienceAllowed)
+            return new(null,null,states.Select(s=>s with{Quality=s.Enabled?ObservationQuality.Unavailable:ObservationQuality.Disabled,
+                Measurements=[],Message=SimulatorPolicy.Reason}).ToArray(),context?.PlanSnapshot?.Id,context?.Template,
+                CollectionStatus:mission is null?ScienceCollectionStatus.Stopped:ScienceCollectionStatus.Unavailable,
+                Units:displayUnits?.Invoke()??ScienceUnits.Aviation);
         return new(CurrentGuidance(connection, position), atmosphere, states, context?.PlanSnapshot?.Id,
             context?.Template, science.AvailabilityError(),
             mission is null || collectionManaged&&collectionPhase is CollectionPhase.Armed or CollectionPhase.BetweenSessions or CollectionPhase.Stopped ? ScienceCollectionStatus.Stopped : intentionallyPaused ? ScienceCollectionStatus.Paused :

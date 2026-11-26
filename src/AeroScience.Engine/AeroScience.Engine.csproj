@@ -10,6 +10,7 @@
     <ProjectReference Include="../AeroScience.Missions/AeroScience.Missions.csproj" />
     <ProjectReference Include="../AeroScience.HdfReader/AeroScience.HdfReader.csproj" />
     <ProjectReference Include="../AeroScience.SimConnect/AeroScience.SimConnect.csproj" />
+    <ProjectReference Include="../AeroScience.XPlane/AeroScience.XPlane.csproj" />
   </ItemGroup>
   <ItemGroup><Content Update="wwwroot/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
   <ItemGroup>

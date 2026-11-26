@@ -1,10 +1,20 @@
 using System.Net;
+using AeroScience.Missions;
 
 namespace AeroScience.Engine;
 
 public sealed class EngineOptions
 {
     public string Telemetry { get; set; } = "SimConnect";
+    public int XPlanePort { get; set; } = 8086;
+    public string SimulatorId => Telemetry switch
+    {
+        "SimConnect" => SimulatorPreferences.Msfs2024,
+        "XPlane" => SimulatorPreferences.XPlane12,
+        _ => throw new InvalidOperationException(PresentationTextError())
+    };
+    private static string PresentationTextError() => AeroScience.Shared.PresentationText.Text("simulator.invalidSaved");
+    public SimulatorPreferences Simulator => SimulatorPreferences.Effective(new(1, SimulatorId, XPlanePort));
     public bool RequireExistingDatabase { get; set; }
     public string? ConfigurationDirectory { get; set; }
     public string? ScienceLibraryDirectory { get; set; }
@@ -20,7 +30,7 @@ public sealed class EngineOptions
     public void Validate()
     {
         ApplicationProfile.Current.ValidateEngine(this);
-        if (Telemetry != "SimConnect") throw new InvalidOperationException("Production AeroScience uses live SimConnect telemetry only.");
+        _ = Simulator;
         if (Port is < 1024 or > 65535) throw new InvalidOperationException("AeroScience:Port must be 1024–65535.");
         if (SamplingIntervalMs is < 250 or > 60000) throw new InvalidOperationException("Sampling interval must be 250–60000 ms.");
         if (string.IsNullOrWhiteSpace(DataDirectory)) throw new InvalidOperationException("A data directory is required.");

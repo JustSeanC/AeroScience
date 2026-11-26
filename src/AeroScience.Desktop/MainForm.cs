@@ -15,6 +15,9 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
 {
     public PreferenceStore Preferences { get; }
     public StorageManager Storage { get; }
+    // Frozen for the companion process, including storage/setup engine restarts.
+    public SimulatorPreferences ActiveSimulator { get; }
+    public bool UsesMsfs => ActiveSimulator.Id == SimulatorPreferences.Msfs2024;
     private WebApplication? engine;
     private readonly Label status = new() { AutoSize = true, MaximumSize = new(700, 0) };
     private readonly Button dashboard = new() { Text = WindowsPresentation.Text("windows.mainForm.openDashboard"), AutoSize = true };
@@ -42,7 +45,8 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     public bool Busy { get => busy || choosingSource || (engine?.Services.GetService<ScientificImportSession>()?.IsBusy ?? false) || (engine?.Services.GetService<LidarImportSession>()?.IsBusy ?? false); private set => busy=value; }
     public bool Recording => engine?.Services.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null;
     private readonly ToolbarPromptPolicy toolbarPrompts = new();
-    public ToolbarVersionStatus Toolbar => ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory, "Toolbar"), PreferredCommunity());
+    public ToolbarVersionStatus Toolbar => UsesMsfs ? ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory, "Toolbar"), PreferredCommunity())
+        : throw new InvalidOperationException(WindowsPresentation.Text("simulator.toolbarUnavailable"));
     private string? PreferredCommunity() => Preferences.Load().CommunityDirectory ?? ToolbarInstaller.DiscoverCommunityFolders().OrderByDescending(p => Directory.Exists(Path.Combine(p, ApplicationProfile.Current.ToolbarPackage))).FirstOrDefault();
     public StorageStatus MissionStorage => Storage.Status(StorageKind.Missions);
     public StorageStatus ScienceStorage => Storage.Status(StorageKind.ScienceLibrary);
@@ -50,6 +54,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     public MainForm(string configurationDirectory, bool showSetup = false)
     {
         Preferences = new(configurationDirectory, ApplicationProfile.Current.Isolated ? ApplicationProfile.Current.ConfigurationDirectory : null); Storage = new(Preferences);
+        ActiveSimulator = Preferences.Simulator();
         Preferences.ValidateDirectory(configurationDirectory);
         new MapSettings(configurationDirectory).InitializeDefaults(File.Exists(Preferences.SettingsPath) || File.Exists(Path.Combine(configurationDirectory, "missions.db")));
         Text = ApplicationProfile.Current.Name + " " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
@@ -99,8 +104,11 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
                     if (ShowAuxiliary(wizard) != DialogResult.OK) { Close(); return; }
                 }
                 Storage.Initialize(); await StartEngineAsync(); OpenDashboard();
-                var toolbar = Toolbar;
-                if (toolbarPrompts.ShouldPrompt(toolbar)) { toolbarPrompts.Dismiss(toolbar); using var prompt = new ToolbarUpdateForm(this, toolbar); ShowAuxiliary(prompt); }
+                if (UsesMsfs)
+                {
+                    var toolbar = Toolbar;
+                    if (toolbarPrompts.ShouldPrompt(toolbar)) { toolbarPrompts.Dismiss(toolbar); using var prompt = new ToolbarUpdateForm(this, toolbar); ShowAuxiliary(prompt); }
+                }
             }
             catch (Exception error) { ShowError(error); }
             timer.Start(); RefreshStatus();
@@ -133,18 +141,20 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         foreach (var path in new[] { preferences.MissionDirectory, preferences.ScienceLibraryDirectory })
             SetupCoordinator.ValidateDataLocation(path, AppContext.BaseDirectory, requireAvailable: false);
         preferences = Storage.Initialize();
+        var simulatorOptions=ApplicationProfile.Current.EngineOptions(preferences with{Simulator=ActiveSimulator});
         using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(ApplicationProfile.Current.RegistryKey))
         {
             key.SetValue("MissionDirectory", preferences.MissionDirectory);
             key.SetValue("ScienceLibraryDirectory", preferences.ScienceLibraryDirectory);
         }
         var args = new[] {
-            "--AeroScience:Telemetry=SimConnect",
+            "--AeroScience:Telemetry=" + simulatorOptions.Telemetry,
+            "--AeroScience:XPlanePort=" + simulatorOptions.XPlanePort,
             "--AeroScience:Port=" + ApplicationProfile.Current.Port,
             "--AeroScience:ConfigurationDirectory=" + Preferences.DirectoryPath,
             "--AeroScience:DataDirectory=" + preferences.MissionDirectory,
             "--AeroScience:ScienceLibraryDirectory=" + preferences.ScienceLibraryDirectory,
-            "--AeroScience:RequireExistingDatabase=true", "--AeroScience:EnableToolbarBridge=true",
+            "--AeroScience:RequireExistingDatabase=true", "--AeroScience:EnableToolbarBridge=" + simulatorOptions.EnableToolbarBridge,
             "--AeroScience:SamplingIntervalMs=" + preferences.SamplingIntervalMs,
             "--AeroScience:EnableLan=" + preferences.EnableLan,
             "--AeroScience:LanAddress=" + preferences.LanAddress
@@ -160,6 +170,15 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         if (app is null) return;
         try { await app.StopAsync(); }
         finally { await app.DisposeAsync(); }
+    }
+    internal SimulatorSettingsView SimulatorSettings() => engine?.Services.GetRequiredService<SimulatorSettings>().View(localOwner:true)
+        ?? new(1,Guid.Empty,Preferences.Simulator(),ActiveSimulator,!ActiveSimulator.SameConnection(Preferences.Simulator()),false,
+            "simulator.engineStopped",ConnectionState.Disconnected,"EngineStopped",false,false);
+    internal SimulatorSettingsView SaveSimulator(SimulatorChange change)
+    {
+        if (Busy) throw new InvalidOperationException(WindowsPresentation.Text("simulator.maintenance"));
+        return (engine?.Services.GetRequiredService<SimulatorSettings>()
+            ?? throw new InvalidOperationException(WindowsPresentation.Text("simulator.engineStopped"))).Save(change);
     }
     internal CollectedScienceDeletionPreview PreviewCollectedScience()
     {
@@ -192,6 +211,15 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         if (engine.Lifetime.ApplicationStopped.IsCancellationRequested)
         { status.Text = WindowsPresentation.Text("windows.mainForm.theLocalEngineStoppedAfterAnErrorCollectFeedback"); dashboard.Enabled = false; return; }
         var snapshot = engine.Services.GetRequiredService<MissionCoordinator>().Snapshot();
+        if (!UsesMsfs)
+        {
+            var source = SimulatorSettings();
+            status.Text = WindowsPresentation.Text("simulator.nativeStatus", new Dictionary<string, object> {
+                ["name"] = SimulatorPreferences.Name(ActiveSimulator.Id), ["status"] = WindowsPresentation.Text(source.StatusKey,
+                    new Dictionary<string,object>{["name"]=SimulatorPreferences.Name(ActiveSimulator.Id)}),
+                ["recording"] = WindowsPresentation.Text("simulator.noRecording") });
+            return;
+        }
         status.Text = WindowsPresentation.Text("windows.mainForm.engineRunningToolbar", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{ApplicationProfile.Current.Name}"), ["value2"] = WindowsPresentation.Format($"{snapshot.Connection.Message}"), ["value3"] = WindowsPresentation.Format($"{(snapshot.ActiveMission is null ? WindowsPresentation.Text("windows.flight.noMission") : WindowsPresentation.Text("windows.flight.recording"))}"), ["value4"] = WindowsPresentation.Format($"{Toolbar.Message}") });
     }
     public void OpenDashboard(bool settings = false)
@@ -218,6 +246,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     }
     public bool InstallToolbar(IWin32Window owner, string? community)
     {
+        if (!UsesMsfs) { MessageBox.Show(owner, WindowsPresentation.Text("simulator.toolbarUnavailable")); return false; }
         if (Busy || Recording) { MessageBox.Show(owner, WindowsPresentation.Text("windows.mainForm.endRecordingAndWaitForOtherOperationsBeforeUpdating")); return false; }
         if (string.IsNullOrWhiteSpace(community) || !Directory.Exists(community))
         {
@@ -279,7 +308,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         var science=engine?.Services.GetRequiredService<ScienceStore>()??throw new InvalidOperationException(WindowsPresentation.Text("windows.error.stoppedFolder"));
         NativeFolder.Open(science.ScientificFolder(libraryId,sourceId));
     });
-    void IDesktopActions.OpenToolbar() => Dispatch(() => { using var form = new SettingsForm(this, false, toolbar: true); ShowAuxiliary(form); });
+    void IDesktopActions.OpenToolbar() => Dispatch(() => { if (!UsesMsfs) { MessageBox.Show(this,WindowsPresentation.Text("simulator.toolbarUnavailable")); return; } using var form = new SettingsForm(this, false, toolbar: true); ShowAuxiliary(form); });
     void IDesktopActions.OpenSettings() => Dispatch(() => ShowSettings(false));
     void IDesktopActions.OpenStorage() => Dispatch(() => ShowSettings(true));
     void IDesktopActions.OpenDataManagement() => Dispatch(() => ShowDataManagement());

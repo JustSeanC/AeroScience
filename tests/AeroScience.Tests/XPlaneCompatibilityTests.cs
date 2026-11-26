@@ -45,8 +45,10 @@ public sealed class XPlaneCompatibilityTests
         ITelemetryProvider candidate = new XPlaneTelemetryProvider();
         Assert.IsType<XPlaneTelemetryProvider>(candidate); // Construction alone opens no connection.
         var options = new EngineOptions(); Assert.Equal("SimConnect", options.Telemetry);
-        options.Telemetry = "XPlane";
+        options.Telemetry = "Unknown";
         Assert.Throws<InvalidOperationException>(() => options.Validate());
+        options.Telemetry = "XPlane"; options.Validate();
+        Assert.Equal("xplane12",options.SimulatorId); // P03 host selection; production authority is tested separately.
         var valid = new TelemetryFrame(DateTimeOffset.UnixEpoch, TelemetrySource.Simulator, "legacy", 0, 0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0);
         Assert.True(valid.IsValid);
         Assert.False((valid with { Latitude = double.NaN }).IsValid);

@@ -35,12 +35,18 @@ public sealed record ApplicationProfile(bool Validation, string ValidationVersio
     public string CommandEvent => Beta080 ? "AeroScience.Beta.0_8_0.Command.v1" : Native080 ? "AeroScience.Validation.0_8_0.Command.v1" : Validation ? "AeroScience.Validation.0_7_0.Command.v1" : "AeroScience.Command.v1";
     public string ReplyEvent => Beta080 ? "AeroScience.Beta.0_8_0.Reply.v1" : Native080 ? "AeroScience.Validation.0_8_0.Reply.v1" : Validation ? "AeroScience.Validation.0_7_0.Reply.v1" : "AeroScience.Reply.v1";
     public string SessionCookieName => Beta080 ? "AeroScience.Beta.0_8_0.Session" : Native080 ? "AeroScience.Validation.0_8_0."+PrivateInstance+".Session" : Validation ? "AeroScience.Validation.0_7_0.Session" : AccessControl.CookieName;
-    public EngineOptions EngineOptions(AppPreferences preferences) => new()
+    public EngineOptions EngineOptions(AppPreferences preferences)
     {
+        var simulator = SimulatorPreferences.Effective(preferences.Simulator);
+        return new()
+        {
+        Telemetry = simulator.Id == SimulatorPreferences.XPlane12 ? "XPlane" : "SimConnect",
+        XPlanePort = simulator.XPlanePort, EnableToolbarBridge = simulator.Id == SimulatorPreferences.Msfs2024,
         ConfigurationDirectory=ConfigurationDirectory, DataDirectory=preferences.MissionDirectory,
         ScienceLibraryDirectory=preferences.ScienceLibraryDirectory, Port=Port, RequireExistingDatabase=true,
         EnableLan=preferences.EnableLan,LanAddress=preferences.LanAddress,SamplingIntervalMs=preferences.SamplingIntervalMs
-    };
+        };
+    }
     public PreferenceStore Preferences()
     {
         if(Native080)ValidatePrivateMarker(ConfigurationDirectory);

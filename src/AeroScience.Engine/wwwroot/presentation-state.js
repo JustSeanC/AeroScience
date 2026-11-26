@@ -10,6 +10,7 @@ export function missionPresentation(data, {now = Date.now(), pending = false} = 
     : collection.fault || data.flight.research?.scienceStorageError || data.flight.connection?.state !== 'connected'
       ? 'unavailable' : phases.includes(state.phase) ? state.phase : 'unknown';
   if (science === 'collecting' && !state.currentSessionId) science = 'unknown';
+  if(data?.flight?.simulator?.scienceIntegrationReady===false)science='unavailable';
   return Object.freeze({fresh, flightId:fresh ? flight?.id || null : null,
     recording:!fresh ? 'unknown' : flight ? 'active' : 'inactive', science, pending:!!pending,
     // Availability comes only from the server, with stale/unbound/pending guarded.
